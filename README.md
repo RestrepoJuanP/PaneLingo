@@ -166,7 +166,15 @@ panelingo/
 
 La referencia visual obligatoria es el mockup de alta fidelidad `design/PaneLingo.dc.html`, aprobado por el Product Owner. Los colores, tipografías, radios y espaciados están extraídos y documentados en **[`design/DESIGN_TOKENS.md`](design/DESIGN_TOKENS.md)**, que es la fuente de verdad visual del proyecto.
 
+Las capturas del mockup renderizado están en `design/screenshots/` y son la mejor referencia visual: consúltalas antes de maquetar cada pantalla. Las de `design/screenshots/fuera-de-alcance/` son contexto del producto completo y no se construyen en el Sprint 1.
+
 La interfaz se redacta en español. El mockup está en inglés: se toma de él la composición y la jerarquía, no los textos.
+
+### Página de referencia de estilos
+
+Con el servidor de desarrollo levantado, <http://127.0.0.1:8000/design-system/> reúne todos los componentes y sus estados en una sola página, para compararlos con las capturas.
+
+**Es una página de desarrollo, no forma parte del producto.** Solo responde cuando `DJANGO_DEBUG=True`; con `DEBUG` desactivado devuelve 404, de modo que nunca queda expuesta en producción.
 
 Requisito no funcional: la aplicación cumple **WCAG 2.1 nivel AA**. Las desviaciones deliberadas respecto al mockup están documentadas en `DESIGN_TOKENS.md`.
 

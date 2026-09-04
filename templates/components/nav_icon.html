@@ -1,0 +1,22 @@
+{# Iconografía de la navegación. Decorativa: cada ítem lleva su texto. #}
+<svg class="nav-item__icon" viewBox="0 0 17 17" fill="none" aria-hidden="true" focusable="false">
+  {% if icon == "library" %}
+    <rect x="1" y="1" width="15" height="15" rx="4" stroke="currentColor" stroke-width="1.5"/>
+    <path d="M8.5 1v15M1 8.5h15" stroke="currentColor" stroke-width="1.5"/>
+  {% elif icon == "upload" %}
+    <rect x="1" y="1" width="15" height="15" rx="4" stroke="currentColor" stroke-width="1.5"/>
+    <path d="M1 8.5h15" stroke="currentColor" stroke-width="1.5"/>
+  {% elif icon == "workspace" %}
+    <rect x="1" y="1" width="15" height="15" rx="4" stroke="currentColor" stroke-width="1.5"/>
+    <path d="M8.5 1v15" stroke="currentColor" stroke-width="1.5"/>
+  {% elif icon == "review" %}
+    <rect x="1" y="1" width="15" height="15" rx="4" stroke="currentColor" stroke-width="1.5"/>
+    <circle cx="8.5" cy="8.5" r="2.5" fill="currentColor"/>
+  {% elif icon == "terms" %}
+    <rect x="1" y="1" width="15" height="15" rx="4" stroke="currentColor" stroke-width="1.5"/>
+    <path d="M1 6h15M1 11h15" stroke="currentColor" stroke-width="1.5"/>
+  {% else %}
+    <rect x="1" y="1" width="15" height="15" rx="4" stroke="currentColor" stroke-width="1.5"/>
+    <circle cx="8.5" cy="8.5" r="3" stroke="currentColor" stroke-width="1.5"/>
+  {% endif %}
+</svg>

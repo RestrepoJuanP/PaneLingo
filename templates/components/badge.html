@@ -1,0 +1,6 @@
+{# Chip de estado, de solo lectura.
+   variant: neutral | progress | success | warning | danger
+   No confundir con el pill selector, que es un control y usa otra paleta. #}
+<span class="badge badge--{{ variant|default:'neutral' }}{% if on_cover %} badge--on-cover{% endif %}">
+  {{ label }}
+</span>

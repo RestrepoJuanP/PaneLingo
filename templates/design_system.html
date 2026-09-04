@@ -1,0 +1,340 @@
+{% extends "base.html" %}
+
+{# Página de referencia del sistema de diseño. Solo desarrollo (DEBUG=True).
+   Muestra todos los componentes y sus estados juntos, para compararlos con
+   design/screenshots/. No forma parte del producto. #}
+
+{% block title %}Sistema de diseño · PaneLingo{% endblock %}
+
+{% block extra_css %}
+  <style>
+    .ds { max-width: 1180px; margin: 0 auto; padding: var(--sp-12) var(--pad-page) 96px; }
+    .ds__lede { max-width: 620px; margin-bottom: var(--sp-12); color: var(--muted); }
+    .ds__section { margin-bottom: 48px; }
+    .ds__h { font-size: var(--fs-section); font-weight: 700;
+             letter-spacing: var(--ls-heading); margin-bottom: var(--sp-3);
+             padding-bottom: var(--sp-4); border-bottom: 1px solid var(--border); }
+    .ds__note { margin-bottom: var(--sp-8); font-size: var(--fs-sm);
+                font-weight: 500; color: var(--muted); max-width: 640px; }
+    .ds__row { display: flex; flex-wrap: wrap; gap: var(--sp-6);
+               align-items: flex-start; margin-bottom: var(--sp-8); }
+    .ds__stack { display: flex; flex-direction: column; gap: var(--sp-6);
+                 max-width: 394px; }
+    .ds__swatches { display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+                    gap: var(--sp-6); }
+    .ds__swatch { border: 1px solid var(--border); border-radius: var(--r-xl);
+                  overflow: hidden; background: var(--surface); }
+    .ds__chip { height: 56px; }
+    .ds__swatch-label { padding: var(--sp-4) var(--sp-5); font-size: var(--fs-xs);
+                        font-weight: 600; }
+    .ds__swatch-value { display: block; margin-top: 2px; font-weight: 500;
+                        color: var(--muted); }
+    .ds__panel { padding: var(--sp-9); border: 1px solid var(--border);
+                 border-radius: var(--r-2xl); background: var(--surface); }
+  </style>
+{% endblock %}
+
+{% block body %}
+  <div class="ds" id="contenido">
+    <h1 class="page-title">Sistema de diseño</h1>
+    <p class="ds__lede page-subtitle">
+      Página de desarrollo. Reúne todos los componentes y sus estados para
+      compararlos con las capturas de <code>design/screenshots/</code>. No
+      forma parte del producto y no existe cuando <code>DEBUG</code> es
+      <code>False</code>.
+    </p>
+
+    {# ---------------------------------------------------------------- #}
+    <section class="ds__section">
+      <h2 class="ds__h">Color</h2>
+      <div class="ds__swatches">
+        {% for name, value in colors %}
+          <div class="ds__swatch">
+            <div class="ds__chip" style="background: var({{ name }})"></div>
+            <div class="ds__swatch-label">
+              {{ name }}<span class="ds__swatch-value">{{ value }}</span>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    {# ---------------------------------------------------------------- #}
+    <section class="ds__section">
+      <h2 class="ds__h">Botones</h2>
+      <p class="ds__note">
+        Primario, secundario y destructivo, con sus estados. El destructivo
+        sólido queda reservado a la confirmación dentro de un modal.
+      </p>
+      <div class="ds__row">
+        <button type="button" class="btn btn--primary">Nuevo álbum</button>
+        <button type="button" class="btn btn--secondary">Cargar páginas</button>
+        <button type="button" class="btn btn--danger">Eliminar</button>
+        <button type="button" class="btn btn--danger-solid">Eliminar definitivamente</button>
+      </div>
+      <div class="ds__row">
+        <button type="button" class="btn btn--primary" disabled>Primario deshabilitado</button>
+        <button type="button" class="btn btn--secondary" disabled>Secundario deshabilitado</button>
+        <button type="button" class="btn btn--danger" aria-disabled="true">
+          Eliminar · próximo sprint
+        </button>
+      </div>
+      <div class="ds__row">
+        <button type="button" class="btn btn--primary btn--loading">
+          <span class="btn__spinner" aria-hidden="true"></span>Creando álbum…
+        </button>
+        <button type="button" class="btn btn--secondary btn--loading">
+          <span class="btn__spinner" aria-hidden="true"></span>Cargando…
+        </button>
+      </div>
+    </section>
+
+    {# ---------------------------------------------------------------- #}
+    <section class="ds__section">
+      <h2 class="ds__h">Formularios</h2>
+      <div class="ds__row">
+        <div class="ds__stack">
+          <div class="field">
+            <label class="field__label" for="ds-email">Correo electrónico</label>
+            <input class="input" type="email" id="ds-email" placeholder="tu@estudio.com" />
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="ds-title">
+              Título del álbum <span class="field__required" aria-hidden="true">*</span>
+            </label>
+            <input class="input" type="text" id="ds-title" value="Neon Yokai Bureau" />
+            <p class="field__hint" id="ds-title-hint">Un álbum por cómic, tomo o temporada.</p>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="ds-bad">Campo con error</label>
+            <input
+              class="input input--invalid" type="text" id="ds-bad" value=""
+              aria-describedby="ds-bad-error" aria-invalid="true"
+            />
+            <p class="field__error" id="ds-bad-error">Este campo es obligatorio.</p>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="ds-select">Idioma de origen</label>
+            <select class="select" id="ds-select">
+              <option>Japonés</option>
+              <option>Coreano</option>
+              <option>Francés</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="ds-textarea">Notas</label>
+            <textarea class="textarea" id="ds-textarea"
+                      placeholder="Contexto de la obra, nombres propios…"></textarea>
+          </div>
+
+          <label class="checkbox">
+            <input type="checkbox" checked />
+            Mantener la sesión iniciada en este dispositivo
+          </label>
+        </div>
+
+        <div class="ds__stack">
+          <div class="form-errors">
+            <span class="form-errors__icon" aria-hidden="true">!</span>
+            <ul class="form-errors__list">
+              <li>El correo o la contraseña no son correctos.</li>
+              <li>Revisa los datos e inténtalo de nuevo.</li>
+            </ul>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="ds-pass">Contraseña</label>
+            <input class="input" type="password" id="ds-pass" value="clave" />
+            {% include "components/password_strength.html" with input_id="ds-pass" %}
+            <p class="field__hint">
+              Escribe en el campo para ver los tres niveles del medidor.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {# ---------------------------------------------------------------- #}
+    <section class="ds__section">
+      <h2 class="ds__h">Pills, pestañas y tarjetas de opción</h2>
+      <p class="ds__note">
+        El <strong>pill selector</strong> es un control y se pinta de negro al
+        seleccionarse. El <strong>chip de estado</strong> es de solo lectura y
+        usa los colores semánticos. La <strong>tarjeta de opción</strong> sí
+        usa el índigo de marca.
+      </p>
+      <div class="pill-group" data-pill-target="ds-lang" style="margin-bottom: var(--sp-8)">
+        <button type="button" class="pill" aria-pressed="true" data-value="ja">Japonés</button>
+        <button type="button" class="pill" aria-pressed="false" data-value="ko">Coreano</button>
+        <button type="button" class="pill" aria-pressed="false" data-value="fr">Francés</button>
+        <button type="button" class="pill" aria-pressed="false" data-value="zh">Chino</button>
+      </div>
+      <input type="hidden" id="ds-lang" value="ja" />
+
+      <div class="tabs" style="max-width: 394px; margin-bottom: var(--sp-8)">
+        <button type="button" class="tabs__tab" aria-selected="true">Iniciar sesión</button>
+        <button type="button" class="tabs__tab" aria-selected="false">Crear cuenta</button>
+      </div>
+
+      <div class="ds__row">
+        <button type="button" class="option-card" aria-pressed="true">
+          <span class="option-card__title">Fiel</span>
+          <span class="option-card__hint">Cercana al fraseo y al ritmo originales.</span>
+        </button>
+        <button type="button" class="option-card" aria-pressed="false">
+          <span class="option-card__title">Natural</span>
+          <span class="option-card__hint">Se lee como si se hubiera escrito en el idioma destino.</span>
+        </button>
+      </div>
+    </section>
+
+    {# ---------------------------------------------------------------- #}
+    <section class="ds__section">
+      <h2 class="ds__h">Badges de estado</h2>
+      <div class="ds__row">
+        {% include "components/badge.html" with label="En progreso" variant="progress" %}
+        {% include "components/badge.html" with label="Completado" variant="success" %}
+        {% include "components/badge.html" with label="Borrador" variant="warning" %}
+        {% include "components/badge.html" with label="Sin cargar" variant="neutral" %}
+        {% include "components/badge.html" with label="Error" variant="danger" %}
+      </div>
+    </section>
+
+    {# ---------------------------------------------------------------- #}
+    <section class="ds__section">
+      <h2 class="ds__h">Barra de progreso</h2>
+      <p class="ds__note">
+        Componente construido y documentado, pero <strong>no usado en las
+        pantallas del Sprint 1</strong>: una barra al 0% en cada álbum
+        comunicaría un avance que todavía no existe, porque la traducción llega
+        en un sprint posterior.
+      </p>
+      <div class="ds__panel ds__stack">
+        {% include "components/progress_bar.html" with percent=0 show_value=True label="Progreso de ejemplo" %}
+        {% include "components/progress_bar.html" with percent=32 show_value=True label="Progreso de ejemplo" %}
+        {% include "components/progress_bar.html" with percent=100 show_value=True label="Progreso de ejemplo" %}
+        {% include "components/progress_bar.html" with percent=54 slim=True label="Progreso de ejemplo" %}
+      </div>
+    </section>
+
+    {# ---------------------------------------------------------------- #}
+    <section class="ds__section">
+      <h2 class="ds__h">Tarjeta de estadística</h2>
+      <p class="ds__note">
+        Construida y documentada. <strong>No se muestra en el dashboard del
+        Sprint 1</strong>: de las cuatro del mockup solo una tendría dato real,
+        y una sola tarjeta en una grilla pensada para cuatro se lee como un
+        fallo de maquetación. El número de álbumes ya aparece junto al título
+        de la sección.
+      </p>
+      <div class="stat-grid">
+        {% include "components/stat_card.html" with label="Álbumes" value="3" %}
+        {% include "components/stat_card.html" with label="Páginas cargadas" value="47" hint="en 3 álbumes" %}
+      </div>
+    </section>
+
+    {# ---------------------------------------------------------------- #}
+    <section class="ds__section">
+      <h2 class="ds__h">Tarjeta de álbum</h2>
+      <p class="ds__note">
+        Las portadas son composiciones abstractas generadas de forma
+        determinista a partir del identificador del álbum: sin imágenes
+        externas ni obra con derechos. Si el álbum ya tiene páginas cargadas,
+        la primera página pasa a ser la portada.
+      </p>
+      <div class="album-grid">
+        {% include "components/album_card.html" with seed="alfa" title="Neon Yokai Bureau" page_count=24 edited_label="hace 2 horas" lang_pair="JA → ES" status_label="En progreso" status_variant="progress" show_menu=True %}
+        {% include "components/album_card.html" with seed="beta" title="Ember Line — temporada 1" page_count=18 edited_label="ayer" lang_pair="KO → ES" status_label="Completado" status_variant="success" show_menu=True %}
+        {% include "components/album_card.html" with seed="gamma" title="Salt & Static" page_count=12 edited_label="hace 3 días" lang_pair="JA → ES" status_label="Borrador" status_variant="warning" show_menu=True %}
+        {% include "components/album_card.html" with seed="delta" title="Cascade Kids" page_count=0 edited_label="hace 6 días" lang_pair="FR → ES" show_menu=True %}
+      </div>
+    </section>
+
+    {# ---------------------------------------------------------------- #}
+    <section class="ds__section">
+      <h2 class="ds__h">Miniatura de página</h2>
+      <div class="page-grid">
+        {% include "components/page_thumb.html" with number=1 %}
+        {% include "components/page_thumb.html" with number=2 status_label="Cargada" status_variant="success" %}
+        {% include "components/page_thumb.html" with number=3 status_label="Error" status_variant="danger" %}
+      </div>
+    </section>
+
+    {# ---------------------------------------------------------------- #}
+    <section class="ds__section">
+      <h2 class="ds__h">Estado vacío</h2>
+      <p class="ds__note">Dos variantes: biblioteca sin álbumes y álbum sin páginas.</p>
+      <div style="display: grid; gap: var(--sp-8)">
+        {% include "components/empty_state.html" with title="Todavía no tienes álbumes" body="Un álbum agrupa las páginas de un cómic, un tomo de manga o una temporada de webtoon. Crea el primero para empezar." action_label="Crear mi primer álbum" %}
+        {% include "components/empty_state.html" with title="Este álbum aún no tiene páginas" body="Carga las páginas completas de la obra. Puedes añadir más en cualquier momento." action_label="Cargar páginas" %}
+      </div>
+    </section>
+
+    {# ---------------------------------------------------------------- #}
+    <section class="ds__section">
+      <h2 class="ds__h">Zona de carga</h2>
+      {% include "components/dropzone.html" with input_id="ds-files" body="Sube la página completa, no globos recortados. PNG, JPG o WEBP, hasta 10 MB por archivo." %}
+      <input class="sr-only" type="file" id="ds-files" multiple />
+    </section>
+
+    {# ---------------------------------------------------------------- #}
+    <section class="ds__section">
+      <h2 class="ds__h">Modal</h2>
+      <p class="ds__note">
+        Foco atrapado mientras está abierto, cierre con <kbd>Escape</kbd> o
+        clic en el velo, y devolución del foco al botón que lo abrió.
+      </p>
+      <button type="button" class="btn btn--secondary" data-modal-open="ds-modal">
+        Abrir modal de confirmación
+      </button>
+      {% include "components/confirm_modal.html" with modal_id="ds-modal" title="¿Eliminar “Neon Yokai Bureau”?" body="Se eliminarán también las 24 páginas cargadas. Esta acción no se puede deshacer." confirm_label="Eliminar definitivamente" cancel_label="Cancelar" %}
+    </section>
+
+    {# ---------------------------------------------------------------- #}
+    <section class="ds__section">
+      <h2 class="ds__h">Toasts</h2>
+      <p class="ds__note">
+        En la aplicación los renderiza el framework de messages de Django
+        dentro de una región con <code>aria-live="polite"</code>. Aquí se
+        muestran en estático.
+      </p>
+      <div class="ds__row" style="align-items: center">
+        <div class="toast">
+          <span class="toast__dot" aria-hidden="true">✓</span>
+          <span>Álbum creado correctamente.</span>
+          <button type="button" class="toast__close" data-toast-close aria-label="Cerrar mensaje">✕</button>
+        </div>
+        <div class="toast toast--error">
+          <span class="toast__dot" aria-hidden="true">!</span>
+          <span>No se pudo cargar la página. Inténtalo de nuevo.</span>
+          <button type="button" class="toast__close" data-toast-close aria-label="Cerrar mensaje">✕</button>
+        </div>
+      </div>
+    </section>
+
+    {# ---------------------------------------------------------------- #}
+    <section class="ds__section">
+      <h2 class="ds__h">Navegación lateral</h2>
+      <p class="ds__note">
+        Los cuatro destinos fuera del alcance del Sprint 1 se maquetan
+        deshabilitados con <code>aria-disabled="true"</code>, para conservar la
+        composición del mockup sin prometer funciones que no existen.
+      </p>
+      <div class="ds__panel" style="max-width: 246px">
+        <nav class="sidebar__nav" aria-label="Ejemplo de navegación">
+          {% include "components/nav_item.html" with label="Álbumes" icon="library" url="#" current="albums" key="albums" %}
+          {% include "components/nav_item.html" with label="Cargar páginas" icon="upload" url="#" current="albums" key="upload" %}
+          {% include "components/nav_item.html" with label="Traducción" icon="workspace" disabled=True %}
+          {% include "components/nav_item.html" with label="Revisión y exportación" icon="review" disabled=True %}
+          {% include "components/nav_item.html" with label="Terminología" icon="terms" disabled=True %}
+          {% include "components/nav_item.html" with label="Configuración" icon="settings" disabled=True %}
+        </nav>
+      </div>
+    </section>
+  </div>
+{% endblock %}

@@ -1,0 +1,16 @@
+{# Ítem de la navegación inferior, visible por debajo de 900px. #}
+{% if disabled %}
+  <span class="mobile-nav__item" aria-disabled="true">
+    {% include "components/nav_icon.html" with icon=icon %}
+    <span>{{ label }}</span>
+  </span>
+{% else %}
+  <a
+    class="mobile-nav__item"
+    href="{{ url|default:'#' }}"
+    {% if current == key %}aria-current="page"{% endif %}
+  >
+    {% include "components/nav_icon.html" with icon=icon %}
+    <span>{{ label }}</span>
+  </a>
+{% endif %}

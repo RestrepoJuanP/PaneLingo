@@ -1,0 +1,19 @@
+{# Ítem de la navegación lateral.
+   Los destinos fuera del alcance del Sprint 1 se maquetan deshabilitados,
+   con aria-disabled y una indicación textual de que llegan más adelante. #}
+{% if disabled %}
+  <span class="nav-item" aria-disabled="true">
+    {% include "components/nav_icon.html" with icon=icon %}
+    <span class="nav-item__label">{{ label }}</span>
+    <span class="nav-item__soon">Próximo sprint</span>
+  </span>
+{% else %}
+  <a
+    class="nav-item"
+    href="{{ url|default:'#' }}"
+    {% if current == key %}aria-current="page"{% endif %}
+  >
+    {% include "components/nav_icon.html" with icon=icon %}
+    <span class="nav-item__label">{{ label }}</span>
+  </a>
+{% endif %}

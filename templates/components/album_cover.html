@@ -1,0 +1,29 @@
+{# Portada de álbum.
+   Si el álbum ya tiene páginas cargadas, la primera página es la portada.
+   Si no, se genera una composición abstracta determinista a partir del
+   identificador: mismas viñetas y mismos degradados en cada visita, sin
+   imágenes externas ni obra con derechos. #}
+{% load design %}
+<div class="cover {{ extra_class|default:'' }}">
+  {% if cover_image %}
+    <img class="cover__img" src="{{ cover_image }}" alt="" />
+  {% else %}
+    <div class="cover__grid cover__grid--{{ seed|cover_layout }}" aria-hidden="true">
+      {% for panel in seed|cover_panels %}
+        <div class="cover__panel cover__panel--{{ panel }}"></div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="cover__scrim" aria-hidden="true"></div>
+
+  {% if status_label %}
+    <span class="cover__badge">
+      {% include "components/badge.html" with label=status_label variant=status_variant on_cover=True %}
+    </span>
+  {% endif %}
+
+  {% if lang_pair %}
+    <span class="cover__lang">{{ lang_pair }}</span>
+  {% endif %}
+</div>

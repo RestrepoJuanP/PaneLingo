@@ -1,0 +1,29 @@
+{# Tarjeta de álbum.
+   Adaptación al Sprint 1: el metadato del mockup ("24 pages · 7 approved ·
+   93 blocks left") se reduce al número de páginas, porque en este sprint no
+   existen bloques, aprobaciones ni traducciones. La barra de progreso está
+   construida en el sistema de diseño pero no se muestra aquí. #}
+<article class="album-card">
+  <a href="{{ album_url|default:'#' }}" tabindex="-1" aria-hidden="true">
+    {% include "components/album_cover.html" with seed=seed cover_image=cover_image lang_pair=lang_pair status_label=status_label status_variant=status_variant extra_class="album-card__cover" %}
+  </a>
+
+  <div class="album-card__body">
+    <div class="album-card__head">
+      <a class="album-card__title" href="{{ album_url|default:'#' }}">{{ title }}</a>
+      {% if show_menu %}
+        <button
+          type="button"
+          class="btn-icon"
+          aria-label="Acciones de {{ title }}"
+        >···</button>
+      {% endif %}
+    </div>
+
+    <p class="album-card__meta">{{ page_count }} {{ page_count|pluralize:"página,páginas" }}</p>
+
+    {% if edited_label %}
+      <p class="album-card__edited">Editado {{ edited_label }}</p>
+    {% endif %}
+  </div>
+</article>

@@ -1,0 +1,44 @@
+{% load static %}<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}PaneLingo{% endblock %}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Archivo:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="{% static 'css/tokens.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/app.css' %}" />
+    {% block extra_css %}{% endblock %}
+  </head>
+
+  <body>
+    <a class="skip-link" href="#contenido">Saltar al contenido</a>
+
+    {% block body %}{% endblock %}
+
+    {# Región de mensajes. aria-live="polite" para que un lector de pantalla
+       anuncie el mensaje sin interrumpir lo que esté leyendo. #}
+    <div
+      class="toasts"
+      role="status"
+      aria-live="polite"
+      aria-atomic="false"
+      id="mensajes"
+    >
+      {% block messages %}
+        {% for message in messages %}
+          {% include "components/toast.html" with message=message %}
+        {% endfor %}
+      {% endblock %}
+    </div>
+
+    <script src="{% static 'js/app.js' %}" defer></script>
+    {% block extra_js %}{% endblock %}
+  </body>
+</html>

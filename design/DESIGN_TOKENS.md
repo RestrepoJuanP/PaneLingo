@@ -234,6 +234,111 @@ Base de 4px, con los pasos impares heredados del mockup. Un valor por token.
 
 ---
 
+## Pill selector (control interactivo)
+
+El mockup usa dos componentes con la misma forma exterior de píldora pero con paletas distintas, y conviene no confundirlos:
+
+- El **chip de estado** es de solo lectura ("Completado", "Borrador", "En progreso") y usa las parejas de la tabla de colores semánticos.
+- El **pill selector** es un control de elección (idioma origen y destino, filtros de la biblioteca, rol en el registro, orden de lectura). Al seleccionarse **se pinta de negro**, no del índigo de marca.
+
+Verificado en `PaneLingo.dc.html` (helper `chip(active)`) y visible en `screenshots/create-new-album.png`, `screenshots/auth-create-account.png` y `screenshots/upload-and-scan.png`.
+
+| Token | Valor | Uso |
+|---|---|---|
+| `--pill-bg` | `#ffffff` | Fondo en reposo |
+| `--pill-fg` | `#5a5548` | Texto en reposo |
+| `--pill-border` | `#e2ded4` | Borde en reposo |
+| `--pill-selected-bg` | `#191821` | Fondo seleccionado |
+| `--pill-selected-fg` | `#ffffff` | Texto seleccionado |
+| `--pill-selected-border` | `#191821` | Borde seleccionado |
+
+La **tarjeta de opción** (estilo de traducción en el modal de creación) es un control distinto y sí usa el índigo: borde `--brand`, fondo `--brand-tint-2`, título `--brand-hover`. En reposo, borde `--border` sobre `--surface`.
+
+## Selector de pestañas (segmented control)
+
+Mismo patrón en el formulario de autenticación y en la cabecera de ajustes.
+
+| Token | Valor | Uso |
+|---|---|---|
+| `--tab-track-bg` | `#efece5` | Carril que contiene las pestañas |
+| `--tab-active-bg` | `#ffffff` | Pestaña activa |
+| `--tab-active-fg` | `#191821` | Texto de la pestaña activa |
+| `--tab-inactive-fg` | `#6f6a60` | Texto de las pestañas inactivas |
+| `--shadow-tab-active` | `0 1px 2px rgba(25,24,33,.10)` | Relieve de la pestaña activa |
+
+## Medidor de fuerza de contraseña
+
+Aparece en `screenshots/auth-create-account.png`. Barra de 5px de alto sobre `--track`, con la etiqueta a la derecha en el mismo color que la barra.
+
+El relleno de la barra y el texto de la etiqueta llevan **tokens distintos**: la barra es un elemento no textual (umbral AA de 3:1 contra `--track`) y la etiqueta es texto de 11px (umbral AA de 4.5:1 contra `--surface`). Un único color no satisface ambos sin volverse marrón.
+
+| Nivel | Relleno de barra | Contraste vs `--track` | Etiqueta | Contraste vs `--surface` |
+|---|---|---|---|---|
+| Débil — menos de 6 caracteres | `--strength-weak` `#b13c22` | 4.98:1 | `--strength-weak-fg` `#b13c22` | 5.93:1 |
+| Media — de 6 a 9 caracteres | `--strength-medium` `#b07714` | 3.21:1 | `--strength-medium-fg` `#8a5b12` | 5.86:1 |
+| Fuerte — 10 caracteres o más | `--strength-strong` `#2f7d4f` | 4.23:1 | `--strength-strong-fg` `#215c3a` | 7.90:1 |
+
+El mockup usa `#c98a1e` para el nivel medio, en barra y etiqueta a la vez. Ese valor da **2.47:1 contra el carril y 2.94:1 contra el fondo**, y no cumple ninguno de los dos umbrales. Se sustituye por el par `#b07714` / `#8a5b12`, que conserva el ámbar y sí cumple. Es la desviación registrada en la sección final.
+
+El nivel de fuerza nunca se comunica solo por color: la etiqueta de texto ("Muy corta", "Aceptable", "Segura") acompaña siempre a la barra.
+
+## Portadas de álbum
+
+Las portadas del mockup son composiciones abstractas de paneles con degradado, sin imágenes externas ni obra con derechos. Se eligen de forma determinista a partir del identificador del álbum.
+
+| Token | Valor |
+|---|---|
+| `--cover-1` | `linear-gradient(150deg, #2b2560, #4c3fd9 55%, #8d7bf0)` |
+| `--cover-2` | `linear-gradient(30deg, #1b1836, #3a3170 70%, #f2765a)` |
+| `--cover-3` | `radial-gradient(circle at 30% 30%, #fbd8c8, #f2765a 60%, #c04a34)` |
+| `--cover-4` | `linear-gradient(200deg, #f4f2ec, #cfc9bb)` |
+| `--cover-5` | `linear-gradient(120deg, #14141d, #33304a)` |
+| `--cover-6` | `radial-gradient(circle at 70% 20%, #ffe7a8, #f0a24b 55%, #8c4a1f)` |
+| `--cover-7` | `linear-gradient(160deg, #1d3b4a, #2f7d8c 60%, #a8dbd9)` |
+| `--cover-8` | `linear-gradient(45deg, #4c3fd9, #241f4d)` |
+
+Tramas superpuestas y velo:
+
+| Token | Valor | Uso |
+|---|---|---|
+| `--pattern-halftone` | `radial-gradient(circle, rgba(0,0,0,.22) 22%, transparent 26%) 0 0 / 6px 6px` | Trama de puntos sobre paneles cálidos |
+| `--pattern-speedlines` | `repeating-linear-gradient(105deg, rgba(255,255,255,.16) 0 2px, transparent 2px 9px)` | Líneas de velocidad sobre paneles fríos |
+| `--cover-scrim` | `linear-gradient(to top, rgba(20,19,26,.55), rgba(20,19,26,0) 55%)` | Velo inferior que da contraste a la etiqueta de idiomas |
+| `--cover-placeholder` | `#eceae3` | Fondo del hueco de portada mientras no hay composición |
+| `--panel-border` | `#191821` | Contorno de cada viñeta |
+
+## Lettering de cómic
+
+Formas abstractas de la ilustración del panel de autenticación. Tipografía `--font-comic` (Archivo).
+
+| Token | Valor | Uso |
+|---|---|---|
+| `--comic-bubble-bg` | `#ffffff` | Globo de diálogo |
+| `--comic-narration-bg` | `#fdf6e8` | Caja de narración |
+| `--comic-ink` | `#191821` | Contorno y texto del lettering |
+| `--shadow-sfx` | `2px 2px 0 #191821, -1px -1px 0 #191821` | Contorno de las onomatopeyas |
+
+## Identidad
+
+| Token | Valor | Uso |
+|---|---|---|
+| `--avatar-gradient` | `linear-gradient(140deg, #4c3fd9, #f2765a)` | Fondo del avatar con iniciales |
+
+## Originalidad del contenido ilustrativo
+
+Todo el contenido ilustrativo de la interfaz es original del equipo.
+
+- **No hay imágenes empaquetadas.** La aplicación no distribuye ningún archivo `.png`, `.jpg`, `.svg` ni equivalente como contenido decorativo. El CSS no contiene una sola función `url()`: las viñetas del panel de autenticación y las portadas de álbum se dibujan con `linear-gradient`, `radial-gradient` y `repeating-linear-gradient` sobre una retícula CSS.
+- **No hay personajes ni figuras.** Las composiciones son rectángulos con degradado. No representan personas, criaturas ni escenas.
+- **No se reproduce obra de terceros.** Ni imagen, ni viñeta, ni texto procedente de un cómic, manga o webtoon publicado.
+- **El lettering está escrito para PaneLingo.** Los tres textos de la ilustración son originales: el globo "Espera. Esta frase no es así.", la caja de narración "Cada viñeta hereda el contexto de la anterior." y la onomatopeya "TZONK". El globo evoca el trabajo de traducir —la duda ante una línea— y la caja de narración describe lo que hace el producto. "TZONK" es una acuñación propia, no una onomatopeya convencional ni una expresión tomada de una obra concreta.
+- **Los únicos recursos externos son dos tipografías**, Plus Jakarta Sans y Archivo, servidas desde Google Fonts bajo licencia abierta.
+- **Las únicas imágenes que muestra la aplicación son las que sube el propio usuario**: las páginas de sus álbumes, servidas desde `media/` con control de acceso por propietario.
+
+Las capturas de `design/screenshots/` y el mockup `PaneLingo.dc.html` son material de referencia interno del proyecto y no se distribuyen con la aplicación.
+
+---
+
 ## Desviaciones deliberadas respecto al mockup
 
 El mockup es la referencia visual, pero la wiki declara **WCAG 2.1 nivel AA** como requisito no funcional del sistema. Donde ambos entran en conflicto, gana la accesibilidad. Estas son las desviaciones acordadas:
@@ -271,6 +376,14 @@ Los demás tokens de texto y las parejas de estado (`--success-fg` sobre `--succ
 }
 ```
 
-### 3. Idioma de la interfaz
+### 3. Ámbar del medidor de fuerza de contraseña
+
+El mockup pinta el nivel medio con `#c98a1e`, tanto la barra como la etiqueta. Ese color da 2.47:1 contra `--track` y 2.94:1 contra `--surface`, por debajo del 3:1 que AA exige para elementos no textuales y del 4.5:1 para texto pequeño. Se sustituye por dos tokens: `--strength-medium` (`#b07714`, 3.21:1) para la barra y `--strength-medium-fg` (`#8a5b12`, 5.86:1) para la etiqueta. El matiz ámbar se conserva.
+
+### 4. Barra de progreso multicolor
+
+`--warning` (`#f2b23a`) aparece en el mockup como segmento de la barra de progreso de traducción, donde da 1.73:1 contra `--track`. Esa barra pertenece al flujo de traducción y **no se usa en el Sprint 1**. Cuando se incorpore, sus segmentos deberán distinguirse por algo más que el color —la leyenda con etiqueta y cifra que ya trae el mockup cumple ese papel—, según el criterio 1.4.1 de WCAG. El uso de `--warning` como fondo de chip, acompañado de `--warning-fg`, sí cumple y no cambia.
+
+### 5. Idioma de la interfaz
 
 El mockup está redactado en inglés. La interfaz de PaneLingo va en **español**, porque los casos de prueba de la wiki referencian los rótulos en español ("Crear cuenta", "Cargar página", "Eliminar", "Cancelar"). Los tokens y los identificadores de código siguen en inglés.
