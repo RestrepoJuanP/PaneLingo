@@ -2,10 +2,10 @@
 
 | Campo | Valor |
 |---|---|
-| Fecha y hora | `2026-09-04T16:56:59-05:00` |
+| Fecha y hora | `2026-09-04T16:57:53-05:00` |
 | Rama | `feature/HU-03-logout` |
-| Commit | `f0c2ddae55c2204186f65cdeec0e84b63832f283` |
-| Arbol de trabajo | con cambios sin versionar |
+| Commit | `b960c61d70f79fde0136a9de32326ce357e68b11` |
+| Arbol de trabajo | limpio |
 | Resultado global | **PASA (7/7)** (verde) |
 
 ## Pasos
