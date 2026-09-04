@@ -5,16 +5,16 @@ Etapa           : 08
 Paso            : 7 de 7 — pip-audit — auditoria de dependencias
 Comando         : pip-audit -r requirements.txt
 Herramienta     : pip-audit 2.10.1
-Fecha y hora    : 2026-09-04T18:18:13-05:00
+Fecha y hora    : 2026-09-04T18:19:38-05:00
 Rama            : feature/HU-06-album-title
-Commit          : 22f4dc81ccd6d243546d786271ef465e50065f28
-Arbol de trabajo: con cambios sin versionar
+Commit          : 02c76ace1685f2c2837b5cd82be81cbf623ef43e
+Arbol de trabajo: limpio
 Directorio      : /f/PaneLingo
 ==============================================================================
 
 WARNING:venv:Actual environment location may have moved due to redirects, links or junctions.
-  Requested location: "C:\Users\TOMMYS~1\AppData\Local\Temp\tmpwklktgq1\Scripts\python.exe"
-  Actual location:    "C:\Users\Tommysepf\AppData\Local\Temp\tmpwklktgq1\Scripts\python.exe"
+  Requested location: "C:\Users\TOMMYS~1\AppData\Local\Temp\tmpjlhqoten\Scripts\python.exe"
+  Actual location:    "C:\Users\Tommysepf\AppData\Local\Temp\tmpjlhqoten\Scripts\python.exe"
 No known vulnerabilities found
 
 ==============================================================================
