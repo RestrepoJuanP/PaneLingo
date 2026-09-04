@@ -1,0 +1,23 @@
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "N", "B", "I", "C90"]
+
+[tool.ruff.lint.per-file-ignores]
+# Las migraciones las genera Django automáticamente: no se escriben a mano y
+# no deben reescribirse para acomodar el formato, porque su contenido debe
+# corresponder exactamente con el estado de los modelos.
+# La única regla que dispara aquí es E501, sobre cadenas help_text que Black
+# no puede partir. Cuatro de las cinco provienen de AbstractUser, están en
+# inglés y no están bajo nuestro control.
+# El ignore es deliberadamente mínimo: una sola regla, una sola ruta.
+"**/migrations/*.py" = ["E501"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.black]
+line-length = 88
+target-version = ["py312"]

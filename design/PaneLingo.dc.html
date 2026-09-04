@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Archivo:wght@500;700&family=Zen+Kaku+Gothic+New:wght@500;700&family=Noto+Sans+KR:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f7f6f3;color:#191821;font-family:'Plus Jakarta Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased;text-wrap:pretty}
+a{color:#4c3fd9;text-decoration:none}
+a:hover{color:#f2765a}
+input,textarea,select,button{font-family:inherit}
+textarea{resize:vertical}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:.35}50%{opacity:1}}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+</style>
+</helmet>
+
+<sc-if value="{{ isAuth }}" hint-placeholder-val="{{ true }}">
+<div style="min-height:100vh;display:flex;background:#f7f6f3">
+  <div style="flex:1.05;min-width:0;background:#1b1836;display:flex;flex-direction:column;justify-content:space-between;padding:clamp(24px,3.4vw,52px);position:relative;overflow:hidden">
+    <div style="display:flex;align-items:center;gap:11px;position:relative;z-index:2">
+      <div style="width:26px;height:26px;border-radius:7px;border:1.5px solid #fff;background:linear-gradient(#fff 0 0) center/1.5px 100% no-repeat,linear-gradient(#fff 0 0) center/100% 1.5px no-repeat"></div>
+      <span style="font:800 19px/1 'Plus Jakarta Sans',sans-serif;color:#fff;letter-spacing:-.02em">PaneLingo</span>
+    </div>
+    <div style="position:relative;z-index:2;max-width:520px">
+      <div style="display:grid;grid-template-columns:1.35fr 1fr;grid-template-rows:120px 96px;gap:10px;margin-bottom:30px">
+        <div style="border:2px solid #fff;border-radius:8px;background:repeating-linear-gradient(105deg,rgba(255,255,255,.16) 0 3px,transparent 3px 14px),linear-gradient(150deg,#2b2560,#4c3fd9 55%,#8d7bf0);position:relative;overflow:hidden">
+          <div style="position:absolute;left:9%;top:14%;width:56%;background:#fff;border:2px solid #17161a;border-radius:11px;padding:7px 9px;font:700 11px/1.2 Archivo,sans-serif;text-transform:uppercase;color:#17161a">Nine pages left before dawn.</div>
+        </div>
+        <div style="border:2px solid #fff;border-radius:8px;background:radial-gradient(circle,rgba(0,0,0,.22) 22%,transparent 26%) 0 0/7px 7px,radial-gradient(circle at 30% 30%,#fbd8c8,#f2765a 60%,#c04a34);position:relative;overflow:hidden">
+          <div style="position:absolute;left:12%;top:52%;font:700 25px/1 Archivo,sans-serif;color:#fff;text-shadow:2px 2px 0 #17161a;transform:rotate(-8deg)">DOKUN</div>
+        </div>
+        <div style="border:2px solid #fff;border-radius:8px;background:linear-gradient(200deg,#1d3b4a,#2f7d8c 60%,#a8dbd9);position:relative;overflow:hidden">
+          <div style="position:absolute;left:8%;bottom:12%;width:74%;background:#fdf6e8;border:2px solid #17161a;border-radius:3px;padding:6px 8px;font:500 10px/1.25 Archivo,sans-serif;color:#17161a">2 A.M., rain. The city held its breath.</div>
+        </div>
+        <div style="border:2px solid #fff;border-radius:8px;background:repeating-linear-gradient(15deg,rgba(255,255,255,.14) 0 3px,transparent 3px 16px),linear-gradient(45deg,#4c3fd9,#241f4d)"></div>
+      </div>
+      <h1 style="margin:0 0 14px;font:800 clamp(26px,3vw,38px)/1.12 'Plus Jakarta Sans',sans-serif;color:#fff;letter-spacing:-.03em">Whole-page context, not stray speech bubbles.</h1>
+      <p style="margin:0;font:400 15px/1.6 'Plus Jakarta Sans',sans-serif;color:rgba(255,255,255,.62);max-width:430px">PaneLingo reads the full page — panels, reading order, sound effects — then translates each block knowing what came before it.</p>
+    </div>
+    <div style="display:flex;gap:26px;flex-wrap:wrap;position:relative;z-index:2">
+      <div><div style="font:800 20px/1 'Plus Jakarta Sans',sans-serif;color:#f2765a">98.2%</div><div style="font:500 11px/1.4 'Plus Jakarta Sans',sans-serif;color:rgba(255,255,255,.5);margin-top:5px">OCR accuracy on clean scans</div></div>
+      <div><div style="font:800 20px/1 'Plus Jakarta Sans',sans-serif;color:#f2765a">14 langs</div><div style="font:500 11px/1.4 'Plus Jakarta Sans',sans-serif;color:rgba(255,255,255,.5);margin-top:5px">Source scripts supported</div></div>
+      <div><div style="font:800 20px/1 'Plus Jakarta Sans',sans-serif;color:#f2765a">SOC 2</div><div style="font:500 11px/1.4 'Plus Jakarta Sans',sans-serif;color:rgba(255,255,255,.5);margin-top:5px">Your unreleased pages stay private</div></div>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:0;display:flex;align-items:center;justify-content:center;padding:clamp(20px,3vw,48px)">
+    <div style="width:100%;max-width:394px">
+      <div style="display:flex;gap:4px;padding:4px;background:#efece5;border-radius:11px;margin-bottom:26px">
+        <button type="button" onClick="{{ tabLogin }}" style="flex:1;padding:9px 10px;border:none;border-radius:8px;background:{{ tabLoginBg }};color:{{ tabLoginFg }};font:600 13px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer;box-shadow:{{ tabLoginSh }}">Log in</button>
+        <button type="button" onClick="{{ tabSignup }}" style="flex:1;padding:9px 10px;border:none;border-radius:8px;background:{{ tabSignupBg }};color:{{ tabSignupFg }};font:600 13px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer;box-shadow:{{ tabSignupSh }}">Create account</button>
+      </div>
+
+      <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ true }}">
+      <div>
+        <h2 style="margin:0 0 7px;font:700 24px/1.2 'Plus Jakarta Sans',sans-serif;letter-spacing:-.02em">Welcome back</h2>
+        <p style="margin:0 0 24px;font:400 13.5px/1.5 'Plus Jakarta Sans',sans-serif;color:#6f6a60">Your work in progress was autosaved 4 minutes ago.</p>
+        <sc-if value="{{ authErr }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;gap:9px;padding:11px 13px;border:1px solid #f3c4b8;background:#fdece7;border-radius:10px;margin-bottom:16px">
+            <div style="width:16px;height:16px;flex:none;border-radius:50%;background:#d9482b;color:#fff;font:700 11px/16px 'Plus Jakarta Sans',sans-serif;text-align:center">!</div>
+            <div style="font:500 12.5px/1.45 'Plus Jakarta Sans',sans-serif;color:#8c2f1a">{{ authErr }}</div>
+          </div>
+        </sc-if>
+        <label style="display:block;font:600 12px/1 'Plus Jakarta Sans',sans-serif;color:#3a3730;margin-bottom:7px">Email</label>
+        <input type="email" value="{{ email }}" onChange="{{ onEmail }}" placeholder="you@studio.com" style="width:100%;padding:11px 13px;border:1px solid #ddd8ce;border-radius:10px;background:#fff;font:500 13.5px/1.3 'Plus Jakarta Sans',sans-serif;color:#191821;margin-bottom:16px;outline:none" style-focus="border-color:#4c3fd9;box-shadow:0 0 0 3px rgba(76,63,217,.12)">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px">
+          <label style="font:600 12px/1 'Plus Jakarta Sans',sans-serif;color:#3a3730">Password</label>
+          <a href="#reset" style="font:500 11.5px/1 'Plus Jakarta Sans',sans-serif">Forgot?</a>
+        </div>
+        <input type="password" value="{{ pass }}" onChange="{{ onPass }}" placeholder="••••••••" style="width:100%;padding:11px 13px;border:1px solid #ddd8ce;border-radius:10px;background:#fff;font:500 13.5px/1.3 'Plus Jakarta Sans',sans-serif;color:#191821;margin-bottom:18px;outline:none" style-focus="border-color:#4c3fd9;box-shadow:0 0 0 3px rgba(76,63,217,.12)">
+        <label style="display:flex;align-items:center;gap:9px;font:500 12.5px/1 'Plus Jakarta Sans',sans-serif;color:#4a463d;margin-bottom:20px;cursor:pointer"><input type="checkbox" checked="{{ true }}" style="width:15px;height:15px;accent-color:#4c3fd9;cursor:pointer">Keep me signed in on this device</label>
+        <button type="button" onClick="{{ doLogin }}" style="width:100%;padding:13px;border:none;border-radius:10px;background:{{ loginBtnBg }};color:#fff;font:700 14px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px" style-hover="background:#3f34bb">
+          <sc-if value="{{ authBusy }}" hint-placeholder-val="{{ false }}"><span style="width:14px;height:14px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;display:inline-block;animation:spin .7s linear infinite"></span></sc-if>
+          {{ loginBtnLabel }}
+        </button>
+        <div style="display:flex;align-items:center;gap:12px;margin:20px 0"><div style="flex:1;height:1px;background:#e2ded4"></div><span style="font:500 11px/1 'Plus Jakarta Sans',sans-serif;color:#9a958a">OR</span><div style="flex:1;height:1px;background:#e2ded4"></div></div>
+        <button type="button" onClick="{{ doLogin }}" style="width:100%;padding:12px;border:1px solid #ddd8ce;border-radius:10px;background:#fff;color:#2b2740;font:600 13px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer" style-hover="border-color:#bdb7aa">Continue with studio SSO</button>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isSignup }}" hint-placeholder-val="{{ false }}">
+      <div>
+        <h2 style="margin:0 0 7px;font:700 24px/1.2 'Plus Jakarta Sans',sans-serif;letter-spacing:-.02em">Create your account</h2>
+        <p style="margin:0 0 22px;font:400 13.5px/1.5 'Plus Jakarta Sans',sans-serif;color:#6f6a60">Free while you translate your first 20 pages. No card needed.</p>
+        <label style="display:block;font:600 12px/1 'Plus Jakarta Sans',sans-serif;color:#3a3730;margin-bottom:7px">Full name</label>
+        <input type="text" placeholder="Mira Okonkwo" style="width:100%;padding:11px 13px;border:1px solid #ddd8ce;border-radius:10px;background:#fff;font:500 13.5px/1.3 'Plus Jakarta Sans',sans-serif;margin-bottom:16px;outline:none" style-focus="border-color:#4c3fd9;box-shadow:0 0 0 3px rgba(76,63,217,.12)">
+        <label style="display:block;font:600 12px/1 'Plus Jakarta Sans',sans-serif;color:#3a3730;margin-bottom:7px">Work email</label>
+        <input type="email" placeholder="you@studio.com" style="width:100%;padding:11px 13px;border:1px solid #ddd8ce;border-radius:10px;background:#fff;font:500 13.5px/1.3 'Plus Jakarta Sans',sans-serif;margin-bottom:16px;outline:none" style-focus="border-color:#4c3fd9;box-shadow:0 0 0 3px rgba(76,63,217,.12)">
+        <label style="display:block;font:600 12px/1 'Plus Jakarta Sans',sans-serif;color:#3a3730;margin-bottom:7px">Password</label>
+        <input type="password" value="{{ npass }}" onChange="{{ onNpass }}" placeholder="At least 10 characters" style="width:100%;padding:11px 13px;border:1px solid #ddd8ce;border-radius:10px;background:#fff;font:500 13.5px/1.3 'Plus Jakarta Sans',sans-serif;margin-bottom:9px;outline:none" style-focus="border-color:#4c3fd9;box-shadow:0 0 0 3px rgba(76,63,217,.12)">
+        <div style="display:flex;align-items:center;gap:9px;margin-bottom:18px">
+          <div style="flex:1;height:5px;border-radius:3px;background:#e7e3db;overflow:hidden"><div style="height:100%;width:{{ pwPct }};background:{{ pwColor }};border-radius:3px;transition:width .25s"></div></div>
+          <span style="font:600 11px/1 'Plus Jakarta Sans',sans-serif;color:{{ pwColor }};min-width:56px;text-align:right">{{ pwLabel }}</span>
+        </div>
+        <div style="font:600 12px/1 'Plus Jakarta Sans',sans-serif;color:#3a3730;margin-bottom:9px">What describes you best?</div>
+        <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:20px">
+          <sc-for list="{{ roles }}" as="r" hint-placeholder-count="3">
+            <button type="button" onClick="{{ r.on }}" style="padding:8px 12px;border:1px solid {{ r.bd }};background:{{ r.bg }};color:{{ r.fg }};border-radius:20px;font:600 12px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">{{ r.label }}</button>
+          </sc-for>
+        </div>
+        <label style="display:flex;gap:9px;font:500 12px/1.45 'Plus Jakarta Sans',sans-serif;color:#4a463d;margin-bottom:20px;cursor:pointer"><input type="checkbox" style="width:15px;height:15px;accent-color:#4c3fd9;flex:none;margin-top:1px;cursor:pointer"><span>I agree to the <a href="#terms">Terms</a> and confirm I hold the rights to the pages I upload.</span></label>
+        <button type="button" onClick="{{ doLogin }}" style="width:100%;padding:13px;border:none;border-radius:10px;background:#4c3fd9;color:#fff;font:700 14px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer" style-hover="background:#3f34bb">Create account</button>
+      </div>
+      </sc-if>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isApp }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:100vh;background:#f7f6f3">
+<div style="display:flex;width:100%;max-width:{{ shellMax }};margin:0 auto;min-height:100vh;border-left:{{ shellEdge }};border-right:{{ shellEdge }}">
+
+  <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+  <aside style="width:246px;flex:none;background:#fff;border-right:1px solid #e7e3db;display:flex;flex-direction:column;padding:18px 14px;position:sticky;top:0;height:100vh">
+    <div style="display:flex;align-items:center;gap:10px;padding:6px 8px 20px">
+      <div style="width:24px;height:24px;border-radius:7px;border:1.5px solid #4c3fd9;background:linear-gradient(#4c3fd9 0 0) center/1.5px 100% no-repeat,linear-gradient(#4c3fd9 0 0) center/100% 1.5px no-repeat"></div>
+      <span style="font:800 17px/1 'Plus Jakarta Sans',sans-serif;letter-spacing:-.02em">PaneLingo</span>
+    </div>
+    <nav style="display:flex;flex-direction:column;gap:2px">
+      <sc-for list="{{ nav }}" as="it" hint-placeholder-count="6">
+        <button type="button" onClick="{{ it.on }}" style="display:flex;align-items:center;gap:11px;padding:9px 10px;border:none;border-radius:9px;background:{{ it.bg }};color:{{ it.fg }};font:600 13px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer;text-align:left;width:100%" style-hover="background:#f2f0ea">
+          <span style="width:17px;height:17px;flex:none;border:1.5px solid currentColor;border-radius:4px;background:{{ it.mark }}"></span>
+          <span style="flex:1">{{ it.label }}</span>
+          <sc-if value="{{ it.badge }}" hint-placeholder-val="{{ false }}"><span style="padding:2px 6px;border-radius:20px;background:#fdece7;color:#c04a34;font:700 10.5px/1.4 'Plus Jakarta Sans',sans-serif">{{ it.badge }}</span></sc-if>
+        </button>
+      </sc-for>
+    </nav>
+    <div style="margin-top:22px;padding:13px;border:1px solid #e7e3db;border-radius:12px;background:#faf9f6">
+      <div style="font:700 11.5px/1 'Plus Jakarta Sans',sans-serif;color:#3a3730;margin-bottom:9px">Monthly page credits</div>
+      <div style="height:6px;border-radius:4px;background:#e7e3db;overflow:hidden;margin-bottom:8px"><div style="height:100%;width:62%;background:linear-gradient(90deg,#4c3fd9,#8d7bf0);border-radius:4px"></div></div>
+      <div style="font:500 11px/1.4 'Plus Jakarta Sans',sans-serif;color:#6f6a60">124 of 200 pages scanned · resets Aug 12</div>
+    </div>
+    <div style="flex:1"></div>
+    <button type="button" onClick="{{ goSettings }}" style="display:flex;align-items:center;gap:10px;padding:9px 8px;border:none;background:none;border-radius:10px;cursor:pointer;width:100%;text-align:left" style-hover="background:#f2f0ea">
+      <span style="width:31px;height:31px;flex:none;border-radius:9px;background:linear-gradient(140deg,#4c3fd9,#f2765a);color:#fff;font:700 12px/31px 'Plus Jakarta Sans',sans-serif;text-align:center">MO</span>
+      <span style="min-width:0"><span style="display:block;font:600 12.5px/1.2 'Plus Jakarta Sans',sans-serif;color:#191821;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Mira Okonkwo</span><span style="display:block;font:500 11px/1.3 'Plus Jakarta Sans',sans-serif;color:#8a8478;margin-top:2px">Studio Flux · Pro</span></span>
+    </button>
+  </aside>
+  </sc-if>
+
+  <main style="flex:1;min-width:0;display:flex;flex-direction:column;padding-bottom:{{ mainPadBottom }}">
+    <header style="position:sticky;top:0;z-index:30;display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:12px clamp(14px,2.2vw,26px);background:rgba(247,246,243,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e7e3db">
+      <sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">
+          <div style="width:22px;height:22px;flex:none;border-radius:6px;border:1.5px solid #4c3fd9;background:linear-gradient(#4c3fd9 0 0) center/1.5px 100% no-repeat,linear-gradient(#4c3fd9 0 0) center/100% 1.5px no-repeat"></div>
+          <span style="font:700 14px/1.2 'Plus Jakarta Sans',sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ crumb }}</span>
+        </div>
+      </sc-if>
+      <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+        <div style="flex:1 1 200px;min-width:0;display:flex;align-items:center;gap:10px">
+          <span style="font:600 13px/1.2 'Plus Jakarta Sans',sans-serif;color:#8a8478;white-space:nowrap">{{ crumbRoot }}</span>
+          <span style="color:#c4bfb2">/</span>
+          <span style="font:700 13.5px/1.2 'Plus Jakarta Sans',sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ crumb }}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid #e2ded4;border-radius:10px;background:#fff;flex:0 1 240px;min-width:0">
+          <span style="width:12px;height:12px;border:1.5px solid #a9a397;border-radius:50%;flex:none"></span>
+          <input type="text" placeholder="Search albums, pages, terms…" style="border:none;outline:none;background:none;font:500 12.5px/1 'Plus Jakarta Sans',sans-serif;width:100%;color:#191821">
+        </div>
+      </sc-if>
+      <div style="display:flex;align-items:center;gap:8px;padding:7px 11px;border-radius:9px;background:{{ saveBg }};border:1px solid {{ saveBd }}">
+        <span style="width:7px;height:7px;border-radius:50%;background:{{ saveDot }};animation:{{ saveAnim }}"></span>
+        <span style="font:600 11.5px/1 'Plus Jakarta Sans',sans-serif;color:{{ saveFg }};white-space:nowrap">{{ saveLabel }}</span>
+      </div>
+      <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+        <button type="button" onClick="{{ toggleVp }}" title="Toggle responsive preview" style="padding:8px 11px;border:1px solid #e2ded4;border-radius:9px;background:#fff;font:600 11.5px/1 'Plus Jakarta Sans',sans-serif;color:#6f6a60;cursor:pointer;white-space:nowrap" style-hover="border-color:#bdb7aa">{{ vpLabel }}</button>
+      </sc-if>
+    </header>
+
+    <sc-if value="{{ onDashboard }}" hint-placeholder-val="{{ true }}">
+    <div style="padding:clamp(16px,2.4vw,30px);animation:rise .28s ease both">
+      <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;justify-content:space-between;margin-bottom:22px">
+        <div>
+          <h1 style="margin:0 0 6px;font:800 clamp(21px,2.4vw,28px)/1.15 'Plus Jakarta Sans',sans-serif;letter-spacing:-.03em">Good afternoon, Mira</h1>
+          <p style="margin:0;font:500 13.5px/1.5 'Plus Jakarta Sans',sans-serif;color:#6f6a60">{{ dashSub }}</p>
+        </div>
+        <div style="display:flex;gap:9px;flex-wrap:wrap">
+          <button type="button" onClick="{{ goUpload }}" style="display:inline-flex;align-items:center;gap:8px;padding:11px 15px;border:1px solid #ddd8ce;border-radius:10px;background:#fff;color:#2b2740;font:600 13px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer" style-hover="border-color:#bdb7aa">Upload pages</button>
+          <button type="button" onClick="{{ openCreate }}" style="display:inline-flex;align-items:center;gap:8px;padding:11px 16px;border:none;border-radius:10px;background:#4c3fd9;color:#fff;font:700 13px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer" style-hover="background:#3f34bb"><span style="font-size:15px;line-height:1">+</span>New album</button>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(178px,1fr));gap:12px;margin-bottom:22px">
+        <sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
+          <div style="background:#fff;border:1px solid #e7e3db;border-radius:14px;padding:15px 16px">
+            <div style="font:600 11.5px/1 'Plus Jakarta Sans',sans-serif;color:#8a8478;margin-bottom:11px">{{ s.label }}</div>
+            <div style="display:flex;align-items:baseline;gap:8px">
+              <span style="font:800 25px/1 'Plus Jakarta Sans',sans-serif;letter-spacing:-.03em;color:{{ s.color }}">{{ s.value }}</span>
+              <span style="font:600 11.5px/1 'Plus Jakarta Sans',sans-serif;color:#8a8478">{{ s.hint }}</span>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="background:#1b1836;border-radius:16px;padding:16px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:28px">
+        <div style="width:78px;flex:none;aspect-ratio:3/4.24;border-radius:6px;overflow:hidden;position:relative;container-type:size;background:#fff;border:1px solid rgba(255,255,255,.25)">
+          <sc-for list="{{ resumePanels }}" as="p" hint-placeholder-count="4"><div style="position:absolute;left:{{ p.l }}%;top:{{ p.t }}%;width:{{ p.w }}%;height:{{ p.h }}%;background:{{ p.bg }};border:0.5cqw solid #191821;border-radius:0.7cqw"></div></sc-for>
+        </div>
+        <div style="flex:1;min-width:180px">
+          <div style="font:600 11px/1 'Plus Jakarta Sans',sans-serif;color:#f2765a;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Pick up where you left off</div>
+          <div style="font:700 16px/1.3 'Plus Jakarta Sans',sans-serif;color:#fff;margin-bottom:6px">{{ resumeTitle }}</div>
+          <div style="font:500 12.5px/1.5 'Plus Jakarta Sans',sans-serif;color:rgba(255,255,255,.6)">{{ resumeSub }}</div>
+        </div>
+        <button type="button" onClick="{{ goWorkspace }}" style="padding:11px 17px;border:none;border-radius:10px;background:#f2765a;color:#231a17;font:700 13px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer" style-hover="background:#e4674b">Resume translating</button>
+      </div>
+
+      <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div style="display:flex;align-items:baseline;gap:9px">
+          <h2 style="margin:0;font:700 17px/1.2 'Plus Jakarta Sans',sans-serif;letter-spacing:-.02em">Albums</h2>
+          <span style="font:600 12px/1 'Plus Jakarta Sans',sans-serif;color:#8a8478">{{ libCount }}</span>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <sc-for list="{{ filters }}" as="f" hint-placeholder-count="5">
+            <button type="button" onClick="{{ f.on }}" style="padding:7px 12px;border:1px solid {{ f.bd }};background:{{ f.bg }};color:{{ f.fg }};border-radius:20px;font:600 12px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">{{ f.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+
+      <sc-if value="{{ libEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="border:1.5px dashed #d5d0c4;border-radius:16px;padding:44px 24px;text-align:center;background:#fbfaf7">
+          <div style="display:flex;gap:8px;justify-content:center;margin-bottom:20px">
+            <div style="width:44px;height:58px;border:1.5px dashed #c9c4b8;border-radius:5px"></div>
+            <div style="width:44px;height:58px;border:1.5px dashed #c9c4b8;border-radius:5px;background:#f2f0ea"></div>
+            <div style="width:44px;height:58px;border:1.5px dashed #c9c4b8;border-radius:5px"></div>
+          </div>
+          <div style="font:700 15px/1.3 'Plus Jakarta Sans',sans-serif;margin-bottom:7px">{{ emptyTitle }}</div>
+          <p style="margin:0 auto 18px;max-width:330px;font:500 12.5px/1.55 'Plus Jakarta Sans',sans-serif;color:#6f6a60">{{ emptyBody }}</p>
+          <button type="button" onClick="{{ openCreate }}" style="padding:11px 17px;border:none;border-radius:10px;background:#4c3fd9;color:#fff;font:700 13px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">Create your first album</button>
+        </div>
+      </sc-if>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(252px,1fr));gap:16px">
+        <sc-for list="{{ libAlbums }}" as="al" hint-placeholder-count="4">
+          <div style="background:#fff;border:1px solid #e7e3db;border-radius:16px;overflow:hidden;position:relative;transition:box-shadow .18s,transform .18s" style-hover="box-shadow:0 10px 26px rgba(25,24,33,.11);transform:translateY(-2px)">
+            <div onClick="{{ al.open }}" style="position:relative;height:150px;background:#eceae3;cursor:pointer;overflow:hidden">
+              <div style="position:absolute;left:0;top:0;width:100%;aspect-ratio:3/4.24;container-type:size">
+                <sc-for list="{{ al.cover }}" as="p" hint-placeholder-count="4"><div style="position:absolute;left:{{ p.l }}%;top:{{ p.t }}%;width:{{ p.w }}%;height:{{ p.h }}%;background:{{ p.bg }};border:0.4cqw solid #191821;border-radius:0.5cqw"></div></sc-for>
+              </div>
+              <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(20,19,26,.55),rgba(20,19,26,0) 55%)"></div>
+              <span style="position:absolute;top:10px;left:10px;padding:4px 9px;border-radius:20px;background:{{ al.stBg }};color:{{ al.stFg }};font:700 10.5px/1.4 'Plus Jakarta Sans',sans-serif;backdrop-filter:blur(4px)">{{ al.status }}</span>
+              <span style="position:absolute;bottom:10px;left:11px;font:700 11px/1.4 Archivo,sans-serif;color:#fff;letter-spacing:.06em">{{ al.langPair }}</span>
+            </div>
+            <div style="padding:14px 15px 15px">
+              <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;margin-bottom:4px">
+                <button type="button" onClick="{{ al.open }}" style="border:none;background:none;padding:0;text-align:left;font:700 14.5px/1.3 'Plus Jakarta Sans',sans-serif;color:#191821;cursor:pointer;letter-spacing:-.01em" style-hover="color:#4c3fd9">{{ al.title }}</button>
+                <button type="button" onClick="{{ al.menu }}" style="flex:none;width:24px;height:24px;border:none;background:none;border-radius:7px;cursor:pointer;color:#8a8478;font:700 14px/1 'Plus Jakarta Sans',sans-serif" style-hover="background:#f2f0ea">···</button>
+              </div>
+              <div style="font:500 11.5px/1.4 'Plus Jakarta Sans',sans-serif;color:#8a8478;margin-bottom:13px">{{ al.meta }}</div>
+              <div style="display:flex;align-items:center;gap:9px;margin-bottom:9px">
+                <div style="flex:1;height:6px;border-radius:4px;background:#eeebe3;overflow:hidden;display:flex">
+                  <div style="height:100%;width:{{ al.pctApproved }}%;background:#4c3fd9"></div>
+                  <div style="height:100%;width:{{ al.pctFlag }}%;background:#f2b23a"></div>
+                </div>
+                <span style="font:700 11.5px/1 'Plus Jakarta Sans',sans-serif;color:#3a3730;min-width:30px;text-align:right">{{ al.pct }}%</span>
+              </div>
+              <div style="font:500 11px/1.4 'Plus Jakarta Sans',sans-serif;color:#a09a8e">Edited {{ al.edited }}</div>
+            </div>
+            <sc-if value="{{ al.menuOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute;top:150px;right:12px;z-index:20;background:#fff;border:1px solid #e2ded4;border-radius:12px;box-shadow:0 14px 34px rgba(25,24,33,.16);padding:6px;min-width:168px">
+                <sc-for list="{{ al.actions }}" as="a" hint-placeholder-count="4">
+                  <button type="button" onClick="{{ a.on }}" style="display:block;width:100%;text-align:left;padding:8px 10px;border:none;background:none;border-radius:8px;font:600 12.5px/1 'Plus Jakarta Sans',sans-serif;color:{{ a.fg }};cursor:pointer" style-hover="background:#f4f2ec">{{ a.label }}</button>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ onAlbum }}" hint-placeholder-val="{{ false }}">
+    <div style="padding:clamp(16px,2.4vw,30px);animation:rise .28s ease both">
+      <button type="button" onClick="{{ goDashboard }}" style="display:inline-flex;align-items:center;gap:7px;padding:0;border:none;background:none;font:600 12.5px/1 'Plus Jakarta Sans',sans-serif;color:#6f6a60;cursor:pointer;margin-bottom:16px" style-hover="color:#4c3fd9">← All albums</button>
+      <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start;margin-bottom:22px">
+        <div style="width:112px;flex:none;aspect-ratio:3/4.24;border-radius:9px;overflow:hidden;position:relative;container-type:size;background:#fff;border:1px solid #ddd8ce">
+          <sc-for list="{{ albumCover }}" as="p" hint-placeholder-count="4"><div style="position:absolute;left:{{ p.l }}%;top:{{ p.t }}%;width:{{ p.w }}%;height:{{ p.h }}%;background:{{ p.bg }};border:0.5cqw solid #191821;border-radius:0.7cqw"></div></sc-for>
+        </div>
+        <div style="flex:1;min-width:220px">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px">
+            <sc-if value="{{ renaming }}" hint-placeholder-val="{{ false }}">
+              <input type="text" value="{{ renameVal }}" onChange="{{ onRename }}" style="font:800 24px/1.15 'Plus Jakarta Sans',sans-serif;letter-spacing:-.03em;padding:5px 9px;border:1px solid #4c3fd9;border-radius:9px;outline:none;max-width:100%;box-shadow:0 0 0 3px rgba(76,63,217,.12)">
+              <button type="button" onClick="{{ saveRename }}" style="padding:9px 13px;border:none;border-radius:9px;background:#4c3fd9;color:#fff;font:700 12px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">Save</button>
+            </sc-if>
+            <sc-if value="{{ notRenaming }}" hint-placeholder-val="{{ true }}">
+              <h1 style="margin:0;font:800 clamp(21px,2.4vw,28px)/1.15 'Plus Jakarta Sans',sans-serif;letter-spacing:-.03em">{{ albumTitle }}</h1>
+              <button type="button" onClick="{{ startRename }}" style="padding:5px 9px;border:1px solid #e2ded4;border-radius:7px;background:#fff;font:600 11px/1 'Plus Jakarta Sans',sans-serif;color:#6f6a60;cursor:pointer" style-hover="border-color:#bdb7aa">Rename</button>
+            </sc-if>
+            <span style="padding:4px 10px;border-radius:20px;background:{{ albumStBg }};color:{{ albumStFg }};font:700 11px/1.4 'Plus Jakarta Sans',sans-serif">{{ albumStatus }}</span>
+          </div>
+          <p style="margin:0 0 16px;font:500 13px/1.5 'Plus Jakarta Sans',sans-serif;color:#6f6a60">{{ albumMeta }}</p>
+          <div style="display:flex;gap:9px;flex-wrap:wrap">
+            <button type="button" onClick="{{ goWorkspace }}" style="padding:11px 16px;border:none;border-radius:10px;background:#4c3fd9;color:#fff;font:700 13px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer" style-hover="background:#3f34bb">Open workspace</button>
+            <button type="button" onClick="{{ goUpload }}" style="padding:11px 15px;border:1px solid #ddd8ce;border-radius:10px;background:#fff;color:#2b2740;font:600 13px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer" style-hover="border-color:#bdb7aa">Add pages</button>
+            <button type="button" onClick="{{ goReview }}" style="padding:11px 15px;border:1px solid #ddd8ce;border-radius:10px;background:#fff;color:#2b2740;font:600 13px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer" style-hover="border-color:#bdb7aa">Review &amp; export</button>
+            <button type="button" onClick="{{ askDelete }}" style="padding:11px 15px;border:1px solid #f0d6cd;border-radius:10px;background:#fff;color:#b13c22;font:600 13px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer" style-hover="background:#fdece7">Delete</button>
+          </div>
+        </div>
+        <div style="width:250px;flex:none;background:#fff;border:1px solid #e7e3db;border-radius:14px;padding:15px">
+          <div style="font:700 12px/1 'Plus Jakarta Sans',sans-serif;margin-bottom:13px">Translation progress</div>
+          <div style="display:flex;height:9px;border-radius:5px;overflow:hidden;background:#eeebe3;margin-bottom:12px">
+            <div style="width:{{ albumPctApproved }}%;background:#4c3fd9"></div>
+            <div style="width:{{ albumPctFlag }}%;background:#f2b23a"></div>
+            <div style="width:{{ albumPctDraft }}%;background:#c8c3b7"></div>
+          </div>
+          <sc-for list="{{ albumLegend }}" as="l" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+              <span style="width:8px;height:8px;border-radius:2px;background:{{ l.color }};flex:none"></span>
+              <span style="flex:1;font:500 12px/1 'Plus Jakarta Sans',sans-serif;color:#4a463d">{{ l.label }}</span>
+              <span style="font:700 12px/1 'Plus Jakarta Sans',sans-serif;color:#191821">{{ l.value }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div style="display:flex;align-items:baseline;gap:9px">
+          <h2 style="margin:0;font:700 16px/1.2 'Plus Jakarta Sans',sans-serif;letter-spacing:-.02em">Pages</h2>
+          <span style="font:600 12px/1 'Plus Jakarta Sans',sans-serif;color:#8a8478">{{ pagesCount }}</span>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <sc-for list="{{ pageFilters }}" as="f" hint-placeholder-count="4">
+            <button type="button" onClick="{{ f.on }}" style="padding:7px 12px;border:1px solid {{ f.bd }};background:{{ f.bg }};color:{{ f.fg }};border-radius:20px;font:600 12px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">{{ f.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+
+      <sc-if value="{{ hasSelection }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:11px 14px;border-radius:12px;background:#1b1836;margin-bottom:14px">
+          <span style="font:700 12.5px/1 'Plus Jakarta Sans',sans-serif;color:#fff">{{ selectionLabel }}</span>
+          <div style="flex:1"></div>
+          <button type="button" onClick="{{ markSelectedDone }}" style="padding:8px 12px;border:none;border-radius:8px;background:#f2765a;color:#231a17;font:700 12px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">Mark as done</button>
+          <button type="button" onClick="{{ rescanSelected }}" style="padding:8px 12px;border:1px solid rgba(255,255,255,.28);border-radius:8px;background:none;color:#fff;font:600 12px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">Re-scan</button>
+          <button type="button" onClick="{{ clearSelection }}" style="padding:8px 10px;border:none;background:none;color:rgba(255,255,255,.6);font:600 12px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">Clear</button>
+        </div>
+      </sc-if>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(146px,1fr));gap:14px">
+        <sc-for list="{{ pageCards }}" as="pg" hint-placeholder-count="8">
+          <div style="background:#fff;border:1.5px solid {{ pg.bd }};border-radius:12px;overflow:hidden;transition:box-shadow .16s" style-hover="box-shadow:0 8px 20px rgba(25,24,33,.1)">
+            <div onClick="{{ pg.open }}" style="position:relative;aspect-ratio:3/4.24;cursor:pointer;background:#fff;container-type:size;overflow:hidden">
+              <sc-for list="{{ pg.panels }}" as="p" hint-placeholder-count="4"><div style="position:absolute;left:{{ p.l }}%;top:{{ p.t }}%;width:{{ p.w }}%;height:{{ p.h }}%;background:{{ p.bg }};border:0.55cqw solid #191821;border-radius:0.8cqw"></div></sc-for>
+              <sc-for list="{{ pg.bubbles }}" as="b" hint-placeholder-count="3"><div style="position:absolute;left:{{ b.x }}%;top:{{ b.y }}%;width:{{ b.w }}%;height:{{ b.h }}%;background:{{ b.bg }};border:{{ b.bd }};border-radius:{{ b.r }};color:{{ b.fg }};font-family:{{ b.ff }};font-weight:{{ b.fw }};font-size:{{ b.fs }};line-height:1.15;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;padding:0.6cqw;text-shadow:{{ b.sh }};transform:{{ b.tr }}">{{ b.source }}</div></sc-for>
+              <sc-if value="{{ pg.unscanned }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;inset:0;background:rgba(247,246,243,.86);display:flex;align-items:center;justify-content:center;text-align:center;padding:10px;font:600 10.5px/1.4 'Plus Jakarta Sans',sans-serif;color:#6f6a60">Not scanned yet</div></sc-if>
+              <label onClick="{{ pg.stopProp }}" style="position:absolute;top:6px;left:6px;width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,.92);border:1px solid #cdc7ba;display:flex;align-items:center;justify-content:center;cursor:pointer"><input type="checkbox" checked="{{ pg.selected }}" onChange="{{ pg.toggleSel }}" style="width:12px;height:12px;accent-color:#4c3fd9;cursor:pointer"></label>
+              <sc-if value="{{ pg.warn }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:6px;right:6px;padding:3px 6px;border-radius:6px;background:#fff5e0;border:1px solid #f0d99c;font:700 9.5px/1.3 'Plus Jakarta Sans',sans-serif;color:#8a5b12">{{ pg.warn }}</span></sc-if>
+            </div>
+            <div style="padding:9px 10px 10px;border-top:1px solid #eeebe3">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:7px">
+                <span style="font:700 11.5px/1 'Plus Jakarta Sans',sans-serif;color:#191821">Page {{ pg.n }}</span>
+                <span style="padding:3px 7px;border-radius:20px;background:{{ pg.stBg }};color:{{ pg.stFg }};font:700 9.5px/1.3 'Plus Jakarta Sans',sans-serif;white-space:nowrap">{{ pg.stLabel }}</span>
+              </div>
+              <div style="height:4px;border-radius:3px;background:#eeebe3;overflow:hidden"><div style="height:100%;width:{{ pg.pct }}%;background:{{ pg.barColor }}"></div></div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ onUpload }}" hint-placeholder-val="{{ false }}">
+    <div style="padding:clamp(16px,2.4vw,30px);animation:rise .28s ease both">
+      <h1 style="margin:0 0 6px;font:800 clamp(21px,2.4vw,26px)/1.15 'Plus Jakarta Sans',sans-serif;letter-spacing:-.03em">Upload &amp; scan pages</h1>
+      <p style="margin:0 0 22px;font:500 13.5px/1.5 'Plus Jakarta Sans',sans-serif;color:#6f6a60">Adding to <strong style="color:#191821">{{ albumTitle }}</strong> · full-page analysis runs automatically after upload.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;align-items:start">
+        <div style="min-width:0">
+          <div onClick="{{ simulateUpload }}" style="border:1.5px dashed #c6c0b3;border-radius:16px;background:#fbfaf7;padding:30px 22px;text-align:center;cursor:pointer;margin-bottom:16px;transition:border-color .16s,background .16s" style-hover="border-color:#4c3fd9;background:#f5f3ff">
+            <div style="width:46px;height:46px;margin:0 auto 14px;border-radius:13px;border:1.5px solid #4c3fd9;background:linear-gradient(#4c3fd9 0 0) center/1.5px 100% no-repeat,linear-gradient(#4c3fd9 0 0) center/100% 1.5px no-repeat"></div>
+            <div style="font:700 15px/1.3 'Plus Jakarta Sans',sans-serif;margin-bottom:7px">Drop full comic pages here</div>
+            <p style="margin:0 auto;max-width:340px;font:500 12.5px/1.55 'Plus Jakarta Sans',sans-serif;color:#6f6a60">Upload the entire page, not cropped bubbles — PaneLingo uses the whole composition to get reading order and tone right. PNG, JPG, WEBP, PDF, up to 40&nbsp;MB each.</p>
+            <div style="margin-top:16px;display:flex;gap:9px;justify-content:center;flex-wrap:wrap">
+              <span style="padding:10px 15px;border-radius:10px;background:#4c3fd9;color:#fff;font:700 12.5px/1 'Plus Jakarta Sans',sans-serif">Choose files</span>
+              <span style="padding:10px 15px;border-radius:10px;background:#fff;border:1px solid #ddd8ce;color:#2b2740;font:600 12.5px/1 'Plus Jakarta Sans',sans-serif">Import from scanner</span>
+            </div>
+          </div>
+
+          <div style="background:#fff;border:1px solid #e7e3db;border-radius:14px;overflow:hidden">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 15px;border-bottom:1px solid #eeebe3">
+              <span style="font:700 13px/1 'Plus Jakarta Sans',sans-serif">Processing queue</span>
+              <span style="font:600 11.5px/1 'Plus Jakarta Sans',sans-serif;color:#8a8478">{{ queueLabel }}</span>
+            </div>
+            <sc-for list="{{ uploads }}" as="u" hint-placeholder-count="4">
+              <div style="display:flex;gap:12px;padding:13px 15px;border-bottom:1px solid #f2f0ea;align-items:flex-start">
+                <div style="width:38px;flex:none;aspect-ratio:3/4.24;border-radius:5px;overflow:hidden;position:relative;container-type:size;background:#fff;border:1px solid #e2ded4;opacity:{{ u.thumbOpacity }}">
+                  <sc-for list="{{ u.panels }}" as="p" hint-placeholder-count="3"><div style="position:absolute;left:{{ p.l }}%;top:{{ p.t }}%;width:{{ p.w }}%;height:{{ p.h }}%;background:{{ p.bg }};border:0.6cqw solid #191821"></div></sc-for>
+                </div>
+                <div style="flex:1;min-width:0">
+                  <div style="display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;margin-bottom:5px">
+                    <span style="font:600 12.5px/1.3 'Plus Jakarta Sans',sans-serif;color:#191821">{{ u.name }}</span>
+                    <span style="font:500 11px/1.3 'Plus Jakarta Sans',sans-serif;color:#a09a8e">{{ u.size }}</span>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                    <sc-if value="{{ u.spinning }}" hint-placeholder-val="{{ false }}"><span style="width:11px;height:11px;flex:none;border:2px solid #d8d3c9;border-top-color:#4c3fd9;border-radius:50%;display:inline-block;animation:spin .8s linear infinite"></span></sc-if>
+                    <span style="font:600 11.5px/1.4 'Plus Jakarta Sans',sans-serif;color:{{ u.stateColor }}">{{ u.state }}</span>
+                  </div>
+                  <sc-if value="{{ u.showBar }}" hint-placeholder-val="{{ false }}">
+                    <div style="height:5px;border-radius:3px;background:#eeebe3;overflow:hidden;max-width:340px"><div style="height:100%;width:{{ u.pct }}%;background:#4c3fd9;transition:width .4s"></div></div>
+                  </sc-if>
+                  <sc-if value="{{ u.warn }}" hint-placeholder-val="{{ false }}">
+                    <div style="margin-top:8px;padding:10px 12px;border-radius:10px;background:{{ u.warnBg }};border:1px solid {{ u.warnBd }}">
+                      <div style="font:600 12px/1.45 'Plus Jakarta Sans',sans-serif;color:{{ u.warnFg }};margin-bottom:9px">{{ u.warn }}</div>
+                      <div style="display:flex;gap:7px;flex-wrap:wrap">
+                        <button type="button" onClick="{{ u.fix }}" style="padding:7px 11px;border:none;border-radius:8px;background:{{ u.warnFg }};color:#fff;font:700 11.5px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">{{ u.fixLabel }}</button>
+                        <button type="button" onClick="{{ u.ignore }}" style="padding:7px 11px;border:1px solid #ddd8ce;border-radius:8px;background:#fff;color:#4a463d;font:600 11.5px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">Use anyway</button>
+                      </div>
+                    </div>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-for>
+            <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:13px 15px">
+              <span style="font:500 12px/1.4 'Plus Jakarta Sans',sans-serif;color:#6f6a60">{{ queueFoot }}</span>
+              <button type="button" onClick="{{ goWorkspace }}" style="padding:10px 15px;border:none;border-radius:10px;background:#4c3fd9;color:#fff;font:700 12.5px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer" style-hover="background:#3f34bb">Start translating</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="min-width:0;display:flex;flex-direction:column;gap:16px">
+          <div style="background:#fff;border:1px solid #e7e3db;border-radius:14px;padding:15px">
+            <div style="font:700 13px/1 'Plus Jakarta Sans',sans-serif;margin-bottom:14px">Scan settings</div>
+            <sc-for list="{{ scanToggles }}" as="t" hint-placeholder-count="4">
+              <label style="display:flex;gap:11px;align-items:flex-start;padding:9px 0;border-bottom:1px solid #f2f0ea;cursor:pointer">
+                <input type="checkbox" checked="{{ t.on }}" onChange="{{ t.toggle }}" style="width:15px;height:15px;margin-top:2px;accent-color:#4c3fd9;flex:none;cursor:pointer">
+                <span style="min-width:0"><span style="display:block;font:600 12.5px/1.3 'Plus Jakarta Sans',sans-serif;color:#191821">{{ t.label }}</span><span style="display:block;font:500 11.5px/1.45 'Plus Jakarta Sans',sans-serif;color:#8a8478;margin-top:3px">{{ t.hint }}</span></span>
+              </label>
+            </sc-for>
+            <div style="padding-top:13px">
+              <div style="font:600 12px/1 'Plus Jakarta Sans',sans-serif;margin-bottom:9px">Reading order</div>
+              <div style="display:flex;gap:7px;flex-wrap:wrap">
+                <sc-for list="{{ orderOpts }}" as="o" hint-placeholder-count="3">
+                  <button type="button" onClick="{{ o.on }}" style="padding:8px 12px;border:1px solid {{ o.bd }};background:{{ o.bg }};color:{{ o.fg }};border-radius:9px;font:600 12px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">{{ o.label }}</button>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+          <div style="background:#faf7ff;border:1px solid #e0daf8;border-radius:14px;padding:15px">
+            <div style="font:700 12.5px/1 'Plus Jakarta Sans',sans-serif;color:#3f34bb;margin-bottom:10px">Why we ask for whole pages</div>
+            <p style="margin:0 0 10px;font:500 12px/1.6 'Plus Jakarta Sans',sans-serif;color:#4a4670">A cropped bubble loses who is speaking, what is happening behind them, and where the line falls in the panel sequence. With the full page, PaneLingo groups bubbles per panel, follows the gutter flow, separates narration from dialogue, and keeps names consistent across the album.</p>
+            <div style="font:500 11.5px/1.5 'Plus Jakarta Sans',sans-serif;color:#6f6a60">Average detection: 11 regions per page · 1.8 s per page</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ onWorkspace }}" hint-placeholder-val="{{ false }}">
+    <div>
+      <div style="display:flex;flex-wrap:wrap;gap:9px;align-items:center;padding:10px clamp(12px,2vw,20px);background:#fff;border-bottom:1px solid #e7e3db">
+        <button type="button" onClick="{{ goAlbum }}" style="padding:8px 11px;border:1px solid #e2ded4;border-radius:9px;background:#fff;font:600 12px/1 'Plus Jakarta Sans',sans-serif;color:#4a463d;cursor:pointer" style-hover="border-color:#bdb7aa">← Album</button>
+        <div style="display:flex;align-items:center;gap:6px;padding:4px;border:1px solid #e2ded4;border-radius:9px">
+          <button type="button" onClick="{{ prevPage }}" style="width:28px;height:26px;border:none;border-radius:6px;background:#f7f6f3;color:#4a463d;font:700 12px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer" style-hover="background:#eeebe3">‹</button>
+          <span style="font:700 12px/1 'Plus Jakarta Sans',sans-serif;color:#191821;padding:0 3px;white-space:nowrap">{{ pageLabel }}</span>
+          <button type="button" onClick="{{ nextPage }}" style="width:28px;height:26px;border:none;border-radius:6px;background:#f7f6f3;color:#4a463d;font:700 12px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer" style-hover="background:#eeebe3">›</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;padding:4px;border:1px solid #e2ded4;border-radius:9px">
+          <button type="button" onClick="{{ doUndo }}" style="padding:6px 9px;border:none;border-radius:6px;background:none;color:{{ undoFg }};font:600 11.5px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer" style-hover="background:#f7f6f3">↶ Undo</button>
+          <button type="button" onClick="{{ doRedo }}" style="padding:6px 9px;border:none;border-radius:6px;background:none;color:{{ redoFg }};font:600 11.5px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer" style-hover="background:#f7f6f3">Redo ↷</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;padding:4px;border:1px solid #e2ded4;border-radius:9px">
+          <button type="button" onClick="{{ zoomOut }}" style="width:26px;height:26px;border:none;border-radius:6px;background:#f7f6f3;font:700 13px/1 'Plus Jakarta Sans',sans-serif;color:#4a463d;cursor:pointer" style-hover="background:#eeebe3">−</button>
+          <span style="font:700 11.5px/1 'Plus Jakarta Sans',sans-serif;min-width:38px;text-align:center">{{ zoomLabel }}</span>
+          <button type="button" onClick="{{ zoomIn }}" style="width:26px;height:26px;border:none;border-radius:6px;background:#f7f6f3;font:700 13px/1 'Plus Jakarta Sans',sans-serif;color:#4a463d;cursor:pointer" style-hover="background:#eeebe3">+</button>
+          <button type="button" onClick="{{ zoomFit }}" style="padding:6px 9px;border:none;border-radius:6px;background:none;font:600 11.5px/1 'Plus Jakarta Sans',sans-serif;color:#6f6a60;cursor:pointer" style-hover="background:#f7f6f3">Fit</button>
+        </div>
+        <button type="button" onClick="{{ toggleRegions }}" style="padding:8px 11px;border:1px solid {{ regBd }};border-radius:9px;background:{{ regBg }};font:600 12px/1 'Plus Jakarta Sans',sans-serif;color:{{ regFg }};cursor:pointer">Regions {{ regState }}</button>
+        <div style="flex:1"></div>
+        <div style="display:flex;align-items:center;gap:9px">
+          <div style="width:96px;height:6px;border-radius:4px;background:#eeebe3;overflow:hidden"><div style="height:100%;width:{{ wsPct }}%;background:#4c3fd9;transition:width .3s"></div></div>
+          <span style="font:700 11.5px/1 'Plus Jakarta Sans',sans-serif;color:#3a3730;white-space:nowrap">{{ wsProgress }}</span>
+        </div>
+        <button type="button" onClick="{{ goReview }}" style="padding:9px 14px;border:none;border-radius:9px;background:#f2765a;color:#231a17;font:700 12.5px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer" style-hover="background:#e4674b">Review page</button>
+      </div>
+
+      <div style="display:flex;flex-wrap:wrap;align-items:stretch;min-height:calc(100vh - 116px)">
+        <div style="flex:1 1 380px;min-width:280px;background:#231f2b;padding:22px clamp(12px,2vw,26px);display:flex;flex-direction:column;align-items:center;gap:14px">
+          <div style="display:flex;gap:7px;align-self:flex-start;flex-wrap:wrap">
+            <sc-for list="{{ tools }}" as="t" hint-placeholder-count="3">
+              <button type="button" onClick="{{ t.on }}" style="padding:7px 11px;border:1px solid {{ t.bd }};background:{{ t.bg }};color:{{ t.fg }};border-radius:8px;font:600 11.5px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">{{ t.label }}</button>
+            </sc-for>
+          </div>
+          <div style="width:{{ pageW }}px;max-width:100%;aspect-ratio:3/4.24;position:relative;container-type:size;background:#fff;border-radius:3px;box-shadow:0 18px 44px rgba(0,0,0,.4)">
+            <sc-for list="{{ wsPanels }}" as="p" hint-placeholder-count="4"><div style="position:absolute;left:{{ p.l }}%;top:{{ p.t }}%;width:{{ p.w }}%;height:{{ p.h }}%;background:{{ p.bg }};border:0.55cqw solid #191821;border-radius:0.8cqw"></div></sc-for>
+            <sc-for list="{{ wsBubbles }}" as="b" hint-placeholder-count="5"><div style="position:absolute;left:{{ b.x }}%;top:{{ b.y }}%;width:{{ b.w }}%;height:{{ b.h }}%;background:{{ b.bg }};border:{{ b.bd }};border-radius:{{ b.r }};color:{{ b.fg }};font-family:{{ b.ff }};font-weight:{{ b.fw }};font-size:{{ b.fs }};line-height:1.2;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;padding:0.8cqw;text-shadow:{{ b.sh }};transform:{{ b.tr }}">{{ b.source }}</div></sc-for>
+            <sc-for list="{{ wsRegions }}" as="r" hint-placeholder-count="5">
+              <div onClick="{{ r.select }}" style="position:absolute;left:{{ r.x }}%;top:{{ r.y }}%;width:{{ r.w }}%;height:{{ r.h }}%;border:{{ r.border }};border-radius:0.8cqw;background:{{ r.fill }};cursor:pointer;box-shadow:{{ r.glow }}">
+                <span style="position:absolute;top:-1.1cqw;left:-1.1cqw;min-width:3.4cqw;height:3.4cqw;padding:0 0.5cqw;border-radius:1cqw;background:{{ r.badgeBg }};color:{{ r.badgeFg }};font:700 2.1cqw/3.4cqw 'Plus Jakarta Sans',sans-serif;text-align:center">{{ r.n }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;font:500 11.5px/1.5 'Plus Jakarta Sans',sans-serif;color:rgba(255,255,255,.55)">
+            <span>{{ wsPageMeta }}</span>
+            <span>·</span>
+            <span>Right-to-left reading order</span>
+          </div>
+        </div>
+
+        <div style="flex:1 1 400px;min-width:290px;max-width:520px;background:#f7f6f3;border-left:1px solid #e7e3db;display:flex;flex-direction:column">
+          <div style="padding:14px clamp(12px,1.6vw,18px);border-bottom:1px solid #e7e3db;background:#fff">
+            <div style="display:flex;align-items:baseline;gap:9px;margin-bottom:11px">
+              <span style="font:700 14px/1 'Plus Jakarta Sans',sans-serif">Text blocks</span>
+              <span style="font:600 11.5px/1 'Plus Jakarta Sans',sans-serif;color:#8a8478">{{ blocksLabel }}</span>
+            </div>
+            <div style="display:flex;gap:9px;padding:10px 12px;border-radius:10px;background:#faf7ff;border:1px solid #e0daf8">
+              <span style="width:15px;height:15px;flex:none;border-radius:5px;background:#4c3fd9;margin-top:1px"></span>
+              <div style="font:500 11.5px/1.55 'Plus Jakarta Sans',sans-serif;color:#4a4670">{{ contextNote }}</div>
+            </div>
+          </div>
+          <div style="padding:12px clamp(12px,1.6vw,18px) 26px;display:flex;flex-direction:column;gap:11px">
+            <sc-for list="{{ wsBlocks }}" as="b" hint-placeholder-count="5">
+              <div onClick="{{ b.select }}" style="background:#fff;border:1.5px solid {{ b.bd }};border-radius:13px;overflow:hidden;box-shadow:{{ b.shadow }};cursor:pointer">
+                <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:{{ b.headBg }};border-bottom:1px solid #f0ede6;flex-wrap:wrap">
+                  <span style="width:20px;height:20px;flex:none;border-radius:6px;background:{{ b.numBg }};color:{{ b.numFg }};font:700 11px/20px 'Plus Jakarta Sans',sans-serif;text-align:center">{{ b.n }}</span>
+                  <span style="padding:3px 8px;border-radius:20px;background:#f2f0ea;color:#5a5548;font:700 10px/1.4 'Plus Jakarta Sans',sans-serif;letter-spacing:.03em;text-transform:uppercase">{{ b.type }}</span>
+                  <div style="flex:1"></div>
+                  <span style="display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:20px;background:{{ b.confBg }};color:{{ b.confFg }};font:700 10.5px/1.4 'Plus Jakarta Sans',sans-serif">{{ b.confLabel }}</span>
+                  <span style="padding:3px 8px;border-radius:20px;background:{{ b.stBg }};color:{{ b.stFg }};font:700 10.5px/1.4 'Plus Jakarta Sans',sans-serif">{{ b.stLabel }}</span>
+                </div>
+                <div style="padding:12px">
+                  <div style="font:600 10px/1 'Plus Jakarta Sans',sans-serif;color:#a09a8e;letter-spacing:.07em;text-transform:uppercase;margin-bottom:7px">{{ b.srcLang }} source</div>
+                  <textarea rows="2" value="{{ b.source }}" onChange="{{ b.onSource }}" style="width:100%;border:1px solid #ece9e1;border-radius:9px;background:#faf9f6;padding:9px 11px;font:500 13px/1.55 'Zen Kaku Gothic New','Noto Sans KR','Plus Jakarta Sans',sans-serif;color:#3a3730;outline:none" style-focus="border-color:#4c3fd9;background:#fff"></textarea>
+                  <div style="display:flex;align-items:center;gap:8px;margin:10px 0 7px">
+                    <span style="font:600 10px/1 'Plus Jakarta Sans',sans-serif;color:#a09a8e;letter-spacing:.07em;text-transform:uppercase">{{ b.tgtLang }} translation</span>
+                    <div style="flex:1;height:1px;background:#f0ede6"></div>
+                  </div>
+                  <sc-if value="{{ b.retrying }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;align-items:center;gap:9px;padding:14px;border:1px dashed #d8d3c9;border-radius:9px;background:#faf9f6">
+                      <span style="width:13px;height:13px;border:2px solid #d8d3c9;border-top-color:#4c3fd9;border-radius:50%;display:inline-block;animation:spin .8s linear infinite"></span>
+                      <span style="font:600 12px/1 'Plus Jakarta Sans',sans-serif;color:#6f6a60">Re-translating with page context…</span>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ b.notRetrying }}" hint-placeholder-val="{{ true }}">
+                    <textarea rows="2" value="{{ b.translation }}" onChange="{{ b.onTranslation }}" placeholder="Not translated yet — press Retry AI or type your own." style="width:100%;border:1.5px solid {{ b.taBd }};border-radius:9px;background:#fff;padding:9px 11px;font:600 13.5px/1.5 'Plus Jakarta Sans',sans-serif;color:#191821;outline:none" style-focus="border-color:#4c3fd9;box-shadow:0 0 0 3px rgba(76,63,217,.1)"></textarea>
+                  </sc-if>
+                  <sc-if value="{{ b.hasNote }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;gap:8px;margin-top:9px;padding:9px 11px;border-radius:9px;background:#fff5e0;border:1px solid #f2e2b4">
+                      <span style="font:700 10px/1.5 'Plus Jakarta Sans',sans-serif;color:#8a5b12;letter-spacing:.05em;flex:none">TERM</span>
+                      <span style="font:500 11.5px/1.5 'Plus Jakarta Sans',sans-serif;color:#6b4a15">{{ b.note }}</span>
+                    </div>
+                  </sc-if>
+                  <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:11px">
+                    <button type="button" onClick="{{ b.approve }}" style="padding:8px 12px;border:none;border-radius:8px;background:{{ b.apBg }};color:{{ b.apFg }};font:700 11.5px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">{{ b.apLabel }}</button>
+                    <button type="button" onClick="{{ b.retry }}" style="padding:8px 12px;border:1px solid #ddd8ce;border-radius:8px;background:#fff;color:#4a463d;font:600 11.5px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer" style-hover="border-color:#bdb7aa">Retry AI</button>
+                    <button type="button" onClick="{{ b.addNote }}" style="padding:8px 12px;border:1px solid #ddd8ce;border-radius:8px;background:#fff;color:#4a463d;font:600 11.5px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer" style-hover="border-color:#bdb7aa">{{ b.noteLabel }}</button>
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+            <button type="button" onClick="{{ addRegion }}" style="padding:13px;border:1.5px dashed #cdc7ba;border-radius:12px;background:none;color:#6f6a60;font:600 12.5px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer" style-hover="border-color:#4c3fd9;color:#4c3fd9">+ Add a missed text region</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ onReview }}" hint-placeholder-val="{{ false }}">
+    <div style="padding:clamp(16px,2.4vw,30px);animation:rise .28s ease both">
+      <h1 style="margin:0 0 6px;font:800 clamp(21px,2.4vw,26px)/1.15 'Plus Jakarta Sans',sans-serif;letter-spacing:-.03em">Final review — {{ albumTitle }}</h1>
+      <p style="margin:0 0 20px;font:500 13.5px/1.5 'Plus Jakarta Sans',sans-serif;color:#6f6a60">{{ reviewSub }}</p>
+      <sc-if value="{{ completed }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;gap:11px;align-items:center;padding:13px 15px;border-radius:12px;background:#eaf6ee;border:1px solid #bfe0c9;margin-bottom:18px">
+          <span style="width:19px;height:19px;flex:none;border-radius:50%;background:#2f7d4f;color:#fff;font:700 11px/19px 'Plus Jakarta Sans',sans-serif;text-align:center">✓</span>
+          <span style="font:600 13px/1.45 'Plus Jakarta Sans',sans-serif;color:#215c3a">{{ completeMsg }}</span>
+        </div>
+      </sc-if>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:18px;align-items:start">
+        <div style="min-width:0;display:flex;flex-direction:column;gap:16px">
+          <div style="background:#fff;border:1px solid #e7e3db;border-radius:14px;padding:15px">
+            <div style="font:700 13px/1 'Plus Jakarta Sans',sans-serif;margin-bottom:13px">Blocking issues</div>
+            <sc-for list="{{ issues }}" as="i" hint-placeholder-count="3">
+              <div style="display:flex;gap:11px;align-items:flex-start;padding:11px 0;border-bottom:1px solid #f2f0ea">
+                <span style="width:9px;height:9px;flex:none;border-radius:3px;background:{{ i.color }};margin-top:5px"></span>
+                <div style="flex:1;min-width:0">
+                  <div style="font:600 12.5px/1.4 'Plus Jakarta Sans',sans-serif;color:#191821;margin-bottom:3px">{{ i.title }}</div>
+                  <div style="font:500 11.5px/1.5 'Plus Jakarta Sans',sans-serif;color:#8a8478">{{ i.detail }}</div>
+                </div>
+                <button type="button" onClick="{{ i.go }}" style="flex:none;padding:7px 11px;border:1px solid #ddd8ce;border-radius:8px;background:#fff;font:600 11.5px/1 'Plus Jakarta Sans',sans-serif;color:#4a463d;cursor:pointer" style-hover="border-color:#4c3fd9;color:#4c3fd9">{{ i.cta }}</button>
+              </div>
+            </sc-for>
+          </div>
+          <div style="background:#fff;border:1px solid #e7e3db;border-radius:14px;padding:15px">
+            <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:13px">
+              <span style="font:700 13px/1 'Plus Jakarta Sans',sans-serif">Page map</span>
+              <div style="display:flex;gap:11px;flex-wrap:wrap">
+                <sc-for list="{{ mapLegend }}" as="l" hint-placeholder-count="4"><span style="display:inline-flex;align-items:center;gap:5px;font:500 11px/1 'Plus Jakarta Sans',sans-serif;color:#6f6a60"><span style="width:8px;height:8px;border-radius:2px;background:{{ l.color }}"></span>{{ l.label }}</span></sc-for>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(34px,1fr));gap:6px">
+              <sc-for list="{{ mapCells }}" as="c" hint-placeholder-count="24">
+                <button type="button" onClick="{{ c.go }}" title="{{ c.title }}" style="aspect-ratio:3/4;border:1px solid {{ c.bd }};border-radius:5px;background:{{ c.bg }};color:{{ c.fg }};font:700 10.5px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">{{ c.n }}</button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #e7e3db;border-radius:14px;padding:15px">
+            <div style="font:700 13px/1 'Plus Jakarta Sans',sans-serif;margin-bottom:12px">Rendered page preview</div>
+            <div style="display:flex;gap:14px;flex-wrap:wrap">
+              <div>
+                <div style="font:600 10.5px/1 'Plus Jakarta Sans',sans-serif;color:#a09a8e;letter-spacing:.06em;text-transform:uppercase;margin-bottom:7px">Original</div>
+                <div style="width:132px;aspect-ratio:3/4.24;position:relative;container-type:size;background:#fff;border:1px solid #ddd8ce;border-radius:4px;overflow:hidden">
+                  <sc-for list="{{ wsPanels }}" as="p" hint-placeholder-count="4"><div style="position:absolute;left:{{ p.l }}%;top:{{ p.t }}%;width:{{ p.w }}%;height:{{ p.h }}%;background:{{ p.bg }};border:0.55cqw solid #191821;border-radius:0.8cqw"></div></sc-for>
+                  <sc-for list="{{ wsBubbles }}" as="b" hint-placeholder-count="4"><div style="position:absolute;left:{{ b.x }}%;top:{{ b.y }}%;width:{{ b.w }}%;height:{{ b.h }}%;background:{{ b.bg }};border:{{ b.bd }};border-radius:{{ b.r }};color:{{ b.fg }};font-family:{{ b.ff }};font-weight:{{ b.fw }};font-size:{{ b.fs }};line-height:1.15;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;padding:0.6cqw;text-shadow:{{ b.sh }};transform:{{ b.tr }}">{{ b.source }}</div></sc-for>
+                </div>
+              </div>
+              <div>
+                <div style="font:600 10.5px/1 'Plus Jakarta Sans',sans-serif;color:#4c3fd9;letter-spacing:.06em;text-transform:uppercase;margin-bottom:7px">Translated</div>
+                <div style="width:132px;aspect-ratio:3/4.24;position:relative;container-type:size;background:#fff;border:1px solid #ddd8ce;border-radius:4px;overflow:hidden">
+                  <sc-for list="{{ wsPanels }}" as="p" hint-placeholder-count="4"><div style="position:absolute;left:{{ p.l }}%;top:{{ p.t }}%;width:{{ p.w }}%;height:{{ p.h }}%;background:{{ p.bg }};border:0.55cqw solid #191821;border-radius:0.8cqw"></div></sc-for>
+                  <sc-for list="{{ wsBubbles }}" as="b" hint-placeholder-count="4"><div style="position:absolute;left:{{ b.x }}%;top:{{ b.y }}%;width:{{ b.w }}%;height:{{ b.h }}%;background:{{ b.bg }};border:{{ b.bd }};border-radius:{{ b.r }};color:{{ b.fg }};font-family:Archivo,sans-serif;font-weight:{{ b.fw }};font-size:{{ b.fsEn }};line-height:1.1;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;padding:0.6cqw;text-transform:uppercase;text-shadow:{{ b.sh }};transform:{{ b.tr }}">{{ b.translation }}</div></sc-for>
+                </div>
+              </div>
+              <p style="flex:1;min-width:150px;margin:22px 0 0;font:500 11.5px/1.6 'Plus Jakarta Sans',sans-serif;color:#6f6a60">Text is re-flowed inside the original bubble shapes. Fonts, line breaks and bubble padding stay editable before export.</p>
+            </div>
+          </div>
+        </div>
+
+        <div style="min-width:0;display:flex;flex-direction:column;gap:16px">
+          <div style="background:#fff;border:1px solid #e7e3db;border-radius:14px;padding:15px">
+            <div style="font:700 13px/1 'Plus Jakarta Sans',sans-serif;margin-bottom:12px">Export</div>
+            <sc-for list="{{ exportOpts }}" as="e" hint-placeholder-count="5">
+              <label style="display:flex;gap:11px;align-items:flex-start;padding:9px 0;border-bottom:1px solid #f2f0ea;cursor:pointer">
+                <input type="checkbox" checked="{{ e.on }}" onChange="{{ e.toggle }}" style="width:15px;height:15px;margin-top:2px;accent-color:#4c3fd9;flex:none;cursor:pointer">
+                <span style="min-width:0"><span style="display:block;font:600 12.5px/1.3 'Plus Jakarta Sans',sans-serif;color:#191821">{{ e.label }}</span><span style="display:block;font:500 11.5px/1.45 'Plus Jakarta Sans',sans-serif;color:#8a8478;margin-top:3px">{{ e.hint }}</span></span>
+              </label>
+            </sc-for>
+            <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:14px">
+              <button type="button" onClick="{{ doExport }}" style="flex:1;min-width:130px;padding:12px;border:none;border-radius:10px;background:#4c3fd9;color:#fff;font:700 13px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px" style-hover="background:#3f34bb">
+                <sc-if value="{{ exporting }}" hint-placeholder-val="{{ false }}"><span style="width:13px;height:13px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;display:inline-block;animation:spin .7s linear infinite"></span></sc-if>
+                {{ exportLabel }}
+              </button>
+              <button type="button" onClick="{{ markComplete }}" style="padding:12px 14px;border:1px solid #ddd8ce;border-radius:10px;background:#fff;color:#2b2740;font:600 12.5px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer" style-hover="border-color:#bdb7aa">{{ completeLabel }}</button>
+            </div>
+          </div>
+          <sc-if value="{{ exportDone }}" hint-placeholder-val="{{ false }}">
+            <div style="background:#fff;border:1px solid #e7e3db;border-radius:14px;padding:15px">
+              <div style="font:700 13px/1 'Plus Jakarta Sans',sans-serif;margin-bottom:11px">Ready to download</div>
+              <sc-for list="{{ exportFiles }}" as="f" hint-placeholder-count="3">
+                <div style="display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #f2f0ea">
+                  <span style="width:30px;height:30px;flex:none;border-radius:8px;background:#f2f0ea;color:#5a5548;font:700 9px/30px 'Plus Jakarta Sans',sans-serif;text-align:center">{{ f.ext }}</span>
+                  <span style="flex:1;min-width:0"><span style="display:block;font:600 12px/1.3 'Plus Jakarta Sans',sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ f.name }}</span><span style="display:block;font:500 11px/1.3 'Plus Jakarta Sans',sans-serif;color:#a09a8e;margin-top:2px">{{ f.size }}</span></span>
+                  <a href="#download" style="font:700 11.5px/1 'Plus Jakarta Sans',sans-serif">Download</a>
+                </div>
+              </sc-for>
+              <div style="font:500 11px/1.5 'Plus Jakarta Sans',sans-serif;color:#a09a8e;margin-top:11px">Links expire in 7 days. A copy stays in the album's export history.</div>
+            </div>
+          </sc-if>
+          <div style="background:#faf7ff;border:1px solid #e0daf8;border-radius:14px;padding:15px">
+            <div style="font:700 12.5px/1 'Plus Jakarta Sans',sans-serif;color:#3f34bb;margin-bottom:10px">Terminology used in this album</div>
+            <div style="display:flex;flex-wrap:wrap;gap:7px">
+              <sc-for list="{{ glossary }}" as="g" hint-placeholder-count="4"><span style="padding:6px 10px;border-radius:8px;background:#fff;border:1px solid #e0daf8;font:600 11.5px/1.3 'Plus Jakarta Sans',sans-serif;color:#3f34bb">{{ g }}</span></sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ onSettings }}" hint-placeholder-val="{{ false }}">
+    <div style="padding:clamp(16px,2.4vw,30px);max-width:860px;animation:rise .28s ease both">
+      <h1 style="margin:0 0 18px;font:800 clamp(21px,2.4vw,26px)/1.15 'Plus Jakarta Sans',sans-serif;letter-spacing:-.03em">Profile &amp; settings</h1>
+      <div style="display:flex;gap:4px;padding:4px;background:#efece5;border-radius:11px;margin-bottom:20px;flex-wrap:wrap">
+        <sc-for list="{{ setTabs }}" as="t" hint-placeholder-count="3">
+          <button type="button" onClick="{{ t.on }}" style="flex:1;min-width:104px;padding:9px 12px;border:none;border-radius:8px;background:{{ t.bg }};color:{{ t.fg }};box-shadow:{{ t.sh }};font:600 12.5px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">{{ t.label }}</button>
+        </sc-for>
+      </div>
+
+      <sc-if value="{{ setProfile }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div style="background:#fff;border:1px solid #e7e3db;border-radius:14px;padding:17px">
+          <div style="display:flex;gap:15px;align-items:center;flex-wrap:wrap;margin-bottom:18px">
+            <span style="width:58px;height:58px;flex:none;border-radius:16px;background:linear-gradient(140deg,#4c3fd9,#f2765a);color:#fff;font:700 20px/58px 'Plus Jakarta Sans',sans-serif;text-align:center">MO</span>
+            <div style="flex:1;min-width:160px">
+              <div style="font:700 15px/1.3 'Plus Jakarta Sans',sans-serif">Mira Okonkwo</div>
+              <div style="font:500 12px/1.4 'Plus Jakarta Sans',sans-serif;color:#8a8478;margin-top:3px">Freelance JA→EN translator · Studio Flux</div>
+            </div>
+            <button type="button" onClick="{{ toastAvatar }}" style="padding:9px 13px;border:1px solid #ddd8ce;border-radius:9px;background:#fff;font:600 12px/1 'Plus Jakarta Sans',sans-serif;color:#4a463d;cursor:pointer" style-hover="border-color:#bdb7aa">Change photo</button>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px">
+            <sc-for list="{{ profileFields }}" as="f" hint-placeholder-count="4">
+              <label style="display:block">
+                <span style="display:block;font:600 11.5px/1 'Plus Jakarta Sans',sans-serif;color:#3a3730;margin-bottom:7px">{{ f.label }}</span>
+                <input type="text" value="{{ f.value }}" onChange="{{ f.onChange }}" style="width:100%;padding:10px 12px;border:1px solid #ddd8ce;border-radius:9px;background:#fff;font:500 13px/1.3 'Plus Jakarta Sans',sans-serif;color:#191821;outline:none" style-focus="border-color:#4c3fd9;box-shadow:0 0 0 3px rgba(76,63,217,.12)">
+              </label>
+            </sc-for>
+          </div>
+          <div style="display:flex;gap:9px;margin-top:18px;flex-wrap:wrap">
+            <button type="button" onClick="{{ saveProfile }}" style="padding:11px 16px;border:none;border-radius:10px;background:#4c3fd9;color:#fff;font:700 12.5px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer" style-hover="background:#3f34bb">Save changes</button>
+            <span style="align-self:center;font:500 11.5px/1.4 'Plus Jakarta Sans',sans-serif;color:#8a8478">Autosaved to your account — available on every device you sign in to.</span>
+          </div>
+        </div>
+        <div style="background:#fff;border:1px solid #f0d6cd;border-radius:14px;padding:17px">
+          <div style="font:700 13px/1 'Plus Jakarta Sans',sans-serif;color:#b13c22;margin-bottom:9px">Danger zone</div>
+          <p style="margin:0 0 14px;font:500 12px/1.55 'Plus Jakarta Sans',sans-serif;color:#6f6a60;max-width:520px">Deleting your account removes every album, page scan and glossary permanently after a 14-day grace period. Export your projects first.</p>
+          <div style="display:flex;gap:9px;flex-wrap:wrap">
+            <button type="button" onClick="{{ goAuth }}" style="padding:10px 14px;border:1px solid #ddd8ce;border-radius:9px;background:#fff;font:600 12px/1 'Plus Jakarta Sans',sans-serif;color:#4a463d;cursor:pointer">Sign out</button>
+            <button type="button" onClick="{{ toastDelete }}" style="padding:10px 14px;border:1px solid #f0d6cd;border-radius:9px;background:#fdece7;font:600 12px/1 'Plus Jakarta Sans',sans-serif;color:#b13c22;cursor:pointer">Delete account</button>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ setPrefs }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div style="background:#fff;border:1px solid #e7e3db;border-radius:14px;padding:17px">
+          <div style="font:700 13px/1 'Plus Jakarta Sans',sans-serif;margin-bottom:13px">Translation defaults</div>
+          <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:16px">
+            <div>
+              <div style="font:600 11.5px/1 'Plus Jakarta Sans',sans-serif;color:#3a3730;margin-bottom:8px">Default source language</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px">
+                <sc-for list="{{ prefSrcOpts }}" as="o" hint-placeholder-count="4">
+                  <button type="button" onClick="{{ o.on }}" style="padding:7px 11px;border:1px solid {{ o.bd }};background:{{ o.bg }};color:{{ o.fg }};border-radius:20px;font:600 11.5px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">{{ o.label }}</button>
+                </sc-for>
+              </div>
+            </div>
+            <div>
+              <div style="font:600 11.5px/1 'Plus Jakarta Sans',sans-serif;color:#3a3730;margin-bottom:8px">Default target language</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px">
+                <sc-for list="{{ prefTgtOpts }}" as="o" hint-placeholder-count="4">
+                  <button type="button" onClick="{{ o.on }}" style="padding:7px 11px;border:1px solid {{ o.bd }};background:{{ o.bg }};color:{{ o.fg }};border-radius:20px;font:600 11.5px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">{{ o.label }}</button>
+                </sc-for>
+              </div>
+            </div>
+            <div>
+              <div style="font:600 11.5px/1 'Plus Jakarta Sans',sans-serif;color:#3a3730;margin-bottom:8px">Default translation style</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px">
+                <sc-for list="{{ prefStyleOpts }}" as="o" hint-placeholder-count="3">
+                  <button type="button" onClick="{{ o.on }}" style="padding:7px 11px;border:1px solid {{ o.bd }};background:{{ o.bg }};color:{{ o.fg }};border-radius:20px;font:600 11.5px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">{{ o.label }}</button>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+          <sc-for list="{{ prefToggles }}" as="t" hint-placeholder-count="4">
+            <label style="display:flex;gap:11px;align-items:flex-start;padding:10px 0;border-top:1px solid #f2f0ea;cursor:pointer">
+              <input type="checkbox" checked="{{ t.on }}" onChange="{{ t.toggle }}" style="width:15px;height:15px;margin-top:2px;accent-color:#4c3fd9;flex:none;cursor:pointer">
+              <span style="min-width:0"><span style="display:block;font:600 12.5px/1.3 'Plus Jakarta Sans',sans-serif;color:#191821">{{ t.label }}</span><span style="display:block;font:500 11.5px/1.45 'Plus Jakarta Sans',sans-serif;color:#8a8478;margin-top:3px">{{ t.hint }}</span></span>
+            </label>
+          </sc-for>
+        </div>
+        <div style="background:#fff;border:1px solid #e7e3db;border-radius:14px;padding:17px">
+          <div style="font:700 13px/1 'Plus Jakarta Sans',sans-serif;margin-bottom:13px">Keyboard shortcuts</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px">
+            <sc-for list="{{ shortcuts }}" as="k" hint-placeholder-count="6">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="padding:5px 9px;border-radius:7px;background:#f4f2ec;border:1px solid #e2ded4;font:700 11px/1.3 ui-monospace,Menlo,monospace;color:#3a3730;flex:none">{{ k.key }}</span>
+                <span style="font:500 12px/1.4 'Plus Jakarta Sans',sans-serif;color:#6f6a60">{{ k.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ setTeam }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#fff;border:1px solid #e7e3db;border-radius:14px;padding:17px">
+        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <span style="font:700 13px/1 'Plus Jakarta Sans',sans-serif">Team &amp; sharing</span>
+          <button type="button" onClick="{{ toastInvite }}" style="padding:9px 13px;border:none;border-radius:9px;background:#4c3fd9;color:#fff;font:700 12px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">Invite reviewer</button>
+        </div>
+        <sc-for list="{{ team }}" as="m" hint-placeholder-count="3">
+          <div style="display:flex;gap:11px;align-items:center;padding:11px 0;border-top:1px solid #f2f0ea">
+            <span style="width:33px;height:33px;flex:none;border-radius:10px;background:{{ m.bg }};color:#fff;font:700 12px/33px 'Plus Jakarta Sans',sans-serif;text-align:center">{{ m.initials }}</span>
+            <span style="flex:1;min-width:0"><span style="display:block;font:600 12.5px/1.3 'Plus Jakarta Sans',sans-serif">{{ m.name }}</span><span style="display:block;font:500 11.5px/1.3 'Plus Jakarta Sans',sans-serif;color:#8a8478;margin-top:2px">{{ m.email }}</span></span>
+            <span style="padding:4px 9px;border-radius:20px;background:#f2f0ea;color:#5a5548;font:700 10.5px/1.4 'Plus Jakarta Sans',sans-serif">{{ m.role }}</span>
+          </div>
+        </sc-for>
+      </div>
+      </sc-if>
+    </div>
+    </sc-if>
+  </main>
+
+  <sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}">
+  <nav style="position:fixed;bottom:0;left:0;right:0;z-index:40;display:flex;background:#fff;border-top:1px solid #e7e3db;padding:7px 6px 9px">
+    <sc-for list="{{ nav }}" as="it" hint-placeholder-count="5">
+      <button type="button" onClick="{{ it.on }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:4px 2px;border:none;background:none;color:{{ it.fg }};cursor:pointer">
+        <span style="width:18px;height:18px;border:1.5px solid currentColor;border-radius:4px;background:{{ it.mark }}"></span>
+        <span style="font:600 9.5px/1.2 'Plus Jakarta Sans',sans-serif">{{ it.short }}</span>
+      </button>
+    </sc-for>
+  </nav>
+  </sc-if>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ showCreate }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeModal }}" style="position:fixed;inset:0;z-index:60;background:rgba(25,24,33,.45);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:18px">
+  <div onClick="{{ stopProp }}" style="width:100%;max-width:520px;max-height:92vh;overflow:auto;background:#fff;border-radius:18px;box-shadow:0 26px 70px rgba(0,0,0,.3);animation:rise .22s ease both">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:19px 21px 15px;border-bottom:1px solid #eeebe3">
+      <div>
+        <h2 style="margin:0 0 5px;font:700 18px/1.2 'Plus Jakarta Sans',sans-serif;letter-spacing:-.02em">Create new album</h2>
+        <p style="margin:0;font:500 12.5px/1.5 'Plus Jakarta Sans',sans-serif;color:#8a8478">One album per comic, manga volume or webtoon season.</p>
+      </div>
+      <button type="button" onClick="{{ closeModal }}" style="width:28px;height:28px;flex:none;border:none;border-radius:8px;background:#f4f2ec;color:#5a5548;font:600 14px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer" style-hover="background:#eae7df">✕</button>
+    </div>
+    <div style="padding:19px 21px">
+      <label style="display:block;font:600 11.5px/1 'Plus Jakarta Sans',sans-serif;color:#3a3730;margin-bottom:7px">Album title</label>
+      <input type="text" value="{{ naTitle }}" onChange="{{ onNaTitle }}" placeholder="e.g. Neon Yokai Bureau vol. 2" style="width:100%;padding:11px 13px;border:1px solid #ddd8ce;border-radius:10px;font:500 13.5px/1.3 'Plus Jakarta Sans',sans-serif;margin-bottom:8px;outline:none" style-focus="border-color:#4c3fd9;box-shadow:0 0 0 3px rgba(76,63,217,.12)">
+      <sc-if value="{{ naError }}" hint-placeholder-val="{{ false }}"><div style="font:600 11.5px/1.4 'Plus Jakarta Sans',sans-serif;color:#b13c22;margin-bottom:10px">{{ naError }}</div></sc-if>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:15px;margin:14px 0 18px">
+        <div>
+          <div style="font:600 11.5px/1 'Plus Jakarta Sans',sans-serif;color:#3a3730;margin-bottom:8px">Source language</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            <sc-for list="{{ srcOpts }}" as="o" hint-placeholder-count="4">
+              <button type="button" onClick="{{ o.on }}" style="padding:7px 11px;border:1px solid {{ o.bd }};background:{{ o.bg }};color:{{ o.fg }};border-radius:20px;font:600 11.5px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">{{ o.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <div>
+          <div style="font:600 11.5px/1 'Plus Jakarta Sans',sans-serif;color:#3a3730;margin-bottom:8px">Target language</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            <sc-for list="{{ tgtOpts }}" as="o" hint-placeholder-count="4">
+              <button type="button" onClick="{{ o.on }}" style="padding:7px 11px;border:1px solid {{ o.bd }};background:{{ o.bg }};color:{{ o.fg }};border-radius:20px;font:600 11.5px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">{{ o.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      <div style="font:600 11.5px/1 'Plus Jakarta Sans',sans-serif;color:#3a3730;margin-bottom:9px">Translation style</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+        <sc-for list="{{ styleOpts }}" as="s" hint-placeholder-count="3">
+          <button type="button" onClick="{{ s.on }}" style="flex:1;min-width:132px;text-align:left;padding:11px 13px;border:1.5px solid {{ s.bd }};background:{{ s.bg }};border-radius:11px;cursor:pointer">
+            <span style="display:block;font:700 12.5px/1 'Plus Jakarta Sans',sans-serif;color:{{ s.fg }};margin-bottom:5px">{{ s.label }}</span>
+            <span style="display:block;font:500 11px/1.4 'Plus Jakarta Sans',sans-serif;color:#8a8478">{{ s.hint }}</span>
+          </button>
+        </sc-for>
+      </div>
+      <label style="display:flex;gap:11px;align-items:flex-start;padding:12px;border:1px solid #e7e3db;border-radius:11px;cursor:pointer;margin-bottom:16px">
+        <input type="checkbox" checked="{{ naGlossary }}" onChange="{{ toggleNaGlossary }}" style="width:15px;height:15px;margin-top:2px;accent-color:#4c3fd9;flex:none;cursor:pointer">
+        <span><span style="display:block;font:600 12.5px/1.3 'Plus Jakarta Sans',sans-serif">Reuse my studio glossary</span><span style="display:block;font:500 11.5px/1.45 'Plus Jakarta Sans',sans-serif;color:#8a8478;margin-top:3px">184 locked terms, honorifics and character names carry over.</span></span>
+      </label>
+      <div onClick="{{ createAlbum }}" style="border:1.5px dashed #c6c0b3;border-radius:12px;padding:18px;text-align:center;cursor:pointer;background:#fbfaf7" style-hover="border-color:#4c3fd9;background:#f5f3ff">
+        <div style="font:600 12.5px/1.4 'Plus Jakarta Sans',sans-serif;color:#4a463d">Drop pages now, or add them later</div>
+        <div style="font:500 11.5px/1.4 'Plus Jakarta Sans',sans-serif;color:#a09a8e;margin-top:5px">Optional · up to 200 pages per batch</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:9px;justify-content:flex-end;padding:15px 21px;border-top:1px solid #eeebe3;background:#fbfaf7;border-radius:0 0 18px 18px">
+      <button type="button" onClick="{{ closeModal }}" style="padding:11px 15px;border:1px solid #ddd8ce;border-radius:10px;background:#fff;font:600 12.5px/1 'Plus Jakarta Sans',sans-serif;color:#4a463d;cursor:pointer">Cancel</button>
+      <button type="button" onClick="{{ createAlbum }}" style="padding:11px 17px;border:none;border-radius:10px;background:#4c3fd9;color:#fff;font:700 12.5px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer" style-hover="background:#3f34bb">Create album</button>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ showDelete }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeModal }}" style="position:fixed;inset:0;z-index:60;background:rgba(25,24,33,.45);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:18px">
+  <div onClick="{{ stopProp }}" style="width:100%;max-width:410px;background:#fff;border-radius:18px;box-shadow:0 26px 70px rgba(0,0,0,.3);padding:21px;animation:rise .22s ease both">
+    <h2 style="margin:0 0 8px;font:700 17px/1.25 'Plus Jakarta Sans',sans-serif;letter-spacing:-.02em">Delete “{{ albumTitle }}”?</h2>
+    <p style="margin:0 0 18px;font:500 12.5px/1.6 'Plus Jakarta Sans',sans-serif;color:#6f6a60">{{ deleteBody }}</p>
+    <div style="display:flex;gap:9px;justify-content:flex-end;flex-wrap:wrap">
+      <button type="button" onClick="{{ closeModal }}" style="padding:11px 15px;border:1px solid #ddd8ce;border-radius:10px;background:#fff;font:600 12.5px/1 'Plus Jakarta Sans',sans-serif;color:#4a463d;cursor:pointer">Keep album</button>
+      <button type="button" onClick="{{ confirmDelete }}" style="padding:11px 16px;border:none;border-radius:10px;background:#b13c22;color:#fff;font:700 12.5px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">Delete permanently</button>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+<div style="position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:80;display:flex;align-items:center;gap:10px;padding:12px 17px;border-radius:12px;background:{{ toastBg }};box-shadow:0 16px 40px rgba(0,0,0,.24);animation:rise .2s ease both;max-width:92vw">
+  <span style="width:17px;height:17px;flex:none;border-radius:50%;background:{{ toastDot }};color:#fff;font:700 10px/17px 'Plus Jakarta Sans',sans-serif;text-align:center">{{ toastIcon }}</span>
+  <span style="font:600 12.5px/1.4 'Plus Jakarta Sans',sans-serif;color:#fff">{{ toast }}</span>
+</div>
+</sc-if>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;screen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;auth&quot;,&quot;dashboard&quot;,&quot;album&quot;,&quot;upload&quot;,&quot;workspace&quot;,&quot;review&quot;,&quot;settings&quot;],&quot;default&quot;:&quot;auth&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototype&quot;},&quot;viewport&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;auto&quot;,&quot;desktop&quot;,&quot;mobile&quot;],&quot;default&quot;:&quot;auto&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototype&quot;},&quot;showRegions&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Workspace&quot;}}">
+class Component extends DCLogic {
+  ART = [
+    'linear-gradient(150deg,#2b2560,#4c3fd9 55%,#8d7bf0)',
+    'linear-gradient(30deg,#1b1836,#3a3170 70%,#f2765a)',
+    'radial-gradient(circle at 30% 30%,#fbd8c8,#f2765a 60%,#c04a34)',
+    'linear-gradient(200deg,#f4f2ec,#cfc9bb)',
+    'linear-gradient(120deg,#14141d,#33304a)',
+    'radial-gradient(circle at 70% 20%,#ffe7a8,#f0a24b 55%,#8c4a1f)',
+    'linear-gradient(160deg,#1d3b4a,#2f7d8c 60%,#a8dbd9)',
+    'linear-gradient(45deg,#4c3fd9,#241f4d)'
+  ];
+  HALF = 'radial-gradient(circle,rgba(0,0,0,.22) 22%,transparent 26%) 0 0/1.7cqw 1.7cqw,';
+  SPEED = 'repeating-linear-gradient(105deg,rgba(255,255,255,.16) 0 0.5cqw,transparent 0.5cqw 2.6cqw),';
+  LAY = [
+    {p:[[4,3,92,29],[4,34,44,31],[50,34,46,31],[4,67,92,30]],s:[[7,7,32,10,'narration'],[61,9,32,12,'speech'],[8,39,30,13,'speech'],[54,42,26,8,'sfx'],[9,71,31,13,'speech'],[57,76,35,12,'speech']]},
+    {p:[[4,3,44,44],[50,3,46,44],[4,49,92,48]],s:[[7,7,30,12,'speech'],[54,7,34,10,'narration'],[60,29,31,12,'speech'],[9,54,30,13,'speech'],[22,68,24,8,'sfx'],[55,78,36,14,'speech']]},
+    {p:[[4,3,92,22],[4,27,92,26],[4,55,92,20],[4,77,92,20]],s:[[8,6,34,11,'narration'],[58,8,34,11,'speech'],[9,31,30,13,'speech'],[60,36,32,12,'speech'],[10,58,32,11,'speech'],[56,80,36,13,'speech']]},
+    {p:[[4,3,60,34],[66,3,30,34],[4,39,30,26],[36,39,60,26],[4,67,92,30]],s:[[8,7,32,11,'speech'],[69,6,24,9,'narration'],[7,42,24,11,'speech'],[40,43,32,12,'speech'],[9,71,30,12,'speech'],[62,78,30,10,'sfx']]}
+  ];
+  POOL = {
+    ja: {
+      speech: [['また停電か……三丁目だけ、いつも先に消える。','Another blackout. Third district always goes dark first.'],['動くな。あれはまだ数えている。','Don\u2019t move. It\u2019s still counting.'],['バケモノは書類が好きなんだ。判子もね。','Monsters love paperwork. Stamps, too.'],['わたしの名前を、呼ばないで。','Don\u2019t say my name out loud.'],['契約は十二時で切れる。急げ。','The contract expires at twelve. Move.'],['灯りをつけたのは、あなた？','Were you the one who turned the light on?'],['九ページ。夜明けまでに終わるさ。','Nine pages. We\u2019ll finish before dawn.'],['局長は嘘をつくとき、傘を回す。','The director spins her umbrella when she lies.']],
+      narration: [['午前二時、雨。街は息を止めた。','2 A.M., rain. The city held its breath.'],['彼はまだ、階段を数えている。','He is still counting the stairs.'],['三丁目には、名前のない窓が七つある。','Third district has seven windows with no names.'],['雨は、契約書のインクを溶かした。','The rain dissolved the ink on the contract.']],
+      sfx: [['ゴォォォン','GRRRONNG'],['ドドド','DOOM DOOM DOOM'],['ドクン','DOKUN'],['ザアアア','SHHHAAA']]
+    },
+    ko: {
+      speech: [['불은 아직 꺼지지 않았어.','The fire hasn\u2019t gone out yet.'],['계단을 세지 마. 늘어나니까.','Don\u2019t count the stairs. They multiply.'],['오늘은 네 차례야, 선배.','It\u2019s your turn today, senior.'],['우산 접어. 비는 그쳤어.','Close your umbrella. The rain stopped.'],['그 이름은 계약서에 없어.','That name isn\u2019t on the contract.'],['한 층만 더. 참아.','One more floor. Hold on.']],
+      narration: [['새벽 두 시, 도시는 숨을 멈췄다.','2 A.M. The city held its breath.'],['그는 아직 계단을 세고 있다.','He is still counting the stairs.']],
+      sfx: [['쿠구구','KRRRMBLE'],['두근','THUD-DUMP']]
+    },
+    fr: {
+      speech: [['Encore une panne. Le troisième arrondissement, toujours en premier.','Another outage. Third district, always first.'],['Ne bouge pas. Elle compte encore.','Don\u2019t move. She\u2019s still counting.'],['Les monstres adorent la paperasse.','Monsters adore paperwork.'],['Ne prononce pas mon nom.','Don\u2019t speak my name.']],
+      narration: [['Deux heures du matin. La ville retint son souffle.','2 A.M. The city held its breath.'],['Il compte toujours les marches.','He is still counting the stairs.']],
+      sfx: [['VROOOM','VROOOM'],['BADABOUM','KA-BOOM']]
+    }
+  };
+  LANGS = ['Japanese','Korean','French','Chinese (Simplified)','English','Spanish','German','Portuguese (BR)'];
+  CODE = {Japanese:'JA',Korean:'KO',French:'FR','Chinese (Simplified)':'ZH',English:'EN',Spanish:'ES',German:'DE','Portuguese (BR)':'PT'};
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      screen: props.screen || 'auth',
+      authTab: 'login', email: 'mira@studioflux.co', pass: '••••••••••', npass: 'inkandrain', authErr: '', authBusy: false, role: 'Freelance translator',
+      vw: 1440, vp: props.viewport === 'desktop' || props.viewport === 'mobile' ? props.viewport : 'auto',
+      albums: this.buildAlbums(), albumId: 'a1', pageIdx: 7, blockId: 'a1-7-1',
+      zoom: 1, regions: props.showRegions !== false,
+      modal: null, menuId: null, toast: '', toastKind: 'ok', saving: 'saved',
+      filter: 'all', pageFilter: 'all', sel: [], settingsTab: 'profile',
+      undo: [], redo: [], retryId: null,
+      uploads: this.buildUploads(), exporting: false, exportDone: false, completed: false,
+      exp: {script: true, json: false, project: true, images: true, csv: false},
+      scan: {sfx: true, split: false, auto: true, ocrBoost: true}, order: 'rtl',
+      na: {title: '', src: 'Japanese', tgt: 'English', style: 'Faithful', glossary: true}, naError: '',
+      renaming: false, renameVal: '',
+      profile: {name: 'Mira Okonkwo', email: 'mira@studioflux.co', studio: 'Studio Flux', tz: 'Europe/Lisbon (UTC+1)'},
+      prefs: {src: 'Japanese', tgt: 'English', style: 'Faithful', keepHonorifics: true, autoTranslate: true, flagLow: true, weekly: false}
+    };
+  }
+
+  componentDidMount() {
+    this.setState({vw: window.innerWidth});
+    this._onResize = () => this.setState({vw: window.innerWidth});
+    window.addEventListener('resize', this._onResize);
+  }
+  componentWillUnmount() {
+    window.removeEventListener('resize', this._onResize);
+    if (this._t) clearTimeout(this._t);
+  }
+
+  bg(k) {
+    const base = this.ART[k % this.ART.length];
+    const ov = k % 3 === 0 ? this.HALF : k % 3 === 1 ? this.SPEED : '';
+    return ov + base;
+  }
+
+  buildPage(albumId, i, seed, lang, doneRatio, n) {
+    const lay = this.LAY[(seed + i) % this.LAY.length];
+    const pool = this.POOL[lang];
+    const doneCut = Math.round(n * doneRatio);
+    const kind = i < doneCut ? 'done' : i < doneCut + 2 ? 'mid' : 'todo';
+    const panels = lay.p.map((r, k) => ({l: r[0], t: r[1], w: r[2], h: r[3], bg: this.bg(seed + i * 3 + k)}));
+    const blocks = lay.s.map((s, j) => {
+      const type = s[4];
+      const list = pool[type] || pool.speech;
+      const pair = list[(seed * 2 + i * 3 + j) % list.length];
+      const conf = [96, 88, 71, 93, 64, 82, 97, 58][(i + j) % 8];
+      let status;
+      if (kind === 'done') status = 'approved';
+      else if (kind === 'mid') status = j % 3 === 0 ? 'approved' : conf < 75 ? 'flag' : 'draft';
+      else status = 'todo';
+      return {
+        id: albumId + '-' + i + '-' + j, n: j + 1, type: type,
+        x: s[0], y: s[1], w: s[2], h: s[3],
+        source: pair[0], translation: status === 'todo' ? '' : pair[1],
+        conf: conf, status: status,
+        note: (j === 1 && i === 6) ? 'Bureau — keep as “the Bureau”, capital B, per studio glossary.' : ''
+      };
+    });
+    const warn = i === 9 ? 'Blurry' : i === 3 ? 'Rotated 7°' : '';
+    return {id: albumId + '-p' + i, n: i + 1, panels: panels, blocks: blocks, warn: warn, unscanned: i === n - 1 && albumId === 'a1'};
+  }
+
+  buildAlbums() {
+    const mk = (id, title, src, tgt, n, ratio, status, edited, seed, lang) => {
+      const pages = [];
+      for (let i = 0; i < n; i++) pages.push(this.buildPage(id, i, seed, lang, ratio, n));
+      return {id: id, title: title, src: src, tgt: tgt, lang: lang, status: status, edited: edited, pages: pages};
+    };
+    return [
+      mk('a1', 'Neon Yokai Bureau', 'Japanese', 'English', 24, 0.29, 'In progress', '2 hours ago', 0, 'ja'),
+      mk('a2', 'Ember Line — season 1', 'Korean', 'English', 18, 0.5, 'In progress', 'Yesterday', 1, 'ko'),
+      mk('a3', 'Salt & Static', 'Japanese', 'Spanish', 12, 1, 'Completed', '3 days ago', 2, 'ja'),
+      mk('a4', 'Cascade Kids', 'French', 'English', 8, 0, 'Draft', '6 days ago', 3, 'fr'),
+      mk('a5', 'Paper Tigers vol. 2', 'Japanese', 'English', 10, 0.14, 'Archived', 'Mar 14', 1, 'ja')
+    ];
+  }
+
+  buildUploads() {
+    const p = (k) => this.LAY[k % 4].p.map((r, i) => ({l: r[0], t: r[1], w: r[2], h: r[3], bg: this.bg(k + i)}));
+    return [
+      {id: 'u1', name: 'nyb_page_025.png', size: '4.2 MB', state: 'Detected 11 regions · reading order confirmed', kind: 'done', pct: 100, panels: p(2)},
+      {id: 'u2', name: 'nyb_page_026.png', size: '3.8 MB', state: 'Analyzing full page — panels, bubbles, reading order', kind: 'analyzing', pct: 64, panels: p(5)},
+      {id: 'u3', name: 'nyb_page_027_scan.jpg', size: '1.1 MB', state: 'Scan quality check', kind: 'warn', pct: 100, panels: p(1), warn: 'Low resolution (860 × 1220). Small sound effects may be missed — 300 DPI or higher works best.', fixLabel: 'Replace file'},
+      {id: 'u4', name: 'nyb_page_028_phone.jpg', size: '6.4 MB', state: 'Scan quality check', kind: 'err', pct: 100, panels: p(3), warn: 'Page is rotated 7° and slightly blurred near the gutter. Auto-straighten before OCR?', fixLabel: 'Auto-straighten'},
+      {id: 'u5', name: 'nyb_page_029.png', size: '4.0 MB', state: 'Uploading', kind: 'uploading', pct: 38, panels: p(6)}
+    ];
+  }
+
+  // ---------- helpers ----------
+  album(st) { const s = st || this.state; return s.albums.find(a => a.id === s.albumId) || s.albums[0]; }
+  page(st) { const s = st || this.state; const a = this.album(s); return a.pages[Math.min(s.pageIdx, a.pages.length - 1)] || a.pages[0]; }
+  pgStats(pg) {
+    const t = pg.blocks.length;
+    const a = pg.blocks.filter(b => b.status === 'approved').length;
+    const f = pg.blocks.filter(b => b.status === 'flag').length;
+    const d = pg.blocks.filter(b => b.status === 'draft').length;
+    const td = pg.blocks.filter(b => b.status === 'todo').length;
+    return {t: t, a: a, f: f, d: d, td: td, pct: t ? Math.round(a / t * 100) : 0};
+  }
+  alStats(al) {
+    let t = 0, a = 0, f = 0, d = 0, td = 0;
+    al.pages.forEach(p => { const s = this.pgStats(p); t += s.t; a += s.a; f += s.f; d += s.d; td += s.td; });
+    const donePages = al.pages.filter(p => { const s = this.pgStats(p); return s.t > 0 && s.a === s.t; }).length;
+    return {t: t, a: a, f: f, d: d, td: td, pct: t ? Math.round(a / t * 100) : 0, donePages: donePages};
+  }
+  pageStatus(pg) {
+    if (pg.unscanned) return {key: 'unscanned', label: 'Not scanned', bg: '#f2f0ea', fg: '#6f6a60', bar: '#c8c3b7', bd: '#e7e3db'};
+    const s = this.pgStats(pg);
+    if (s.t && s.a === s.t) return {key: 'done', label: 'Approved', bg: '#eaf6ee', fg: '#215c3a', bar: '#2f7d4f', bd: '#dfe9e2'};
+    if (s.f) return {key: 'flag', label: 'Needs review', bg: '#fff5e0', fg: '#8a5b12', bar: '#f2b23a', bd: '#f2e2b4'};
+    if (s.a || s.d) return {key: 'progress', label: 'In progress', bg: '#eef0ff', fg: '#3f34bb', bar: '#4c3fd9', bd: '#e2ded4'};
+    return {key: 'todo', label: 'Untranslated', bg: '#f2f0ea', fg: '#6f6a60', bar: '#c8c3b7', bd: '#e7e3db'};
+  }
+  statusChip(s) {
+    if (s === 'Completed') return {bg: 'rgba(234,246,238,.92)', fg: '#215c3a'};
+    if (s === 'Archived') return {bg: 'rgba(242,240,234,.92)', fg: '#5a5548'};
+    if (s === 'Draft') return {bg: 'rgba(255,245,224,.92)', fg: '#8a5b12'};
+    return {bg: 'rgba(238,240,255,.94)', fg: '#3f34bb'};
+  }
+  bubbleStyle(b) {
+    if (b.type === 'sfx') return {bg: 'none', bd: 'none', r: '0', fg: '#fff', ff: 'Archivo,sans-serif', fw: '700', fs: '3.4cqw', fsEn: '3cqw', sh: '0.25cqw 0.25cqw 0 #191821, -0.15cqw -0.15cqw 0 #191821', tr: 'rotate(-7deg)'};
+    if (b.type === 'narration') return {bg: '#fdf6e8', bd: '0.45cqw solid #191821', r: '0.6cqw', fg: '#191821', ff: "'Zen Kaku Gothic New','Noto Sans KR',sans-serif", fw: '500', fs: '2cqw', fsEn: '1.9cqw', sh: 'none', tr: 'none'};
+    return {bg: '#fff', bd: '0.5cqw solid #191821', r: '2.4cqw', fg: '#191821', ff: "'Zen Kaku Gothic New','Noto Sans KR',sans-serif", fw: '500', fs: '2.1cqw', fsEn: '2cqw', sh: 'none', tr: 'none'};
+  }
+  bubbles(pg) {
+    return pg.blocks.map(b => {
+      const s = this.bubbleStyle(b);
+      return Object.assign({}, s, {x: b.x, y: b.y, w: b.w, h: b.h, source: b.source, translation: b.translation || b.source});
+    });
+  }
+  chip(active) {
+    return active
+      ? {bg: '#191821', fg: '#fff', bd: '#191821'}
+      : {bg: '#fff', fg: '#5a5548', bd: '#e2ded4'};
+  }
+  flash(msg, kind) {
+    if (this._t) clearTimeout(this._t);
+    this.setState({toast: msg, toastKind: kind || 'ok'});
+    this._t = setTimeout(() => this.setState({toast: ''}), 2600);
+  }
+  touch() {
+    this.setState({saving: 'saving'});
+    if (this._s) clearTimeout(this._s);
+    this._s = setTimeout(() => this.setState({saving: 'saved'}), 900);
+  }
+  snapshot() { return {albums: this.state.albums}; }
+  pushUndo() { this.setState(s => ({undo: s.undo.concat([{albums: s.albums}]).slice(-25), redo: []})); }
+  mutateBlock(id, patch) {
+    this.pushUndo();
+    this.setState(s => ({albums: s.albums.map(a => ({...a, pages: a.pages.map(p => ({...p, blocks: p.blocks.map(b => b.id === id ? {...b, ...patch} : b)}))}))}));
+    this.touch();
+  }
+
+  renderVals() {
+    const S = this.state;
+    const isMobile = S.vp === 'mobile' || (S.vp === 'auto' && S.vw < 900);
+    const al = this.album();
+    const pg = this.page();
+    const ps = this.pgStats(pg);
+    const as = this.alStats(al);
+    const srcCode = this.CODE[al.src] || 'JA';
+    const tgtCode = this.CODE[al.tgt] || 'EN';
+    const go = (screen) => () => this.setState({screen: screen, menuId: null, sel: []});
+    let firstWork = al.pages.findIndex(p => this.pageStatus(p).key !== 'done');
+    if (firstWork < 0) firstWork = 0;
+    const workPg = al.pages[firstWork] || pg;
+    const workStats = this.pgStats(workPg);
+    const goWork = () => this.setState({screen: 'workspace', pageIdx: firstWork, blockId: null, menuId: null, sel: []});
+    const filters = [
+      {id: 'all', label: 'All'}, {id: 'progress', label: 'In progress'},
+      {id: 'flag', label: 'Needs review'}, {id: 'done', label: 'Completed'}, {id: 'arch', label: 'Archived'}
+    ].map(f => Object.assign({label: f.label, on: () => this.setState({filter: f.id, menuId: null})}, this.chip(S.filter === f.id)));
+
+    const visible = S.albums.filter(a => {
+      if (S.filter === 'all') return a.status !== 'Archived';
+      if (S.filter === 'arch') return a.status === 'Archived';
+      if (S.filter === 'done') return a.status === 'Completed';
+      if (S.filter === 'flag') return this.alStats(a).f > 0 && a.status !== 'Archived';
+      return a.status === 'In progress' || a.status === 'Draft';
+    });
+
+    const libAlbums = visible.map(a => {
+      const s = this.alStats(a);
+      const chip = this.statusChip(a.status);
+      return {
+        title: a.title, status: a.status, stBg: chip.bg, stFg: chip.fg,
+        langPair: (this.CODE[a.src] || '') + ' → ' + (this.CODE[a.tgt] || ''),
+        meta: a.pages.length + ' pages · ' + s.donePages + ' approved · ' + (s.f + s.td) + ' blocks left',
+        pct: s.pct, pctApproved: s.pct, pctFlag: s.t ? Math.round(s.f / s.t * 100) : 0,
+        edited: a.edited, cover: a.pages[0].panels,
+        open: () => this.setState({screen: 'album', albumId: a.id, pageIdx: 0, menuId: null, sel: []}),
+        menu: (e) => { e.stopPropagation(); this.setState({menuId: S.menuId === a.id ? null : a.id}); },
+        menuOpen: S.menuId === a.id,
+        actions: [
+          {label: 'Rename album', fg: '#3a3730', on: () => this.setState({screen: 'album', albumId: a.id, renaming: true, renameVal: a.title, menuId: null})},
+          {label: 'Duplicate', fg: '#3a3730', on: () => { this.setState(st => ({albums: st.albums.concat([{...a, id: a.id + '-copy' + st.albums.length, title: a.title + ' (copy)', edited: 'Just now', status: 'Draft'}]), menuId: null})); this.flash('Duplicated “' + a.title + '” — pages and glossary copied.'); }},
+          {label: a.status === 'Archived' ? 'Unarchive' : 'Archive', fg: '#3a3730', on: () => { this.setState(st => ({albums: st.albums.map(x => x.id === a.id ? {...x, status: x.status === 'Archived' ? 'In progress' : 'Archived'} : x), menuId: null})); this.flash(a.status === 'Archived' ? 'Album restored to your library.' : 'Album archived — find it under Archived.'); }},
+          {label: 'Delete…', fg: '#b13c22', on: () => this.setState({albumId: a.id, modal: 'delete', menuId: null})}
+        ]
+      };
+    });
+
+    const pageCards = al.pages.filter(p => {
+      if (S.pageFilter === 'all') return true;
+      const st = this.pageStatus(p).key;
+      if (S.pageFilter === 'flag') return st === 'flag';
+      if (S.pageFilter === 'todo') return st === 'todo' || st === 'unscanned';
+      return st === 'done';
+    }).map(p => {
+      const st = this.pageStatus(p);
+      const s = this.pgStats(p);
+      return {
+        n: p.n, panels: p.panels, bubbles: this.bubbles(p), warn: p.warn, unscanned: p.unscanned,
+        stLabel: st.label, stBg: st.bg, stFg: st.fg, bd: S.sel.indexOf(p.n) >= 0 ? '#4c3fd9' : '#e7e3db',
+        pct: s.pct, barColor: st.bar, selected: S.sel.indexOf(p.n) >= 0,
+        open: () => this.setState({screen: 'workspace', pageIdx: p.n - 1, blockId: p.blocks[0] ? p.blocks[0].id : null, zoom: 1}),
+        stopProp: (e) => e.stopPropagation(),
+        toggleSel: (e) => { e.stopPropagation(); this.setState(s2 => ({sel: s2.sel.indexOf(p.n) >= 0 ? s2.sel.filter(x => x !== p.n) : s2.sel.concat([p.n])})); }
+      };
+    });
+
+    const wsBlocks = pg.blocks.map(b => {
+      const conf = b.conf;
+      const confStyle = conf >= 85 ? {bg: '#eaf6ee', fg: '#215c3a', word: 'High'} : conf >= 72 ? {bg: '#eef0ff', fg: '#3f34bb', word: 'Fair'} : {bg: '#fff5e0', fg: '#8a5b12', word: 'Low'};
+      const stMap = {
+        approved: {label: 'Approved', bg: '#eaf6ee', fg: '#215c3a'},
+        flag: {label: 'Check', bg: '#fff5e0', fg: '#8a5b12'},
+        draft: {label: 'Draft', bg: '#f2f0ea', fg: '#5a5548'},
+        todo: {label: 'Untranslated', bg: '#fdece7', fg: '#a8402a'}
+      }[b.status];
+      const selected = S.blockId === b.id;
+      return {
+        n: b.n, type: b.type === 'sfx' ? 'Sound effect' : b.type === 'narration' ? 'Narration box' : 'Speech bubble',
+        source: b.source, translation: b.translation, note: b.note, hasNote: !!b.note,
+        srcLang: srcCode, tgtLang: tgtCode,
+        confLabel: conf + '% ' + confStyle.word, confBg: confStyle.bg, confFg: confStyle.fg,
+        stLabel: stMap.label, stBg: stMap.bg, stFg: stMap.fg,
+        bd: selected ? '#4c3fd9' : b.status === 'flag' ? '#f2e2b4' : '#e7e3db',
+        shadow: selected ? '0 8px 22px rgba(76,63,217,.16)' : 'none',
+        headBg: selected ? '#f5f3ff' : b.status === 'flag' ? '#fffdf6' : '#fbfaf7',
+        numBg: selected ? '#4c3fd9' : '#eeebe3', numFg: selected ? '#fff' : '#5a5548',
+        taBd: b.translation ? '#ece9e1' : '#f3c4b8',
+        retrying: S.retryId === b.id, notRetrying: S.retryId !== b.id,
+        apBg: b.status === 'approved' ? '#eaf6ee' : '#191821', apFg: b.status === 'approved' ? '#215c3a' : '#fff',
+        apLabel: b.status === 'approved' ? '✓ Approved' : 'Approve block',
+        noteLabel: b.note ? 'Edit note' : 'Add term note',
+        select: () => this.setState({blockId: b.id}),
+        onSource: (e) => this.mutateBlock(b.id, {source: e.target.value}),
+        onTranslation: (e) => this.mutateBlock(b.id, {translation: e.target.value, status: b.status === 'todo' ? 'draft' : b.status}),
+        approve: (e) => { e.stopPropagation(); if (!b.translation) { this.flash('Nothing to approve — this block has no translation yet.', 'err'); return; } this.mutateBlock(b.id, {status: 'approved'}); this.flash('Block ' + b.n + ' approved.'); },
+        retry: (e) => {
+          e.stopPropagation();
+          this.setState({retryId: b.id});
+          setTimeout(() => {
+            const alt = b.translation ? b.translation.replace(/\.$/, '') + '…' : (this.POOL[al.lang][b.type] || this.POOL[al.lang].speech)[0][1];
+            this.setState({retryId: null});
+            this.mutateBlock(b.id, {translation: alt, conf: Math.min(99, b.conf + 9), status: 'draft'});
+            this.flash('Re-translated with context from pages ' + Math.max(1, pg.n - 1) + '–' + pg.n + '.');
+          }, 1200);
+        },
+        addNote: (e) => { e.stopPropagation(); this.mutateBlock(b.id, {note: b.note ? '' : 'Locked term — keep “the Bureau” capitalised across the album.'}); this.flash(b.note ? 'Term note removed.' : 'Term note added to your glossary.'); }
+      };
+    });
+
+    const wsRegions = pg.blocks.map(b => {
+      const sel = S.blockId === b.id;
+      const low = b.conf < 72;
+      const col = sel ? '#f2765a' : low ? '#f2b23a' : '#4c3fd9';
+      return {
+        n: b.n, x: b.x - 1, y: b.y - 1, w: b.w + 2, h: b.h + 2,
+        border: S.regions ? '0.4cqw ' + (b.status === 'todo' ? 'dashed' : 'solid') + ' ' + col : '0 solid transparent',
+        fill: sel ? 'rgba(242,118,90,.16)' : 'rgba(76,63,217,0)',
+        glow: sel ? '0 0 0 0.5cqw rgba(242,118,90,.2)' : 'none',
+        badgeBg: S.regions ? col : 'transparent', badgeFg: S.regions ? '#fff' : 'transparent',
+        select: () => this.setState({blockId: b.id})
+      };
+    });
+
+    const mapCells = al.pages.map(p => {
+      const st = this.pageStatus(p);
+      return {
+        n: p.n, bg: st.key === 'done' ? '#2f7d4f' : st.key === 'flag' ? '#f2b23a' : st.key === 'progress' ? '#4c3fd9' : '#eeebe3',
+        fg: st.key === 'todo' || st.key === 'unscanned' ? '#8a8478' : '#fff',
+        bd: st.key === 'todo' || st.key === 'unscanned' ? '#ddd8ce' : 'transparent',
+        title: 'Page ' + p.n + ' — ' + st.label,
+        go: () => this.setState({screen: 'workspace', pageIdx: p.n - 1, blockId: p.blocks[0] ? p.blocks[0].id : null})
+      };
+    });
+
+    const pwLen = (S.npass || '').length;
+    const pwScore = Math.min(100, pwLen * 9);
+    const uploads = S.uploads.map(u => ({
+      name: u.name, size: u.size, state: u.kind === 'uploading' ? u.state + ' ' + u.pct + '%' : u.state,
+      panels: u.panels, pct: u.pct, showBar: u.kind === 'uploading' || u.kind === 'analyzing',
+      spinning: u.kind === 'uploading' || u.kind === 'analyzing',
+      thumbOpacity: u.kind === 'uploading' ? '.5' : '1',
+      stateColor: u.kind === 'done' ? '#215c3a' : u.kind === 'err' ? '#b13c22' : u.kind === 'warn' ? '#8a5b12' : '#4c3fd9',
+      warn: u.warn || '', warnBg: u.kind === 'err' ? '#fdece7' : '#fff5e0', warnBd: u.kind === 'err' ? '#f3c4b8' : '#f2e2b4',
+      warnFg: u.kind === 'err' ? '#b13c22' : '#8a5b12', fixLabel: u.fixLabel || 'Fix',
+      fix: () => { this.setState(s => ({uploads: s.uploads.map(x => x.id === u.id ? {...x, kind: 'done', warn: '', state: u.kind === 'err' ? 'Straightened · detected 9 regions' : 'Upscaled · detected 12 regions'} : x)})); this.flash(u.kind === 'err' ? 'Page straightened and re-scanned.' : 'Page re-scanned at higher resolution.'); },
+      ignore: () => { this.setState(s => ({uploads: s.uploads.map(x => x.id === u.id ? {...x, kind: 'done', warn: '', state: 'Scanned with warnings · 7 regions'} : x)})); this.flash('Kept original scan — flagged for review.', 'err'); }
+    }));
+
+    const vals = {
+      // routing
+      isAuth: S.screen === 'auth', isApp: S.screen !== 'auth',
+      onDashboard: S.screen === 'dashboard', onAlbum: S.screen === 'album', onUpload: S.screen === 'upload',
+      onWorkspace: S.screen === 'workspace', onReview: S.screen === 'review', onSettings: S.screen === 'settings',
+      isMobile: isMobile, isDesktop: !isMobile,
+      shellMax: S.vp === 'mobile' && S.vw > 640 ? '430px' : '100%',
+      shellEdge: S.vp === 'mobile' && S.vw > 640 ? '1px solid #e2ded4' : '0',
+      mainPadBottom: isMobile ? '74px' : '0',
+      vpLabel: S.vp === 'mobile' ? 'Mobile preview' : 'Desktop',
+      toggleVp: () => this.setState({vp: S.vp === 'mobile' ? 'auto' : 'mobile'}),
+
+      // auth
+      isLogin: S.authTab === 'login', isSignup: S.authTab === 'signup',
+      tabLogin: () => this.setState({authTab: 'login', authErr: ''}),
+      tabSignup: () => this.setState({authTab: 'signup', authErr: ''}),
+      tabLoginBg: S.authTab === 'login' ? '#fff' : 'transparent', tabLoginFg: S.authTab === 'login' ? '#191821' : '#6f6a60',
+      tabLoginSh: S.authTab === 'login' ? '0 1px 3px rgba(25,24,33,.12)' : 'none',
+      tabSignupBg: S.authTab === 'signup' ? '#fff' : 'transparent', tabSignupFg: S.authTab === 'signup' ? '#191821' : '#6f6a60',
+      tabSignupSh: S.authTab === 'signup' ? '0 1px 3px rgba(25,24,33,.12)' : 'none',
+      email: S.email, pass: S.pass, npass: S.npass, authErr: S.authErr, authBusy: S.authBusy,
+      onEmail: (e) => this.setState({email: e.target.value, authErr: ''}),
+      onPass: (e) => this.setState({pass: e.target.value, authErr: ''}),
+      onNpass: (e) => this.setState({npass: e.target.value}),
+      loginBtnLabel: S.authBusy ? 'Signing you in…' : 'Log in',
+      loginBtnBg: S.authBusy ? '#6f66df' : '#4c3fd9',
+      pwPct: pwScore + '%', pwLabel: pwLen < 6 ? 'Too short' : pwLen < 10 ? 'Getting there' : 'Strong',
+      pwColor: pwLen < 6 ? '#b13c22' : pwLen < 10 ? '#c98a1e' : '#2f7d4f',
+      roles: ['Freelance translator', 'Comic creator', 'Localization team'].map(r => Object.assign({label: r, on: () => this.setState({role: r})}, this.chip(S.role === r))),
+      doLogin: () => {
+        if (!S.email || !S.pass) { this.setState({authErr: 'Enter your email and password to continue.'}); return; }
+        if (S.pass.length < 6) { this.setState({authErr: 'That password looks too short. Try again or reset it.'}); return; }
+        this.setState({authBusy: true, authErr: ''});
+        setTimeout(() => { this.setState({authBusy: false, screen: 'dashboard'}); this.flash('Welcome back, Mira. Work in progress restored.'); }, 950);
+      },
+      goAuth: () => this.setState({screen: 'auth', authTab: 'login'}),
+
+      // chrome
+      nav: [
+        {id: 'dashboard', label: 'Library', short: 'Library', screen: 'dashboard', mark: 'linear-gradient(currentColor 0 0) center/1.5px 100% no-repeat,linear-gradient(currentColor 0 0) center/100% 1.5px no-repeat'},
+        {id: 'upload', label: 'Upload & scan', short: 'Scan', screen: 'upload', mark: 'linear-gradient(currentColor 0 0) center/100% 1.5px no-repeat'},
+        {id: 'workspace', label: 'Workspace', short: 'Translate', screen: 'workspace', mark: 'linear-gradient(currentColor 0 0) center/1.5px 100% no-repeat'},
+        {id: 'review', label: 'Review & export', short: 'Review', screen: 'review', badge: String(as.f + as.td), mark: 'radial-gradient(circle at 50% 50%,currentColor 2.5px,transparent 3px)'},
+        {id: 'terms', label: 'Terminology', short: 'Terms', screen: 'settings', mark: 'repeating-linear-gradient(#0000 0 3px,currentColor 3px 4.5px)'},
+        {id: 'settings', label: 'Settings', short: 'You', screen: 'settings', mark: 'radial-gradient(circle at 50% 50%,transparent 2.5px,currentColor 3px,currentColor 4px,transparent 4.5px)'}
+      ].map(n => ({
+        label: n.label, short: n.short, mark: n.mark, badge: n.badge || '',
+        bg: S.screen === n.screen && n.id !== 'terms' ? '#f0eefc' : 'transparent',
+        fg: S.screen === n.screen && n.id !== 'terms' ? '#4c3fd9' : '#5a5548',
+        on: go(n.screen)
+      })),
+      crumbRoot: 'Studio Flux',
+      crumb: S.screen === 'dashboard' ? 'Album library' : S.screen === 'album' ? al.title : S.screen === 'upload' ? 'Upload & scan' : S.screen === 'workspace' ? al.title + ' · page ' + pg.n : S.screen === 'review' ? 'Review & export' : 'Profile & settings',
+      saveLabel: S.saving === 'saving' ? 'Saving…' : 'All changes saved',
+      saveBg: S.saving === 'saving' ? '#fff5e0' : '#eaf6ee', saveBd: S.saving === 'saving' ? '#f2e2b4' : '#cfe6d8',
+      saveFg: S.saving === 'saving' ? '#8a5b12' : '#215c3a', saveDot: S.saving === 'saving' ? '#c98a1e' : '#2f7d4f',
+      saveAnim: S.saving === 'saving' ? 'pulse 1s ease-in-out infinite' : 'none',
+
+      // dashboard
+      dashSub: as.f + as.td + ' blocks need you across ' + S.albums.filter(a => a.status === 'In progress').length + ' active albums · autosave is on',
+      stats: [
+        {label: 'Active albums', value: String(S.albums.filter(a => a.status === 'In progress').length), hint: 'of ' + S.albums.length, color: '#191821'},
+        {label: 'Pages approved this week', value: '31', hint: '+8 vs last week', color: '#191821'},
+        {label: 'Blocks awaiting review', value: String(as.f + as.td), hint: 'across albums', color: '#b1500f'},
+        {label: 'Avg AI confidence', value: '87%', hint: 'last 500 blocks', color: '#3f34bb'}
+      ],
+      resumePanels: workPg.panels,
+      resumeTitle: al.title + ' — page ' + workPg.n,
+      resumeSub: workStats.a + ' of ' + workStats.t + ' blocks approved · last edit ' + al.edited + ' · ' + srcCode + ' → ' + tgtCode,
+      filters: filters, libAlbums: libAlbums, libCount: visible.length + ' albums',
+      libEmpty: visible.length === 0,
+      emptyTitle: S.filter === 'arch' ? 'Nothing archived' : S.filter === 'done' ? 'No completed albums yet' : 'No albums in this view',
+      emptyBody: S.filter === 'arch' ? 'Archived albums stay searchable and can be restored at any time — nothing is deleted.' : 'Create an album for each comic, then drop in full pages. PaneLingo scans, orders and pre-translates every panel for you.',
+      openCreate: () => this.setState({modal: 'create', naError: '', menuId: null}),
+      goDashboard: go('dashboard'), goUpload: go('upload'), goWorkspace: goWork, goReview: go('review'), goSettings: go('settings'), goAlbum: go('album'),
+
+      // album detail
+      albumTitle: al.title, albumStatus: al.status, albumStBg: this.statusChip(al.status).bg, albumStFg: this.statusChip(al.status).fg,
+      albumCover: al.pages[0].panels,
+      albumMeta: srcCode + ' → ' + tgtCode + ' · ' + al.pages.length + ' pages · ' + as.t + ' text blocks · edited ' + al.edited,
+      albumPctApproved: as.t ? as.a / as.t * 100 : 0,
+      albumPctFlag: as.t ? as.f / as.t * 100 : 0,
+      albumPctDraft: as.t ? as.d / as.t * 100 : 0,
+      albumLegend: [
+        {label: 'Approved blocks', value: as.a + '/' + as.t, color: '#4c3fd9'},
+        {label: 'Needs review', value: String(as.f), color: '#f2b23a'},
+        {label: 'Draft translations', value: String(as.d), color: '#c8c3b7'},
+        {label: 'Pages fully approved', value: as.donePages + '/' + al.pages.length, color: '#2f7d4f'}
+      ],
+      pagesCount: pageCards.length + ' of ' + al.pages.length + ' shown',
+      pageFilters: [{id: 'all', label: 'All'}, {id: 'flag', label: 'Needs review'}, {id: 'todo', label: 'Untranslated'}, {id: 'done', label: 'Approved'}]
+        .map(f => Object.assign({label: f.label, on: () => this.setState({pageFilter: f.id})}, this.chip(S.pageFilter === f.id))),
+      pageCards: pageCards,
+      hasSelection: S.sel.length > 0,
+      selectionLabel: S.sel.length + (S.sel.length === 1 ? ' page selected' : ' pages selected'),
+      clearSelection: () => this.setState({sel: []}),
+      markSelectedDone: () => { this.pushUndo(); this.setState(s => ({albums: s.albums.map(a => a.id !== al.id ? a : {...a, pages: a.pages.map(p => s.sel.indexOf(p.n) < 0 ? p : {...p, blocks: p.blocks.map(b => ({...b, status: b.translation ? 'approved' : b.status}))})}), sel: []})); this.flash('Marked ' + S.sel.length + ' pages as done.'); this.touch(); },
+      rescanSelected: () => { this.setState({sel: [], screen: 'upload'}); this.flash('Re-scanning ' + S.sel.length + ' pages with full-page context.'); },
+      renaming: S.renaming, notRenaming: !S.renaming, renameVal: S.renameVal,
+      startRename: () => this.setState({renaming: true, renameVal: al.title}),
+      onRename: (e) => this.setState({renameVal: e.target.value}),
+      saveRename: () => { const v = (S.renameVal || '').trim(); if (!v) { this.flash('Album name can’t be empty.', 'err'); return; } this.setState(s => ({albums: s.albums.map(a => a.id === al.id ? {...a, title: v, edited: 'Just now'} : a), renaming: false})); this.flash('Album renamed.'); this.touch(); },
+      askDelete: () => this.setState({modal: 'delete'}),
+
+      // upload
+      uploads: uploads,
+      queueLabel: S.uploads.filter(u => u.kind === 'done').length + ' of ' + S.uploads.length + ' ready',
+      queueFoot: S.uploads.filter(u => u.kind === 'warn' || u.kind === 'err').length + ' pages need a decision before translation starts.',
+      simulateUpload: () => { this.setState(s => ({uploads: s.uploads.concat([{id: 'u' + (s.uploads.length + 1), name: 'nyb_page_0' + (30 + s.uploads.length) + '.png', size: '3.9 MB', state: 'Uploading', kind: 'uploading', pct: 12, panels: this.LAY[s.uploads.length % 4].p.map((r, i) => ({l: r[0], t: r[1], w: r[2], h: r[3], bg: this.bg(s.uploads.length + i)}))}])})); this.flash('1 page added to the scan queue.'); },
+      scanToggles: [
+        {k: 'sfx', label: 'Detect sound effects', hint: 'Reads stylised onomatopoeia baked into the artwork.'},
+        {k: 'ocrBoost', label: 'Full-page context boost', hint: 'Uses panel layout and neighbouring bubbles to disambiguate OCR.'},
+        {k: 'split', label: 'Split double-page spreads', hint: 'Cuts spreads down the gutter and keeps reading order.'},
+        {k: 'auto', label: 'Auto-translate after scanning', hint: 'Drafts every block so you start from a full page.'}
+      ].map(t => ({label: t.label, hint: t.hint, on: !!S.scan[t.k], toggle: () => this.setState(s => ({scan: {...s.scan, [t.k]: !s.scan[t.k]}}))})),
+      orderOpts: [{id: 'rtl', label: 'Right to left (manga)'}, {id: 'ltr', label: 'Left to right'}, {id: 'vert', label: 'Vertical scroll (webtoon)'}]
+        .map(o => Object.assign({label: o.label, on: () => this.setState({order: o.id})}, this.chip(S.order === o.id))),
+
+      // workspace
+      pageLabel: 'Page ' + pg.n + ' / ' + al.pages.length,
+      prevPage: () => this.setState(s => ({pageIdx: Math.max(0, s.pageIdx - 1), blockId: null})),
+      nextPage: () => this.setState(s => ({pageIdx: Math.min(al.pages.length - 1, s.pageIdx + 1), blockId: null})),
+      zoomLabel: Math.round(S.zoom * 100) + '%',
+      zoomIn: () => this.setState(s => ({zoom: Math.min(2, +(s.zoom + 0.15).toFixed(2))})),
+      zoomOut: () => this.setState(s => ({zoom: Math.max(0.6, +(s.zoom - 0.15).toFixed(2))})),
+      zoomFit: () => this.setState({zoom: 1}),
+      pageW: Math.round(430 * S.zoom),
+      regState: S.regions ? 'on' : 'off',
+      regBg: S.regions ? '#f0eefc' : '#fff', regFg: S.regions ? '#4c3fd9' : '#6f6a60', regBd: S.regions ? '#d9d3f6' : '#e2ded4',
+      toggleRegions: () => this.setState({regions: !S.regions}),
+      wsPanels: pg.panels, wsBubbles: this.bubbles(pg), wsRegions: wsRegions, wsBlocks: wsBlocks,
+      wsPct: ps.pct, wsProgress: ps.a + '/' + ps.t + ' approved',
+      wsPageMeta: pg.blocks.length + ' regions detected · 2480 × 3508 px · 350 DPI',
+      blocksLabel: pg.blocks.length + ' blocks · reading order',
+      contextNote: 'Context carried from page ' + Math.max(1, pg.n - 1) + ': “the Bureau”, “Kagura”, formal register between the director and the intern.',
+      tools: [{id: 'select', label: 'Select'}, {id: 'add', label: 'Add region'}, {id: 'order', label: 'Fix reading order'}]
+        .map(t => Object.assign({label: t.label}, t.id === 'select' ? {bg: '#fff', fg: '#191821', bd: '#fff'} : {bg: 'rgba(255,255,255,.08)', fg: 'rgba(255,255,255,.8)', bd: 'rgba(255,255,255,.2)'}, {on: () => this.flash(t.id === 'select' ? 'Select tool active — click a region to jump to its block.' : t.id === 'add' ? 'Draw a box on the page to add a missed text region.' : 'Drag the numbered badges to change reading order.')})),
+      addRegion: () => this.flash('Draw a box on the page to add a missed text region.'),
+      doUndo: () => { if (!S.undo.length) { this.flash('Nothing left to undo.', 'err'); return; } const last = S.undo[S.undo.length - 1]; this.setState(s => ({albums: last.albums, undo: s.undo.slice(0, -1), redo: s.redo.concat([{albums: s.albums}])})); this.flash('Undid last change.'); },
+      doRedo: () => { if (!S.redo.length) { this.flash('Nothing to redo.', 'err'); return; } const nx = S.redo[S.redo.length - 1]; this.setState(s => ({albums: nx.albums, redo: s.redo.slice(0, -1), undo: s.undo.concat([{albums: s.albums}])})); this.flash('Redid change.'); },
+      undoFg: S.undo.length ? '#4a463d' : '#bdb7aa', redoFg: S.redo.length ? '#4a463d' : '#bdb7aa',
+
+      // review
+      reviewSub: as.a + ' of ' + as.t + ' blocks approved · ' + as.donePages + ' of ' + al.pages.length + ' pages signed off · ' + (as.f + as.td) + ' items still flagged',
+      completed: S.completed, completeMsg: 'Album marked complete — ' + as.donePages + '/' + al.pages.length + ' pages approved and locked for export.',
+      completeLabel: S.completed ? 'Reopen album' : 'Mark album complete',
+      markComplete: () => { this.setState(s => ({completed: !s.completed, albums: s.albums.map(a => a.id === al.id ? {...a, status: s.completed ? 'In progress' : 'Completed'} : a)})); this.flash(S.completed ? 'Album reopened for editing.' : 'Album marked complete.'); },
+      issues: [
+        {title: as.td + ' untranslated blocks', detail: 'Mostly sound effects on pages 9–14 · no draft generated yet', color: '#b13c22', cta: 'Translate', go: () => this.setState({screen: 'workspace', pageIdx: 8})},
+        {title: as.f + ' low-confidence translations', detail: 'Below 72% confidence — handwritten or overlapping text', color: '#f2b23a', cta: 'Review', go: () => this.setState({screen: 'workspace', pageIdx: 6})},
+        {title: '1 page never scanned', detail: 'Page ' + al.pages.length + ' was uploaded but not processed', color: '#8a8478', cta: 'Scan now', go: go('upload')}
+      ],
+      mapLegend: [{label: 'Approved', color: '#2f7d4f'}, {label: 'Needs review', color: '#f2b23a'}, {label: 'In progress', color: '#4c3fd9'}, {label: 'Untouched', color: '#eeebe3'}],
+      mapCells: mapCells,
+      exportOpts: [
+        {k: 'script', label: 'Bilingual script (.docx)', hint: 'Page, panel and block numbers with source and target side by side.'},
+        {k: 'images', label: 'Translated page images (.zip)', hint: 'Text re-flowed inside the original bubbles, 350 DPI PNG.'},
+        {k: 'project', label: 'Project file (.panelingo)', hint: 'Regions, glossary, history — reopen anywhere, keep autosave.'},
+        {k: 'json', label: 'Structured text (.json)', hint: 'For your typesetting pipeline or CAT tool.'},
+        {k: 'csv', label: 'Flat table (.csv)', hint: 'One row per block with confidence and status.'}
+      ].map(o => ({label: o.label, hint: o.hint, on: !!S.exp[o.k], toggle: () => this.setState(s => ({exp: {...s.exp, [o.k]: !s.exp[o.k]}}))})),
+      exporting: S.exporting, exportDone: S.exportDone,
+      exportLabel: S.exporting ? 'Packaging export…' : 'Export selected',
+      doExport: () => {
+        const n = Object.keys(S.exp).filter(k => S.exp[k]).length;
+        if (!n) { this.flash('Pick at least one export format.', 'err'); return; }
+        this.setState({exporting: true});
+        setTimeout(() => { this.setState({exporting: false, exportDone: true}); this.flash(n + ' files packaged and ready to download.'); }, 1500);
+      },
+      exportFiles: [
+        {ext: 'DOCX', name: al.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-bilingual-script.docx', size: '412 KB'},
+        {ext: 'ZIP', name: al.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-translated-pages.zip', size: '86.4 MB'},
+        {ext: 'PROJ', name: al.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.panelingo', size: '2.1 MB'}
+      ],
+      glossary: ['the Bureau', 'Kagura (given name)', 'yokai → keep', 'Third District', 'Director Han', 'stamp permit'],
+
+      // settings
+      setTabs: [{id: 'profile', label: 'Profile'}, {id: 'prefs', label: 'Preferences'}, {id: 'team', label: 'Team'}].map(t => ({
+        label: t.label, on: () => this.setState({settingsTab: t.id}),
+        bg: S.settingsTab === t.id ? '#fff' : 'transparent', fg: S.settingsTab === t.id ? '#191821' : '#6f6a60',
+        sh: S.settingsTab === t.id ? '0 1px 3px rgba(25,24,33,.12)' : 'none'
+      })),
+      setProfile: S.settingsTab === 'profile', setPrefs: S.settingsTab === 'prefs', setTeam: S.settingsTab === 'team',
+      profileFields: [
+        {k: 'name', label: 'Full name'}, {k: 'email', label: 'Email'}, {k: 'studio', label: 'Studio / team'}, {k: 'tz', label: 'Time zone'}
+      ].map(f => ({label: f.label, value: S.profile[f.k], onChange: (e) => { this.setState(s => ({profile: {...s.profile, [f.k]: e.target.value}})); this.touch(); }})),
+      saveProfile: () => this.flash('Profile saved to your account.'),
+      toastAvatar: () => this.flash('Pick a square image, at least 256 × 256.'),
+      toastDelete: () => this.flash('Account deletion needs email confirmation.', 'err'),
+      toastInvite: () => this.flash('Invite sent — reviewers can comment but not export.'),
+      prefSrcOpts: ['Japanese', 'Korean', 'Chinese (Simplified)', 'French'].map(v => Object.assign({label: v, on: () => { this.setState(st => ({prefs: {...st.prefs, src: v}})); this.touch(); }}, this.chip(S.prefs.src === v))),
+      prefTgtOpts: ['English', 'Spanish', 'German', 'Portuguese (BR)'].map(v => Object.assign({label: v, on: () => { this.setState(st => ({prefs: {...st.prefs, tgt: v}})); this.touch(); }}, this.chip(S.prefs.tgt === v))),
+      prefStyleOpts: ['Faithful', 'Natural', 'Localized'].map(v => Object.assign({label: v, on: () => { this.setState(st => ({prefs: {...st.prefs, style: v}})); this.touch(); }}, this.chip(S.prefs.style === v))),
+      prefToggles: [
+        {k: 'keepHonorifics', label: 'Keep honorifics untranslated', hint: '-san, -senpai and similar stay as written.'},
+        {k: 'autoTranslate', label: 'Draft translations right after scanning', hint: 'Every new page arrives pre-filled and ready to edit.'},
+        {k: 'flagLow', label: 'Flag anything under 72% confidence', hint: 'Low-confidence blocks land in your review queue automatically.'},
+        {k: 'weekly', label: 'Weekly progress email', hint: 'Pages approved, blocks left, albums nearing completion.'}
+      ].map(t => ({label: t.label, hint: t.hint, on: !!S.prefs[t.k], toggle: () => { this.setState(s => ({prefs: {...s.prefs, [t.k]: !s.prefs[t.k]}})); this.touch(); }})),
+      shortcuts: [
+        {key: 'Enter', label: 'Approve block & go next'}, {key: '⌘ Z', label: 'Undo'}, {key: '⌘ ⇧ Z', label: 'Redo'},
+        {key: 'R', label: 'Retry AI translation'}, {key: '[ / ]', label: 'Previous / next page'}, {key: 'G', label: 'Add term to glossary'}
+      ],
+      team: [
+        {initials: 'MO', name: 'Mira Okonkwo', email: 'mira@studioflux.co', role: 'Owner', bg: 'linear-gradient(140deg,#4c3fd9,#f2765a)'},
+        {initials: 'JT', name: 'Jae Tan', email: 'jae@studioflux.co', role: 'Reviewer', bg: 'linear-gradient(140deg,#2f7d8c,#4c3fd9)'},
+        {initials: 'LP', name: 'Lucía Peña', email: 'lucia@freelance.es', role: 'Translator', bg: 'linear-gradient(140deg,#c04a34,#f0a24b)'}
+      ],
+
+      // modals + toast
+      showCreate: S.modal === 'create', showDelete: S.modal === 'delete',
+      closeModal: () => this.setState({modal: null, naError: ''}),
+      stopProp: (e) => e.stopPropagation(),
+      naTitle: S.na.title, naSrc: S.na.src, naTgt: S.na.tgt, naGlossary: S.na.glossary, naError: S.naError,
+      langs: this.LANGS,
+      onNaTitle: (e) => this.setState(s => ({na: {...s.na, title: e.target.value}, naError: ''})),
+      srcOpts: ['Japanese', 'Korean', 'Chinese (Simplified)', 'French'].map(v => Object.assign({label: v, on: () => this.setState(s => ({na: {...s.na, src: v}, naError: ''}))}, this.chip(S.na.src === v))),
+      tgtOpts: ['English', 'Spanish', 'German', 'Portuguese (BR)'].map(v => Object.assign({label: v, on: () => this.setState(s => ({na: {...s.na, tgt: v}, naError: ''}))}, this.chip(S.na.tgt === v))),
+      toggleNaGlossary: () => this.setState(s => ({na: {...s.na, glossary: !s.na.glossary}})),
+      styleOpts: [
+        {id: 'Faithful', label: 'Faithful', hint: 'Close to the original phrasing and rhythm.'},
+        {id: 'Natural', label: 'Natural', hint: 'Reads like it was written in the target language.'},
+        {id: 'Localized', label: 'Localized', hint: 'Adapts jokes, idioms and units.'}
+      ].map(o => ({label: o.label, hint: o.hint, on: () => this.setState(s => ({na: {...s.na, style: o.id}})),
+        bd: S.na.style === o.id ? '#4c3fd9' : '#e7e3db', bg: S.na.style === o.id ? '#f5f3ff' : '#fff', fg: S.na.style === o.id ? '#3f34bb' : '#191821'})),
+      createAlbum: () => {
+        const t = (S.na.title || '').trim();
+        if (!t) { this.setState({naError: 'Give the album a title so you can find it later.'}); return; }
+        if (S.na.src === S.na.tgt) { this.setState({naError: 'Source and target languages must differ.'}); return; }
+        const lang = S.na.src === 'Korean' ? 'ko' : S.na.src === 'French' ? 'fr' : 'ja';
+        const id = 'a' + (S.albums.length + 1) + Date.now().toString().slice(-3);
+        const pages = [];
+        for (let i = 0; i < 6; i++) pages.push(this.buildPage(id, i, S.albums.length, lang, 0, 6));
+        this.setState(s => ({albums: [{id: id, title: t, src: s.na.src, tgt: s.na.tgt, lang: lang, status: 'Draft', edited: 'Just now', pages: pages}].concat(s.albums), modal: null, albumId: id, screen: 'album', na: {...s.na, title: ''}}));
+        this.flash('“' + t + '” created — 6 sample pages queued for scanning.');
+        this.touch();
+      },
+      deleteBody: 'This removes ' + al.pages.length + ' pages, ' + as.t + ' text blocks and every approved translation in this album. Exports you already downloaded are unaffected.',
+      confirmDelete: () => { this.setState(s => ({albums: s.albums.filter(a => a.id !== al.id), modal: null, screen: 'dashboard', albumId: s.albums.filter(a => a.id !== al.id)[0] ? s.albums.filter(a => a.id !== al.id)[0].id : ''})); this.flash('Album deleted. You can restore it from Trash for 14 days.', 'err'); },
+      toast: S.toast, toastBg: S.toastKind === 'err' ? '#7a2a17' : '#191821',
+      toastDot: S.toastKind === 'err' ? '#f2765a' : '#2f7d4f', toastIcon: S.toastKind === 'err' ? '!' : '✓'
+    };
+    return vals;
+  }
+}
+</script>
+</body>
+</html>
