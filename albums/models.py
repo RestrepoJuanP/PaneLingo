@@ -2,6 +2,7 @@
 
 from django.conf import settings
 from django.db import models
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 
@@ -96,6 +97,10 @@ class Album(models.Model):
     def __str__(self):
         """Devuelve el título del álbum."""
         return self.title
+
+    def get_rename_url(self):
+        """Devuelve la dirección para renombrar este álbum."""
+        return reverse("albums:rename", kwargs={"pk": self.pk})
 
     @property
     def language_pair(self):

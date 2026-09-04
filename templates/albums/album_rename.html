@@ -1,0 +1,40 @@
+{% extends "layouts/app_shell.html" %}
+
+{# Renombrar álbum — HU-06, página propia.
+   Es la degradación del modal para cuando el JavaScript no está disponible, y
+   el destino donde aterrizan los errores de validación enviados desde él. #}
+
+{% block title %}Renombrar {{ album.title }} · PaneLingo{% endblock %}
+
+{% block breadcrumb %}
+  <a class="breadcrumb__link" href="{% url 'albums:list' %}">Mis álbumes</a>
+  <span class="breadcrumb__sep" aria-hidden="true">/</span>
+  <span class="breadcrumb__current">{{ album.title }}</span>
+{% endblock %}
+
+{% block content %}
+  <div class="page-head">
+    <div>
+      <h1 class="page-title">Renombrar álbum</h1>
+      <p class="page-subtitle">
+        El título identifica el proyecto en tu biblioteca. Puedes cambiarlo
+        cuantas veces quieras.
+      </p>
+    </div>
+  </div>
+
+  <div class="card album-form">
+    <form method="post" action="{% url 'albums:rename' album.pk %}" novalidate>
+      {% csrf_token %}
+      {% include "components/form_field.html" with field=form.title %}
+
+      <div class="album-form__actions">
+        <a class="btn btn--secondary" href="{% url 'albums:list' %}">Cancelar</a>
+        <button type="submit" class="btn btn--primary" data-submit-busy>
+          <span class="btn__spinner" hidden aria-hidden="true"></span>
+          <span data-submit-label data-busy-label="Guardando…">Guardar</span>
+        </button>
+      </div>
+    </form>
+  </div>
+{% endblock %}

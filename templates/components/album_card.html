@@ -11,19 +11,34 @@
   <div class="album-card__body">
     <div class="album-card__head">
       <a class="album-card__title" href="{{ album_url|default:'#' }}">{{ title }}</a>
-      {% if show_menu %}
-        <button
-          type="button"
+      {% if rename_url %}
+        {# Renombrar es la única acción de álbum del Sprint 1: eliminar está
+           deshabilitado, y duplicar y archivar quedan fuera de alcance. Un
+           menú "···" de un solo elemento costaría un clic extra y toda la
+           maquinaria de foco atrapado para nada, así que la acción va
+           directa. El aria-label incluye el título para que un lector de
+           pantalla distinga un "Renombrar" de otro al recorrer la rejilla. #}
+        <a
           class="btn-icon"
-          aria-label="Acciones de {{ title }}"
-        >···</button>
+          href="{{ rename_url }}"
+          data-modal-open="renombrar-album"
+          data-modal-action="{{ rename_url }}"
+          data-modal-value="{{ title }}"
+          aria-label="Renombrar «{{ title }}»"
+          title="Renombrar"
+        >
+          <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false" width="15" height="15">
+            <path d="M11.2 1.8a1.6 1.6 0 0 1 2.3 2.3l-7.6 7.6L2.5 13l1.3-3.4 7.4-7.8Z"
+                  stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+          </svg>
+        </a>
       {% endif %}
     </div>
 
     <p class="album-card__meta">{{ page_count }} {{ page_count|pluralize:"página,páginas" }}</p>
 
     {% if edited_label %}
-      <p class="album-card__edited">Editado {{ edited_label }}</p>
+      <p class="album-card__edited">Editado hace {{ edited_label }}</p>
     {% endif %}
   </div>
 </article>

@@ -2,10 +2,10 @@
 
 from django.contrib import messages
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, ListView
+from django.views.generic import CreateView, ListView, UpdateView
 
 from accounts.access import PrivateViewMixin
-from albums.forms import AlbumForm
+from albums.forms import AlbumForm, AlbumRenameForm
 from albums.models import Album
 
 
@@ -71,5 +71,41 @@ class AlbumCreateView(PrivateViewMixin, CreateView):
         response = super().form_valid(form)
         messages.success(
             self.request, f"Álbum «{self.object.title}» creado correctamente."
+        )
+        return response
+
+
+class AlbumRenameView(PrivateViewMixin, UpdateView):
+    """Renombrado rápido de un álbum desde la biblioteca (HU-06).
+
+    Se ofrece como modal ligero sobre la biblioteca. Esta página propia es la
+    degradación para cuando el JavaScript no está disponible, y el destino
+    donde aterrizan los errores de validación.
+    """
+
+    model = Album
+    form_class = AlbumRenameForm
+    template_name = "albums/album_rename.html"
+    success_url = reverse_lazy("albums:list")
+
+    def get_queryset(self):
+        """Restringe el renombrado a los álbumes de quien hace la petición.
+
+        Al filtrar aquí, un álbum ajeno no se encuentra y la vista responde
+        404, no 403: un 403 confirmaría que ese álbum existe.
+        """
+        return Album.objects.filter(owner=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        """Marca el destino activo de la navegación lateral."""
+        context = super().get_context_data(**kwargs)
+        context["nav_current"] = "albums"
+        return context
+
+    def form_valid(self, form):
+        """Guarda el nuevo título y confirma el cambio."""
+        response = super().form_valid(form)
+        messages.success(
+            self.request, f"El álbum ahora se llama «{self.object.title}»."
         )
         return response

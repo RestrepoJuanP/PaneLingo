@@ -5,6 +5,36 @@ from django import forms
 from accounts.forms import AccessibleFormMixin
 from albums.models import Album, Language
 
+# Longitud máxima del título, la misma que declara el modelo.
+TITLE_MAX_LENGTH = 120
+
+
+def clean_album_title(raw_title):
+    """Normaliza y valida el título de un álbum (HU-06).
+
+    Recorta los espacios de los extremos y rechaza un título vacío o formado
+    solo por espacios, que son los dos casos que contempla CA-06.2. Sin el
+    recorte, un título de solo espacios superaría la comprobación de campo
+    obligatorio y crearía un álbum sin nombre visible en la biblioteca.
+
+    NO se impone una longitud mínima mayor que uno, y es deliberado: un título
+    de un solo carácter puede ser perfectamente legítimo en esta herramienta.
+    PaneLingo traduce manga, y el traductor suele introducir el título
+    original; hay obras japonesas tituladas con un único kanji, como 凪 o 蟲.
+    Un mínimo de dos caracteres las rechazaría para protegernos de una
+    pulsación accidental que el usuario ve y corrige al instante. No lo
+    endurezcas creyendo que es un descuido.
+    """
+    title = (raw_title or "").strip()
+    if not title:
+        raise forms.ValidationError("Escribe un título para el álbum.", code="required")
+    if len(title) > TITLE_MAX_LENGTH:
+        raise forms.ValidationError(
+            f"El título no puede superar los {TITLE_MAX_LENGTH} caracteres.",
+            code="max_length",
+        )
+    return title
+
 
 class AlbumForm(AccessibleFormMixin, forms.ModelForm):
     """Creación de un álbum (HU-05).
@@ -62,14 +92,34 @@ class AlbumForm(AccessibleFormMixin, forms.ModelForm):
             self.fields[name].empty_label = "Elige un idioma"
 
     def clean_title(self):
-        """Recorta los espacios sobrantes del título.
+        """Valida el título del álbum (HU-06)."""
+        return clean_album_title(self.cleaned_data.get("title"))
 
-        Sin esto, un título de solo espacios pasaría la comprobación de campo
-        obligatorio y crearía un álbum sin nombre visible.
-        """
-        title = (self.cleaned_data.get("title") or "").strip()
-        if not title:
-            raise forms.ValidationError(
-                "Escribe un título para el álbum.", code="required"
+
+class AlbumRenameForm(AccessibleFormMixin, forms.ModelForm):
+    """Renombrado rápido de un álbum desde la biblioteca (HU-06).
+
+    Solo edita el título. Los idiomas y el estado quedan fuera del formulario
+    a propósito: un renombrado no debe poder alterarlos, ni siquiera mediante
+    campos añadidos al POST.
+    """
+
+    class Meta:
+        model = Album
+        fields = ["title"]
+        labels = {"title": "Título del álbum"}
+        widgets = {
+            "title": forms.TextInput(
+                attrs={
+                    "class": "input",
+                    "autofocus": True,
+                    "maxlength": TITLE_MAX_LENGTH,
+                    "data-modal-field": "title",
+                }
             )
-        return title
+        }
+        error_messages = {"title": {"required": "Escribe un título para el álbum."}}
+
+    def clean_title(self):
+        """Valida el título con las mismas reglas que la creación."""
+        return clean_album_title(self.cleaned_data.get("title"))
