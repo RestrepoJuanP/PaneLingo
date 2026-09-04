@@ -1,0 +1,18 @@
+{# Campos del formulario de álbum, compartidos entre el modal de la
+   biblioteca y la página propia de degradación sin JavaScript.
+
+   Del modal del mockup quedan fuera tres controles:
+   - "Translation style" y "Reuse my studio glossary" pertenecen a la
+     traducción con IA y a la terminología, ambas fuera del Sprint 1.
+   - La zona de carga de páginas corresponde a HU-09 y va aquí, entre los
+     idiomas y el pie, cuando exista la maquinaria de carga.
+   Ninguno se maqueta deshabilitado: un control inhabilitado dentro de un
+   formulario que hay que completar se lee como un paso obligatorio que no se
+   puede cumplir. #}
+
+{% include "components/form_field.html" with field=form.title %}
+
+<div class="album-form__languages">
+  {% include "components/form_field.html" with field=form.source_language %}
+  {% include "components/form_field.html" with field=form.target_language %}
+</div>

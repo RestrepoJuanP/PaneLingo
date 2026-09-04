@@ -37,7 +37,7 @@ class RegistrationViewGetTests(TestCase):
 
         response = self.client.get(reverse("accounts:register"))
 
-        self.assertRedirects(response, reverse("home"))
+        self.assertRedirects(response, reverse("albums:list"))
 
 
 class RegistrationViewSuccessTests(TestCase):
@@ -51,7 +51,7 @@ class RegistrationViewSuccessTests(TestCase):
         user = User.objects.get()
         self.assertEqual(user.email, "mira@estudio.test")
         self.assertEqual(user.display_name, "Mira Okonkwo")
-        self.assertRedirects(response, reverse("home"))
+        self.assertRedirects(response, reverse("albums:list"))
 
     def test_password_is_stored_hashed(self):
         """CP-01.1 — La contraseña se almacena hasheada, no en texto plano."""
@@ -80,7 +80,7 @@ class RegistrationViewSuccessTests(TestCase):
         """El registro deja la sesión iniciada, como anuncia la interfaz."""
         self.client.post(reverse("accounts:register"), data=VALID_PAYLOAD)
 
-        response = self.client.get(reverse("home"))
+        response = self.client.get(reverse("albums:list"))
 
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context["user"].is_authenticated)
@@ -187,8 +187,8 @@ class LoginViewTests(TestCase):
             data={"username": self.user.email, "password": self.password},
         )
 
-        self.assertRedirects(response, reverse("home"))
-        panel = self.client.get(reverse("home"))
+        self.assertRedirects(response, reverse("albums:list"))
+        panel = self.client.get(reverse("albums:list"))
         self.assertEqual(panel.status_code, 200)
         self.assertTrue(panel.context["user"].is_authenticated)
         self.assertEqual(panel.context["user"], self.user)
@@ -204,7 +204,7 @@ class LoginViewTests(TestCase):
         self.assertFalse(response.context["user"].is_authenticated)
         self.assertContains(response, "no son correctos")
 
-        panel = self.client.get(reverse("home"))
+        panel = self.client.get(reverse("albums:list"))
         self.assertEqual(panel.status_code, 302)
 
     def test_unknown_email_gives_the_same_message_as_a_wrong_password(self):
@@ -246,7 +246,7 @@ class LoginViewTests(TestCase):
 
         response = self.client.get(self.login_url)
 
-        self.assertRedirects(response, reverse("home"))
+        self.assertRedirects(response, reverse("albums:list"))
 
 
 class LoginRedirectTests(TestCase):
@@ -264,16 +264,17 @@ class LoginRedirectTests(TestCase):
 
     def test_anonymous_visitor_reaches_a_real_login_screen(self):
         """El panel envía al login, que ya no devuelve 404."""
-        response = self.client.get(reverse("home"), follow=True)
+        response = self.client.get(reverse("albums:list"), follow=True)
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "accounts/login.html")
 
     def test_panel_redirects_to_login_keeping_next(self):
         """La redirección al login conserva el destino en next."""
-        response = self.client.get(reverse("home"))
+        response = self.client.get(reverse("albums:list"))
 
-        self.assertRedirects(response, f"{self.login_url}?next={reverse('home')}")
+        target = reverse("albums:list")
+        self.assertRedirects(response, f"{self.login_url}?next={target}")
 
     def test_next_is_honoured_after_authenticating(self):
         """Tras autenticarse, el usuario llega al destino que pedía.
@@ -299,7 +300,7 @@ class LoginRedirectTests(TestCase):
             data={"username": self.user.email, "password": self.password},
         )
 
-        self.assertRedirects(response, reverse("home"))
+        self.assertRedirects(response, reverse("albums:list"))
 
 
 class RememberMeTests(TestCase):
@@ -380,7 +381,7 @@ class LogoutViewTests(TestCase):
         """CP-03.2 — Tras cerrar sesión, el panel deja de ser accesible."""
         self.client.post(self.logout_url)
 
-        response = self.client.get(reverse("home"))
+        response = self.client.get(reverse("albums:list"))
 
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.startswith(reverse("accounts:login")))
@@ -392,7 +393,7 @@ class LogoutViewTests(TestCase):
 
         self.assertEqual(response.status_code, 405)
         self.assertIn("_auth_user_id", self.client.session)
-        self.assertEqual(self.client.get(reverse("home")).status_code, 200)
+        self.assertEqual(self.client.get(reverse("albums:list")).status_code, 200)
 
     def test_post_without_csrf_token_is_rejected(self):
         """Un POST sin token CSRF no cierra la sesión."""
@@ -411,10 +412,10 @@ class LogoutViewTests(TestCase):
         almacenable, de modo que el navegador no puede servirla desde su
         historial, y una vez cerrada la sesión ya solo devuelve la redirección.
         """
-        panel = self.client.get(reverse("home"))
+        panel = self.client.get(reverse("albums:list"))
         self.assertEqual(panel.status_code, 200)
         self.assertIn("no-store", panel.headers["Cache-Control"])
 
         self.client.post(self.logout_url)
 
-        self.assertEqual(self.client.get(reverse("home")).status_code, 302)
+        self.assertEqual(self.client.get(reverse("albums:list")).status_code, 302)

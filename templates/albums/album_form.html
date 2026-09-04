@@ -1,0 +1,49 @@
+{% extends "layouts/app_shell.html" %}
+
+{# Crear álbum — HU-05, página propia.
+   Es la degradación del modal para cuando el JavaScript no está disponible, y
+   también el destino donde aterrizan los errores de validación enviados desde
+   el modal. #}
+
+{% block title %}Nuevo álbum · PaneLingo{% endblock %}
+
+{% block breadcrumb %}
+  <a class="breadcrumb__link" href="{% url 'albums:list' %}">Mis álbumes</a>
+  <span class="breadcrumb__sep" aria-hidden="true">/</span>
+  <span class="breadcrumb__current">Nuevo álbum</span>
+{% endblock %}
+
+{% block content %}
+  <div class="page-head">
+    <div>
+      <h1 class="page-title">Nuevo álbum</h1>
+      <p class="page-subtitle">
+        Un álbum por cómic, tomo de manga o temporada de webtoon.
+      </p>
+    </div>
+  </div>
+
+  <div class="card album-form">
+    {% if form.non_field_errors %}
+      <div class="form-errors" role="alert">
+        <span class="form-errors__icon" aria-hidden="true">!</span>
+        <ul class="form-errors__list">
+          {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'albums:create' %}" novalidate>
+      {% csrf_token %}
+      {% include "albums/_album_form_fields.html" %}
+
+      <div class="album-form__actions">
+        <a class="btn btn--secondary" href="{% url 'albums:list' %}">Cancelar</a>
+        <button type="submit" class="btn btn--primary" data-submit-busy>
+          <span class="btn__spinner" hidden aria-hidden="true"></span>
+          <span data-submit-label data-busy-label="Creando…">Crear álbum</span>
+        </button>
+      </div>
+    </form>
+  </div>
+{% endblock %}

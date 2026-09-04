@@ -1,0 +1,104 @@
+{% extends "layouts/app_shell.html" %}
+
+{# Biblioteca de álbumes — HU-05.
+   Referencia visual: design/screenshots/dashboard-library.png.
+
+   Adaptaciones al alcance del Sprint 1, ya acordadas en la Etapa 2:
+   - Sin banda "Pick up where you left off": depende del workspace.
+   - Sin tarjetas de estadística: de las cuatro del mockup solo una tendría
+     dato real, y una sola en una grilla de cuatro se lee como un fallo.
+   - Sin barra de progreso en las tarjetas: no hay traducción todavía.
+   - Sin filtros por estado: en este sprint ninguna historia cambia el estado,
+     así que cuatro de los cinco devolverían siempre lista vacía. #}
+
+{% block title %}Mis álbumes · PaneLingo{% endblock %}
+
+{% block breadcrumb %}
+  <span class="breadcrumb__current">Mis álbumes</span>
+{% endblock %}
+
+{% block content %}
+  {% url 'albums:create' as create_url %}
+
+  <div class="page-head">
+    <div>
+      <h1 class="page-title">Mis álbumes</h1>
+      <p class="page-subtitle">
+        Cada álbum agrupa las páginas de un cómic, un tomo de manga o una
+        temporada de webtoon.
+      </p>
+    </div>
+    <div class="page-head__actions">
+      {# Enlace de verdad: sin JavaScript navega a la página propia de
+         creación. El JavaScript lo intercepta para abrir el modal. #}
+      <a
+        class="btn btn--primary"
+        href="{% url 'albums:create' %}"
+        data-modal-open="crear-album"
+      >Nuevo álbum</a>
+    </div>
+  </div>
+
+  {% if albums %}
+    <div class="section-head">
+      <div class="section-head__left">
+        <h2 class="section-title">Álbumes</h2>
+        <span class="section-count">
+          {{ albums|length }} {{ albums|length|pluralize:"álbum,álbumes" }}
+        </span>
+      </div>
+    </div>
+
+    <div class="album-grid">
+      {% for album in albums %}
+        {% include "components/album_card.html" with seed=album.pk title=album.title page_count=album.page_count edited_label=album.updated_at|timesince lang_pair=album.language_pair status_label=album.get_status_display status_variant="neutral" album_url="#" %}
+      {% endfor %}
+    </div>
+  {% else %}
+    {% include "components/empty_state.html" with title="Todavía no tienes álbumes" body="Un álbum agrupa las páginas de un cómic, un tomo de manga o una temporada de webtoon. Crea el primero para empezar a organizar tu trabajo." action_label="Crear mi primer álbum" action_url=create_url action_modal="crear-album" %}
+  {% endif %}
+
+  {# Modal de creación. Sin JavaScript nunca se abre, y el botón de arriba
+     navega a la página propia con el mismo formulario. #}
+  <div
+    class="modal"
+    id="crear-album"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="crear-album-title"
+    hidden
+  >
+    <div class="modal__dialog">
+      <div class="modal__head">
+        <div>
+          <h2 class="modal__title" id="crear-album-title">Crear álbum</h2>
+          <p class="modal__subtitle">
+            Un álbum por cómic, tomo de manga o temporada de webtoon.
+          </p>
+        </div>
+        <button
+          type="button"
+          class="modal__close"
+          data-modal-close
+          aria-label="Cerrar"
+        >✕</button>
+      </div>
+
+      <form method="post" action="{% url 'albums:create' %}" novalidate>
+        {% csrf_token %}
+        <div class="modal__body modal__body--form">
+          {% include "albums/_album_form_fields.html" %}
+        </div>
+        <div class="modal__foot">
+          <button type="button" class="btn btn--secondary" data-modal-close>
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn--primary" data-submit-busy>
+            <span class="btn__spinner" hidden aria-hidden="true"></span>
+            <span data-submit-label data-busy-label="Creando…">Crear álbum</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

@@ -64,15 +64,3 @@ def design_system(request):
     encuentre en desarrollo, sino desplegar con DEBUG activado por descuido.
     """
     return render(request, "design_system.html", {"colors": DESIGN_SYSTEM_COLORS})
-
-
-@private_view
-def home(request):
-    """Panel del usuario. VISTA PUENTE TEMPORAL.
-
-    La biblioteca de álbumes se construye en una etapa posterior. Esta vista
-    existe solo para dar un destino real a la redirección posterior al
-    registro y al usuario ya autenticado que visita /registro/. Sustitúyela
-    por la lista de álbumes cuando llegue su historia de usuario.
-    """
-    return render(request, "home.html")

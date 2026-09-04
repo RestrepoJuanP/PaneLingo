@@ -10,6 +10,10 @@
   <p class="empty-state__title">{{ title }}</p>
   <p class="empty-state__body">{{ body }}</p>
   {% if action_label %}
-    <a class="btn btn--primary" href="{{ action_url|default:'#' }}">{{ action_label }}</a>
+    <a
+      class="btn btn--primary"
+      href="{{ action_url|default:'#' }}"
+      {% if action_modal %}data-modal-open="{{ action_modal }}"{% endif %}
+    >{{ action_label }}</a>
   {% endif %}
 </div>

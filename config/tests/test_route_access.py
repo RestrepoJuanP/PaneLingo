@@ -29,7 +29,8 @@ PUBLIC_ROUTES = [
 
 # Rutas que exigen sesión iniciada y devuelven una página.
 PRIVATE_ROUTES = [
-    "home",
+    "albums:list",
+    "albums:create",
     "design_system",
 ]
 

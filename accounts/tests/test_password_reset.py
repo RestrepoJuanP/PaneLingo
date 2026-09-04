@@ -107,7 +107,7 @@ class PasswordResetHappyPathTests(PasswordResetTestCase):
         logged_in = self.client.login(email=self.user.email, password=NEW_PASSWORD)
 
         self.assertTrue(logged_in)
-        self.assertEqual(self.client.get(reverse("home")).status_code, 200)
+        self.assertEqual(self.client.get(reverse("albums:list")).status_code, 200)
 
 
 class PasswordResetUnknownEmailTests(PasswordResetTestCase):
@@ -255,12 +255,12 @@ class OtherSessionsTests(PasswordResetTestCase):
         """Una sesión abierta en otro dispositivo deja de servir."""
         intruder = Client()
         intruder.login(email=self.user.email, password=OLD_PASSWORD)
-        self.assertEqual(intruder.get(reverse("home")).status_code, 200)
+        self.assertEqual(intruder.get(reverse("albums:list")).status_code, 200)
 
         self.request_reset(self.user.email)
         self.set_new_password(self.confirm_url_from_email(), NEW_PASSWORD)
 
-        response = intruder.get(reverse("home"))
+        response = intruder.get(reverse("albums:list"))
 
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.startswith(reverse("accounts:login")))
