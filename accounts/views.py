@@ -2,11 +2,12 @@
 
 from django.contrib import messages
 from django.contrib.auth import login
+from django.contrib.auth.views import LoginView as DjangoLoginView
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
 
-from accounts.forms import UserRegistrationForm
+from accounts.forms import EmailAuthenticationForm, UserRegistrationForm
 
 
 class RegistrationView(CreateView):
@@ -41,3 +42,27 @@ class RegistrationView(CreateView):
             f"{self.object.display_name}.",
         )
         return response
+
+
+class LoginView(DjangoLoginView):
+    """Inicio de sesión de un traductor (HU-02).
+
+    Se apoya en la vista de Django: ella valida las credenciales, rota la
+    clave de sesión y resuelve el parámetro next comprobando que apunte a
+    este mismo sitio. Aquí solo se añade la duración de la sesión.
+    """
+
+    form_class = EmailAuthenticationForm
+    template_name = "accounts/login.html"
+    redirect_authenticated_user = True
+
+    def form_valid(self, form):
+        """Autentica y fija la duración de la sesión según la casilla.
+
+        Sin marcar, la cookie es de sesión y muere al cerrar el navegador.
+        Marcada, dura lo que indique SESSION_COOKIE_AGE. Se decide antes de
+        llamar a super(), que es quien escribe la sesión.
+        """
+        remember_me = form.cleaned_data.get("remember_me")
+        self.request.session.set_expiry(None if remember_me else 0)
+        return super().form_valid(form)

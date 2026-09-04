@@ -1,0 +1,79 @@
+{% extends "layouts/auth_shell.html" %}
+
+{# Iniciar sesión — HU-02.
+   Referencia visual: design/screenshots/auth-login.png.
+
+   Diferencias deliberadas respecto a la captura:
+   - Se omite "Continue with studio SSO" y su separador: el inicio de sesión
+     federado es una función de equipo, fuera del alcance del Sprint 1.
+   - La casilla "Mantener la sesión iniciada" se renderiza DESMARCADA. En la
+     captura aparece marcada, pero una cookie persistente de catorce días
+     debería ser una decisión consciente y no algo que el usuario se lleva sin
+     advertirlo, sobre todo en equipos compartidos.
+
+   El enlace "¿Olvidaste tu contraseña?" queda sin destino hasta la Etapa 6
+   (HU-04, recuperación de contraseña). #}
+
+{% block title %}Iniciar sesión · PaneLingo{% endblock %}
+
+{% block login_url %}{% url 'accounts:login' %}{% endblock %}
+{% block login_current %}aria-current="page"{% endblock %}
+{% block signup_url %}{% url 'accounts:register' %}{% endblock %}
+
+{% block auth_content %}
+  <h1 class="auth__title">Bienvenido de nuevo</h1>
+  <p class="auth__subtitle">
+    Entra para seguir con tus álbumes y tus traducciones guardadas.
+  </p>
+
+  {% if form.non_field_errors %}
+    <div class="form-errors" role="alert">
+      <span class="form-errors__icon" aria-hidden="true">!</span>
+      <ul class="form-errors__list">
+        {% for error in form.non_field_errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  <form method="post" action="{% url 'accounts:login' %}" novalidate>
+    {% csrf_token %}
+
+    {% include "components/form_field.html" with field=form.username %}
+
+    <div class="field">
+      <div class="field__label-row">
+        <label class="field__label" for="{{ form.password.id_for_label }}">
+          {{ form.password.label }}
+        </label>
+        {# Sin destino hasta la Etapa 6 (HU-04). #}
+        <span class="field__hint">¿Olvidaste tu contraseña?</span>
+      </div>
+      {{ form.password }}
+      {% if form.password.errors %}
+        <div class="field__error" id="{{ form.password.auto_id }}-error">
+          {% for error in form.password.errors %}
+            <p class="field__error-item">{{ error }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="field">
+      <label class="checkbox" for="{{ form.remember_me.id_for_label }}">
+        {{ form.remember_me }}
+        <span>{{ form.remember_me.label }}</span>
+      </label>
+    </div>
+
+    {% if next %}
+      <input type="hidden" name="next" value="{{ next }}" />
+    {% endif %}
+
+    <button type="submit" class="btn btn--primary btn--block" data-submit-busy>
+      <span class="btn__spinner" hidden aria-hidden="true"></span>
+      <span data-submit-label data-busy-label="Entrando…">Iniciar sesión</span>
+    </button>
+  </form>
+{% endblock %}
