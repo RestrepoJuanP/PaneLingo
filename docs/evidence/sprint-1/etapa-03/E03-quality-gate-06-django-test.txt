@@ -5,17 +5,17 @@ Etapa           : 03
 Paso            : 6 de 7 — Django — pruebas automaticas
 Comando         : python manage.py test
 Herramienta     : Python 3.12.10 / Django 5.2.17
-Fecha y hora    : 2026-09-04T15:53:33-05:00
+Fecha y hora    : 2026-09-04T15:54:28-05:00
 Rama            : feature/HU-01-create-account
-Commit          : addfbd974c7d103c6700de4db03a1541875622dc
-Arbol de trabajo: con cambios sin versionar
+Commit          : 2f4ad59fd94345544b440e82b24c013661421c50
+Arbol de trabajo: limpio
 Directorio      : /f/PaneLingo
 ==============================================================================
 
 Creating test database for alias 'default'...
 ...............................
 ----------------------------------------------------------------------
-Ran 31 tests in 4.570s
+Ran 31 tests in 4.850s
 
 OK
 Destroying test database for alias 'default'...
