@@ -40,12 +40,12 @@ class RegistrationView(CreateView):
 
     form_class = UserRegistrationForm
     template_name = "accounts/register.html"
-    success_url = reverse_lazy("home")
+    success_url = reverse_lazy("albums:list")
 
     def dispatch(self, request, *args, **kwargs):
         """Envía al panel a quien ya tiene sesión iniciada."""
         if request.user.is_authenticated:
-            return redirect("home")
+            return redirect("albums:list")
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):

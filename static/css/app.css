@@ -1962,3 +1962,39 @@ textarea {
     scroll-behavior: auto !important;
   }
 }
+
+/* =============================================================================
+   21. Formulario de álbum
+   ========================================================================== */
+
+.album-form {
+  max-width: 560px;
+}
+
+/* Los dos idiomas comparten fila mientras haya sitio. */
+.album-form__languages {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: var(--sp-8);
+}
+
+.album-form__actions {
+  display: flex;
+  gap: var(--sp-4);
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+/* Dentro del modal el cuerpo contiene un formulario, no texto de aviso: le
+   corresponden el color y el tamaño normales, no los del párrafo. */
+.modal__body--form {
+  color: var(--ink-900);
+  font-size: var(--fs-body);
+}
+
+/* El último campo del formulario no necesita separación inferior: el pie del
+   modal y la fila de acciones ya aportan la suya. */
+.modal__body--form .field:last-child,
+.album-form__languages .field {
+  margin-bottom: 0;
+}

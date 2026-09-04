@@ -15,6 +15,8 @@
    - La miga de pan no lleva el nivel de estudio del mockup, que es una
      función de equipo fuera de alcance. #}
 
+{% url 'albums:list' as albums_url %}
+
 {% block body %}
   <div class="app">
     <aside class="sidebar">
@@ -24,7 +26,7 @@
       </div>
 
       <nav class="sidebar__nav" aria-label="Principal">
-        {% include "components/nav_item.html" with label="Álbumes" icon="library" url=nav_albums_url current=nav_current|default:"" key="albums" %}
+        {% include "components/nav_item.html" with label="Álbumes" icon="library" url=albums_url current=nav_current|default:"" key="albums" %}
         {% include "components/nav_item.html" with label="Cargar páginas" icon="upload" url=nav_upload_url current=nav_current|default:"" key="upload" %}
         {% include "components/nav_item.html" with label="Traducción" icon="workspace" disabled=True %}
         {% include "components/nav_item.html" with label="Revisión y exportación" icon="review" disabled=True %}
@@ -61,7 +63,7 @@
     </div>
 
     <nav class="mobile-nav" aria-label="Principal">
-      {% include "components/mobile_nav_item.html" with label="Álbumes" icon="library" url=nav_albums_url current=nav_current|default:"" key="albums" %}
+      {% include "components/mobile_nav_item.html" with label="Álbumes" icon="library" url=albums_url current=nav_current|default:"" key="albums" %}
       {% include "components/mobile_nav_item.html" with label="Cargar" icon="upload" url=nav_upload_url current=nav_current|default:"" key="upload" %}
       {% include "components/mobile_nav_item.html" with label="Traducción" icon="workspace" disabled=True %}
       {% include "components/mobile_nav_item.html" with label="Revisión" icon="review" disabled=True %}

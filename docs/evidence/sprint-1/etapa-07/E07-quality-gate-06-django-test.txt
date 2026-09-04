@@ -1,0 +1,28 @@
+==============================================================================
+PaneLingo — Evidencia del Quality Gate
+==============================================================================
+Etapa           : 07
+Paso            : 6 de 7 — Django — pruebas automaticas
+Comando         : python manage.py test
+Herramienta     : Python 3.12.10 / Django 5.2.17
+Fecha y hora    : 2026-09-04T17:51:59-05:00
+Rama            : feature/HU-05-create-album
+Commit          : 0ad1e76f4c112b33fd69ad20d82b155263b75607
+Arbol de trabajo: con cambios sin versionar
+Directorio      : /f/PaneLingo
+==============================================================================
+
+Creating test database for alias 'default'...
+....................................................................................................Method Not Allowed (GET): /cuentas/salir/
+.......
+----------------------------------------------------------------------
+Ran 107 tests in 36.048s
+
+OK
+Destroying test database for alias 'default'...
+Found 107 test(s).
+System check identified no issues (0 silenced).
+
+==============================================================================
+Codigo de salida: 0  (CORRECTO)
+==============================================================================
