@@ -114,6 +114,14 @@ pip-audit -r requirements.txt   # 7. Auditoría de vulnerabilidades
 
 El orden importa: Ruff aplica primero sus correcciones seguras, Black da el formato final, y los pasos 3 y 4 verifican que ninguna de las dos herramientas deshaga el trabajo de la otra.
 
+Para no copiar las salidas a mano, `./scripts/quality_gate.sh <NN>` ejecuta los siete pasos y guarda la evidencia de la etapa `<NN>` en `docs/evidence/sprint-1/etapa-<NN>/`, junto con un resumen en Markdown listo para la wiki:
+
+```bash
+./scripts/quality_gate.sh 01
+```
+
+Ejecuta los siete pasos aunque alguno falle y termina con código distinto de cero si hubo alguno en rojo. No hace commit ni push. La convención de nombres está documentada en [`docs/evidence/sprint-1/README.md`](docs/evidence/sprint-1/README.md).
+
 La configuración vive en `pyproject.toml`: `line-length = 88`, reglas `["E", "F", "N", "B", "I", "C90"]` y complejidad ciclomática máxima de 10. **No desactives reglas globalmente.** Si `E501` marca una línea que Black no puede partir, reescríbela o usa un `noqa` puntual con su comentario justificativo.
 
 Estos mismos pasos se ejecutan automáticamente en GitHub Actions (`.github/workflows/quality.yml`) en cada push y pull request hacia `main`.

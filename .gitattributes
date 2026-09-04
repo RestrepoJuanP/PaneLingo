@@ -1,0 +1,7 @@
+# Fuerza finales de linea LF en los scripts de shell.
+# Con core.autocrlf=true (por defecto en Git para Windows) el shebang quedaria
+# como "#!/usr/bin/env bash" al clonar y bash respondera "bad interpreter".
+*.sh text eol=lf
+
+# Los archivos generados de evidencia se versionan tal cual.
+docs/evidence/** -text
