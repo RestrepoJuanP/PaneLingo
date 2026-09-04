@@ -1,0 +1,11 @@
+{# Mensaje del framework de messages de Django, renderizado como toast.
+   El contenedor de .toasts lleva aria-live; aquí no se repite. #}
+<div class="toast{% if message.tags == 'error' %} toast--error{% elif message.tags == 'warning' %} toast--warning{% endif %}">
+  <span class="toast__dot" aria-hidden="true">
+    {% if message.tags == 'error' %}!{% elif message.tags == 'warning' %}!{% else %}✓{% endif %}
+  </span>
+  <span>{{ message }}</span>
+  <button type="button" class="toast__close" data-toast-close aria-label="Cerrar mensaje">
+    ✕
+  </button>
+</div>

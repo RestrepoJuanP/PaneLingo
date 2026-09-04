@@ -1,0 +1,19 @@
+{# Miniatura de página, con badge de estado opcional.
+   La relación de aspecto 3/4.24 viene del mockup. #}
+<article class="page-thumb">
+  <figure class="page-thumb__figure">
+    {% if image_url %}
+      <img class="page-thumb__img" src="{{ image_url }}" alt="{{ alt|default:'' }}" />
+    {% endif %}
+    {% if status_label %}
+      <span class="page-thumb__badge">
+        {% include "components/badge.html" with label=status_label variant=status_variant %}
+      </span>
+    {% endif %}
+  </figure>
+  <div class="page-thumb__body">
+    <div class="page-thumb__row">
+      <span class="page-thumb__label">Página {{ number }}</span>
+    </div>
+  </div>
+</article>

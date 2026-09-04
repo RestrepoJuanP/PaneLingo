@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{# Layout dividido de autenticación.
+   Referencia: design/screenshots/auth-login.png y auth-create-account.png.
+   El panel oscuro es --surface-navy plano; los degradados están solo en las
+   viñetas de la ilustración. #}
+
+{% block body %}
+  <div class="auth">
+    <div class="auth__panel">
+      <div class="auth__brand">
+        {% include "components/logo_mark.html" with tone="light" size=26 %}
+        <span class="auth__wordmark">PaneLingo</span>
+      </div>
+
+      <div class="auth__pitch">
+        {# Ilustración de viñetas: composición abstracta propia, generada con
+           CSS. Sin personajes ni obra con derechos. Decorativa, por eso queda
+           oculta a los lectores de pantalla. #}
+        <div class="auth__art" aria-hidden="true">
+          <div class="auth__frame auth__frame--1">
+            <span class="auth__bubble">Nueve páginas antes del amanecer.</span>
+          </div>
+          <div class="auth__frame auth__frame--2">
+            <span class="auth__sfx">DOKUN</span>
+          </div>
+          <div class="auth__frame auth__frame--3">
+            <span class="auth__narration">
+              Dos de la madrugada. La ciudad contuvo el aliento.
+            </span>
+          </div>
+          <div class="auth__frame auth__frame--4"></div>
+        </div>
+
+        <h1 class="auth__headline">
+          La página entera como contexto, no globos sueltos.
+        </h1>
+        <p class="auth__lede">
+          PaneLingo lee la página completa —viñetas, orden de lectura,
+          onomatopeyas— y traduce cada bloque sabiendo qué vino antes.
+        </p>
+      </div>
+
+      <div class="auth__stats">
+        <div>
+          <div class="auth__stat-value">Página completa</div>
+          <div class="auth__stat-label">La unidad de trabajo, nunca el globo suelto</div>
+        </div>
+        <div>
+          <div class="auth__stat-value">Tu obra, tuya</div>
+          <div class="auth__stat-label">Las páginas sin publicar no salen de tu cuenta</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="auth__form-side">
+      <main class="auth__form" id="contenido">
+        <div class="tabs auth__tabs">
+          <a
+            class="tabs__tab"
+            href="{% block login_url %}#{% endblock %}"
+            {% block login_current %}{% endblock %}
+          >Iniciar sesión</a>
+          <a
+            class="tabs__tab"
+            href="{% block signup_url %}#{% endblock %}"
+            {% block signup_current %}{% endblock %}
+          >Crear cuenta</a>
+        </div>
+
+        {% block auth_content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+{% endblock %}

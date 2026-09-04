@@ -9,8 +9,12 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
 
+from config import views
+
 urlpatterns = [
     path("admin/", admin.site.urls),
+    # Página de referencia del sistema de diseño. Solo responde con DEBUG=True.
+    path("design-system/", views.design_system, name="design_system"),
 ]
 
 if settings.DEBUG:

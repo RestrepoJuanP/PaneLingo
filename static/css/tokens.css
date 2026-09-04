@@ -1,0 +1,244 @@
+/* =============================================================================
+   PaneLingo — Tokens de diseño
+   -----------------------------------------------------------------------------
+   Fuente de verdad: design/DESIGN_TOKENS.md, extraído del mockup aprobado
+   design/PaneLingo.dc.html y de las capturas de design/screenshots/.
+
+   Un token, un valor CSS válido. No escribas colores, tamaños ni radios
+   sueltos en las plantillas: usa siempre estas variables.
+   ========================================================================== */
+
+:root {
+  /* --- Color: marca y acento ---------------------------------------------- */
+  --brand: #4c3fd9;
+  --brand-hover: #3f34bb;
+  --brand-light: #8d7bf0;
+  --brand-deep: #2b2560;
+  --brand-tint: #eef0ff;
+  --brand-tint-2: #f5f3ff;
+  --brand-surface: #faf7ff;
+  --brand-surface-border: #e0daf8;
+  --accent: #f2765a;
+  --accent-hover: #e4674b;
+  --accent-ink: #231a17;
+
+  /* --- Color: texto -------------------------------------------------------- */
+  --ink-900: #191821;
+  --ink-800: #2b2740;
+  --ink-700: #3a3730;
+  --ink-600: #4a463d;
+  --ink-500: #5a5548;
+  --muted: #6f6a60;
+  --muted-2: #8a8478;
+  --muted-3: #a09a8e;
+
+  /* --- Color: superficies -------------------------------------------------- */
+  --bg: #f7f6f3;
+  --surface: #ffffff;
+  --surface-subtle: #fbfaf7;
+  --surface-subtle-2: #faf9f6;
+  --surface-muted: #f2f0ea;
+  --surface-muted-2: #f4f2ec;
+  --surface-muted-3: #efece5;
+  --surface-navy: #1b1836;
+  --surface-black: #17161a;
+  --track: #eeebe3;
+
+  /* --- Color: bordes y superposiciones ------------------------------------- */
+  --border: #e7e3db;
+  --divider: #e2ded4;
+  --border-strong: #ddd8ce;
+  --border-hover: #bdb7aa;
+  --border-dashed: #c6c0b3;
+  --border-dashed-soft: #d5d0c4;
+  --border-dashed-faint: #c9c4b8;
+  --focus-ring: rgba(76, 63, 217, 0.12);
+  --overlay: rgba(25, 24, 33, 0.45);
+
+  /* --- Color: semánticos de estado ----------------------------------------- */
+  --success: #2f7d4f;
+  --success-fg: #215c3a;
+  --success-bg: #eaf6ee;
+  --success-border: #dfe9e2;
+  --warning: #f2b23a;
+  --warning-fg: #8a5b12;
+  --warning-bg: #fff5e0;
+  --warning-border: #f2e2b4;
+  --warning-border-strong: #f0d99c;
+  --danger: #b13c22;
+  --danger-strong: #d9482b;
+  --danger-fg: #8c2f1a;
+  --danger-bg: #fdece7;
+  --danger-border: #f3c4b8;
+  --danger-border-soft: #f0d6cd;
+  --danger-deep: #7a2a17;
+  --neutral-bar: #c8c3b7;
+
+  /* --- Sombras -------------------------------------------------------------- */
+  --shadow-card-hover: 0 10px 26px rgba(25, 24, 33, 0.11);
+  --shadow-tile-hover: 0 8px 20px rgba(25, 24, 33, 0.1);
+  --shadow-menu: 0 14px 34px rgba(25, 24, 33, 0.16);
+  --shadow-modal: 0 26px 70px rgba(0, 0, 0, 0.3);
+  --shadow-toast: 0 16px 40px rgba(0, 0, 0, 0.24);
+  --shadow-tab-active: 0 1px 2px rgba(25, 24, 33, 0.1);
+
+  /* --- Tipografía: familias ------------------------------------------------- */
+  --font-ui: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-comic: Archivo, system-ui, sans-serif;
+  --font-ja: "Zen Kaku Gothic New", system-ui, sans-serif;
+  --font-ko: "Noto Sans KR", system-ui, sans-serif;
+
+  /* --- Tipografía: escala --------------------------------------------------- */
+  --fs-hero: clamp(26px, 3vw, 38px);
+  --fs-h1: clamp(21px, 2.4vw, 28px);
+  --fs-stat: 25px;
+  --fs-h2: 24px;
+  --fs-wordmark: 19px;
+  --fs-modal-title: 18px;
+  --fs-section: 17px;
+  --fs-subsection: 16px;
+  --fs-lead: 15px;
+  --fs-card-title: 14.5px;
+  --fs-body: 13.5px;
+  --fs-ui: 13px;
+  --fs-sm: 12.5px;
+  --fs-label: 12px;
+  --fs-label-sm: 11.5px;
+  --fs-xs: 11px;
+  --fs-badge: 10.5px;
+  --fs-micro: 9.5px;
+
+  /* --- Tipografía: interlineado --------------------------------------------- */
+  --lh-tight: 1;
+  --lh-heading: 1.2;
+  --lh-title: 1.3;
+  --lh-snug: 1.4;
+  --lh-body: 1.5;
+  --lh-relaxed: 1.6;
+
+  /* --- Tipografía: interletrado --------------------------------------------- */
+  --ls-hero: -0.03em;
+  --ls-heading: -0.02em;
+  --ls-title: -0.01em;
+  --ls-caps: 0.08em;
+  --ls-caps-tight: 0.06em;
+
+  /* --- Radios de borde ------------------------------------------------------ */
+  --r-xs: 4px;
+  --r-thumb: 5px;
+  --r-badge: 6px;
+  --r-sm: 7px;
+  --r-menu: 8px;
+  --r-md: 9px;
+  --r-lg: 10px;
+  --r-option: 11px;
+  --r-xl: 12px;
+  --r-2xl: 14px;
+  --r-3xl: 16px;
+  --r-modal: 18px;
+  --r-pill: 20px;
+  --r-full: 50%;
+
+  /* --- Escala de espaciado -------------------------------------------------- */
+  --sp-1: 4px;
+  --sp-2: 6px;
+  --sp-3: 8px;
+  --sp-4: 9px;
+  --sp-5: 11px;
+  --sp-6: 12px;
+  --sp-7: 14px;
+  --sp-8: 16px;
+  --sp-9: 18px;
+  --sp-10: 22px;
+  --sp-11: 26px;
+  --sp-12: 30px;
+
+  /* --- Medidas de layout ---------------------------------------------------- */
+  --pad-page: clamp(16px, 2.4vw, 30px);
+  --pad-header: 12px clamp(14px, 2.2vw, 26px);
+  --pad-auth-panel: clamp(24px, 3.4vw, 52px);
+  --w-sidebar: 246px;
+  --w-auth-form: 394px;
+  --w-modal: 520px;
+  --w-modal-sm: 410px;
+  --pad-btn: 11px 16px;
+  --pad-btn-secondary: 11px 15px;
+  --pad-input: 11px 13px;
+  --pad-chip: 4px 9px;
+  --pad-filter: 7px 12px;
+  --ratio-page: 3 / 4.24;
+
+  /* --- Pill selector (control interactivo) ---------------------------------- */
+  --pill-bg: #ffffff;
+  --pill-fg: #5a5548;
+  --pill-border: #e2ded4;
+  --pill-selected-bg: #191821;
+  --pill-selected-fg: #ffffff;
+  --pill-selected-border: #191821;
+
+  /* --- Selector de pestañas ------------------------------------------------- */
+  --tab-track-bg: #efece5;
+  --tab-active-bg: #ffffff;
+  --tab-active-fg: #191821;
+  --tab-inactive-fg: #6f6a60;
+
+  /* --- Medidor de fuerza de contraseña -------------------------------------- */
+  /* Barra y etiqueta llevan tokens distintos: la barra es un elemento no
+     textual (AA 3:1) y la etiqueta es texto de 11px (AA 4.5:1). */
+  --strength-weak: #b13c22;
+  --strength-weak-fg: #b13c22;
+  --strength-medium: #b07714;
+  --strength-medium-fg: #8a5b12;
+  --strength-strong: #2f7d4f;
+  --strength-strong-fg: #215c3a;
+
+  /* --- Portadas de álbum ---------------------------------------------------- */
+  --cover-1: linear-gradient(150deg, #2b2560, #4c3fd9 55%, #8d7bf0);
+  --cover-2: linear-gradient(30deg, #1b1836, #3a3170 70%, #f2765a);
+  --cover-3: radial-gradient(circle at 30% 30%, #fbd8c8, #f2765a 60%, #c04a34);
+  --cover-4: linear-gradient(200deg, #f4f2ec, #cfc9bb);
+  --cover-5: linear-gradient(120deg, #14141d, #33304a);
+  --cover-6: radial-gradient(circle at 70% 20%, #ffe7a8, #f0a24b 55%, #8c4a1f);
+  --cover-7: linear-gradient(160deg, #1d3b4a, #2f7d8c 60%, #a8dbd9);
+  --cover-8: linear-gradient(45deg, #4c3fd9, #241f4d);
+
+  --pattern-halftone: radial-gradient(
+    circle,
+    rgba(0, 0, 0, 0.22) 22%,
+    transparent 26%
+  );
+  --pattern-speedlines: repeating-linear-gradient(
+    105deg,
+    rgba(255, 255, 255, 0.16) 0 2px,
+    transparent 2px 9px
+  );
+  --cover-scrim: linear-gradient(
+    to top,
+    rgba(20, 19, 26, 0.55),
+    rgba(20, 19, 26, 0) 55%
+  );
+  --cover-placeholder: #eceae3;
+  --panel-border: #191821;
+
+  /* --- Lettering de cómic --------------------------------------------------- */
+  --comic-bubble-bg: #ffffff;
+  --comic-narration-bg: #fdf6e8;
+  --comic-ink: #191821;
+  --shadow-sfx: 2px 2px 0 #191821, -1px -1px 0 #191821;
+
+  /* --- Identidad ------------------------------------------------------------ */
+  --avatar-gradient: linear-gradient(140deg, #4c3fd9, #f2765a);
+
+  /* --- Movimiento ------------------------------------------------------------
+     Se anulan bajo prefers-reduced-motion en app.css. */
+  --t-fast: 0.16s;
+  --t-base: 0.18s;
+  --t-slow: 0.28s;
+
+  /* --- Punto de ruptura ------------------------------------------------------
+     Por debajo de 900px la barra lateral pasa a navegación inferior y las
+     grillas a una columna. Documentado aquí para referencia; las media
+     queries llevan el valor literal, porque CSS no admite variables en
+     condiciones de media. */
+  --bp-compact: 900px;
+}

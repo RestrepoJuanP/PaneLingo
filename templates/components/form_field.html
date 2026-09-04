@@ -1,0 +1,19 @@
+{# Campo de formulario.
+   Toda entrada lleva su <label> asociado por for/id. El placeholder es una
+   ayuda complementaria, nunca la única etiqueta. Los errores se asocian al
+   control con aria-describedby. #}
+<div class="field">
+  <label class="field__label" for="{{ field.id_for_label }}">
+    {{ field.label }}{% if field.field.required %} <span class="field__required" aria-hidden="true">*</span>{% endif %}
+  </label>
+
+  {{ field }}
+
+  {% if field.help_text %}
+    <p class="field__hint" id="{{ field.id_for_label }}-hint">{{ field.help_text }}</p>
+  {% endif %}
+
+  {% for error in field.errors %}
+    <p class="field__error" id="{{ field.id_for_label }}-error">{{ error }}</p>
+  {% endfor %}
+</div>

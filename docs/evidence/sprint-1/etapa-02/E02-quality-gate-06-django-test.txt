@@ -1,0 +1,27 @@
+==============================================================================
+PaneLingo — Evidencia del Quality Gate
+==============================================================================
+Etapa           : 02
+Paso            : 6 de 7 — Django — pruebas automaticas
+Comando         : python manage.py test
+Herramienta     : Python 3.12.10 / Django 5.2.17
+Fecha y hora    : 2026-09-03T22:24:00-05:00
+Rama            : chore/design-system
+Commit          : ce4e07cf01037909b1d0843c2725a121e0f5698d
+Arbol de trabajo: con cambios sin versionar
+Directorio      : /f/PaneLingo
+==============================================================================
+
+Creating test database for alias 'default'...
+....
+----------------------------------------------------------------------
+Ran 4 tests in 1.047s
+
+OK
+Destroying test database for alias 'default'...
+Found 4 test(s).
+System check identified no issues (0 silenced).
+
+==============================================================================
+Codigo de salida: 0  (CORRECTO)
+==============================================================================
