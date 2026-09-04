@@ -1,0 +1,19 @@
+==============================================================================
+PaneLingo — Evidencia del Quality Gate
+==============================================================================
+Etapa           : 03
+Paso            : 5 de 7 — Django — comprobaciones del sistema
+Comando         : python manage.py check
+Herramienta     : Python 3.12.10 / Django 5.2.17
+Fecha y hora    : 2026-09-04T15:53:33-05:00
+Rama            : feature/HU-01-create-account
+Commit          : addfbd974c7d103c6700de4db03a1541875622dc
+Arbol de trabajo: con cambios sin versionar
+Directorio      : /f/PaneLingo
+==============================================================================
+
+System check identified no issues (0 silenced).
+
+==============================================================================
+Codigo de salida: 0  (CORRECTO)
+==============================================================================

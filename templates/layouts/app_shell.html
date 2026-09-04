@@ -34,10 +34,10 @@
       <div class="sidebar__spacer"></div>
 
       <div class="sidebar__user">
-        <span class="avatar" aria-hidden="true">{{ user_initials|default:"?" }}</span>
+        <span class="avatar" aria-hidden="true">{{ user.initials|default:"?" }}</span>
         <span class="sidebar__user-text">
-          <span class="sidebar__user-name">{{ user_display_name|default:"Invitada" }}</span>
-          <span class="sidebar__user-mail">{{ user_email|default:"" }}</span>
+          <span class="sidebar__user-name">{{ user.display_name }}</span>
+          <span class="sidebar__user-mail">{{ user.email }}</span>
         </span>
       </div>
       {% block sign_out %}

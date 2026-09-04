@@ -1,0 +1,84 @@
+{% extends "layouts/auth_shell.html" %}
+
+{# Crear cuenta — HU-01.
+   Referencia visual: design/screenshots/auth-create-account.png.
+
+   Dos diferencias deliberadas respecto a la captura:
+   - Se añade el campo de confirmación de contraseña, que el mockup no tiene.
+   - Se omite el selector de perfil ("Freelance translator / Comic creator /
+     Localization team"). No corresponde a ninguna HU, CA ni CP del Sprint 1,
+     y un control deshabilitado dentro de un formulario que hay que completar
+     se lee como un paso obligatorio que no se puede cumplir. Cuando llegue su
+     historia de usuario, va entre la contraseña y la casilla de términos.
+
+   La casilla de términos no enlaza a ninguna página: en el Sprint 1 no existe
+   una de términos, y un enlace muerto es peor que texto plano. #}
+
+{% block title %}Crear cuenta · PaneLingo{% endblock %}
+
+{% block signup_url %}{% url 'accounts:register' %}{% endblock %}
+{% block signup_current %}aria-current="page"{% endblock %}
+
+{# La pestaña de inicio de sesión se conecta en la Etapa 4 (HU-02). #}
+
+{% block auth_content %}
+  <h1 class="auth__title">Crear cuenta</h1>
+  <p class="auth__subtitle">
+    Organiza tus cómics, manga y webtoons en álbumes y trabaja sobre la página
+    completa.
+  </p>
+
+  {% if form.non_field_errors %}
+    <div class="form-errors" role="alert">
+      <span class="form-errors__icon" aria-hidden="true">!</span>
+      <ul class="form-errors__list">
+        {% for error in form.non_field_errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  <form method="post" action="{% url 'accounts:register' %}" novalidate>
+    {% csrf_token %}
+
+    {% include "components/form_field.html" with field=form.display_name %}
+    {% include "components/form_field.html" with field=form.email %}
+
+    <div class="field">
+      <label class="field__label" for="{{ form.password1.id_for_label }}">
+        {{ form.password1.label }} <span class="field__required" aria-hidden="true">*</span>
+      </label>
+      {{ form.password1 }}
+      {% include "components/password_strength.html" with input_id=form.password1.id_for_label %}
+      {% if form.password1.errors %}
+        <div class="field__error" id="{{ form.password1.auto_id }}-error">
+          {% for error in form.password1.errors %}
+            <p class="field__error-item">{{ error }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+
+    {% include "components/form_field.html" with field=form.password2 %}
+
+    <div class="field">
+      <label class="checkbox" for="{{ form.accepted_terms.id_for_label }}">
+        {{ form.accepted_terms }}
+        <span>{{ form.accepted_terms.label }}</span>
+      </label>
+      {% if form.accepted_terms.errors %}
+        <div class="field__error" id="{{ form.accepted_terms.auto_id }}-error">
+          {% for error in form.accepted_terms.errors %}
+            <p class="field__error-item">{{ error }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+
+    <button type="submit" class="btn btn--primary btn--block" data-submit-busy>
+      <span class="btn__spinner" hidden aria-hidden="true"></span>
+      <span data-submit-label data-busy-label="Creando cuenta…">Crear cuenta</span>
+    </button>
+  </form>
+{% endblock %}

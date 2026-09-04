@@ -214,6 +214,37 @@
   }
 
   /* ---------------------------------------------------------------------------
+     Estado de carga al enviar un formulario.
+     Evita además el doble envío, que crearía dos cuentas.
+     ------------------------------------------------------------------------ */
+
+  function bindSubmitBusy(button) {
+    var form = button.form || button.closest("form");
+    if (!form) {
+      return;
+    }
+    form.addEventListener("submit", function () {
+      if (button.disabled) {
+        return;
+      }
+      var spinner = button.querySelector(".btn__spinner");
+      var label = button.querySelector("[data-submit-label]");
+      if (spinner) {
+        spinner.hidden = false;
+      }
+      if (label && label.dataset.busyLabel) {
+        label.textContent = label.dataset.busyLabel;
+      }
+      button.classList.add("btn--loading");
+      // Se deshabilita después del envío para que el navegador incluya el
+      // botón en los datos del formulario.
+      window.setTimeout(function () {
+        button.disabled = true;
+      }, 0);
+    });
+  }
+
+  /* ---------------------------------------------------------------------------
      Arranque
      ------------------------------------------------------------------------ */
 
@@ -225,6 +256,10 @@
     Array.prototype.forEach.call(
       document.querySelectorAll("[data-pill-target]"),
       bindPillGroup,
+    );
+    Array.prototype.forEach.call(
+      document.querySelectorAll("[data-submit-busy]"),
+      bindSubmitBusy,
     );
   }
 
