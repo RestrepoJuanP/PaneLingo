@@ -2,10 +2,10 @@
 
 | Campo | Valor |
 |---|---|
-| Fecha y hora | `2026-09-04T17:27:39-05:00` |
+| Fecha y hora | `2026-09-04T17:28:49-05:00` |
 | Rama | `feature/HU-04-password-recovery` |
-| Commit | `041eeb1b4354b1ff9267c8f9ce6c1c620e9aae67` |
-| Arbol de trabajo | con cambios sin versionar |
+| Commit | `c63deb623bba1141ecbedcb53963c2b0a9318f73` |
+| Arbol de trabajo | limpio |
 | Resultado global | **PASA (7/7)** (verde) |
 
 ## Pasos

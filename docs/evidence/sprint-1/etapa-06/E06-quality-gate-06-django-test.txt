@@ -5,10 +5,10 @@ Etapa           : 06
 Paso            : 6 de 7 — Django — pruebas automaticas
 Comando         : python manage.py test
 Herramienta     : Python 3.12.10 / Django 5.2.17
-Fecha y hora    : 2026-09-04T17:27:39-05:00
+Fecha y hora    : 2026-09-04T17:28:49-05:00
 Rama            : feature/HU-04-password-recovery
-Commit          : 041eeb1b4354b1ff9267c8f9ce6c1c620e9aae67
-Arbol de trabajo: con cambios sin versionar
+Commit          : c63deb623bba1141ecbedcb53963c2b0a9318f73
+Arbol de trabajo: limpio
 Directorio      : /f/PaneLingo
 ==============================================================================
 
@@ -16,7 +16,7 @@ Creating test database for alias 'default'...
 ...................................................................Method Not Allowed (GET): /cuentas/salir/
 .......
 ----------------------------------------------------------------------
-Ran 74 tests in 30.792s
+Ran 74 tests in 26.434s
 
 OK
 Destroying test database for alias 'default'...
