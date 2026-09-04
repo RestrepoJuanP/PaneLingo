@@ -16,10 +16,9 @@
 
 {% block title %}Crear cuenta · PaneLingo{% endblock %}
 
+{% block login_url %}{% url 'accounts:login' %}{% endblock %}
 {% block signup_url %}{% url 'accounts:register' %}{% endblock %}
 {% block signup_current %}aria-current="page"{% endblock %}
-
-{# La pestaña de inicio de sesión se conecta en la Etapa 4 (HU-02). #}
 
 {% block auth_content %}
   <h1 class="auth__title">Crear cuenta</h1>

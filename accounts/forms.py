@@ -2,12 +2,51 @@
 
 from django import forms
 from django.contrib.auth import password_validation
+from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import ValidationError
 
 from accounts.models import User
 
+# Mismo texto para credenciales inválidas y para cuentas inactivas. No debe
+# revelar si el correo está registrado: un mensaje distinto en cada caso
+# permitiría enumerar cuentas existentes.
+INVALID_LOGIN_MESSAGE = (
+    "El correo o la contraseña no son correctos. Revisa los datos e "
+    "inténtalo de nuevo."
+)
 
-class UserRegistrationForm(forms.ModelForm):
+
+class AccessibleFormMixin:
+    """Anota en cada control los atributos de accesibilidad que le tocan.
+
+    Un campo con error apunta a su bloque de errores mediante
+    aria-describedby y se marca con aria-invalid; uno sin error apunta a su
+    texto de ayuda si lo tiene.
+    """
+
+    def full_clean(self):
+        """Valida y anota los atributos de accesibilidad de cada campo."""
+        super().full_clean()
+        self._apply_accessibility_attrs()
+
+    def _apply_accessibility_attrs(self):
+        """Asocia cada control con su descripción y marca los que fallaron."""
+        for name, field in self.fields.items():
+            widget = field.widget
+            described_by = []
+            if name in self.errors:
+                described_by.append(f"id_{name}-error")
+                widget.attrs["aria-invalid"] = "true"
+                css_class = widget.attrs.get("class", "")
+                if "input" in css_class.split():
+                    widget.attrs["class"] = f"{css_class} input--invalid"
+            elif field.help_text:
+                described_by.append(f"id_{name}-hint")
+            if described_by:
+                widget.attrs["aria-describedby"] = " ".join(described_by)
+
+
+class UserRegistrationForm(AccessibleFormMixin, forms.ModelForm):
     """Formulario de creación de cuenta (HU-01).
 
     Valida los campos obligatorios, que el correo no esté registrado, que la
@@ -134,31 +173,6 @@ class UserRegistrationForm(forms.ModelForm):
         except ValidationError as error:
             self.add_error("password1", error)
 
-    def full_clean(self):
-        """Valida y anota los atributos de accesibilidad de cada campo."""
-        super().full_clean()
-        self._apply_accessibility_attrs()
-
-    def _apply_accessibility_attrs(self):
-        """Asocia cada control con su descripción y marca los que fallaron.
-
-        Un campo con error apunta a su bloque de errores mediante
-        aria-describedby; uno sin error, a su texto de ayuda si lo tiene.
-        """
-        for name, field in self.fields.items():
-            widget = field.widget
-            described_by = []
-            if name in self.errors:
-                described_by.append(f"id_{name}-error")
-                widget.attrs["aria-invalid"] = "true"
-                css_class = widget.attrs.get("class", "")
-                if "input" in css_class.split():
-                    widget.attrs["class"] = f"{css_class} input--invalid"
-            elif field.help_text:
-                described_by.append(f"id_{name}-hint")
-            if described_by:
-                widget.attrs["aria-describedby"] = " ".join(described_by)
-
     def save(self, commit=True):
         """Crea el usuario con la contraseña hasheada por Django."""
         user = super().save(commit=False)
@@ -166,3 +180,54 @@ class UserRegistrationForm(forms.ModelForm):
         if commit:
             user.save()
         return user
+
+
+class EmailAuthenticationForm(AccessibleFormMixin, AuthenticationForm):
+    """Formulario de inicio de sesión por correo y contraseña (HU-02).
+
+    Se apoya en el AuthenticationForm de Django, que ya autentica contra el
+    USERNAME_FIELD del modelo —aquí, el correo— y gestiona la sesión. Solo se
+    adaptan las etiquetas, los widgets y los mensajes de error.
+    """
+
+    remember_me = forms.BooleanField(
+        label="Mantener la sesión iniciada en este dispositivo",
+        required=False,
+        initial=False,
+    )
+
+    error_messages = {
+        "invalid_login": INVALID_LOGIN_MESSAGE,
+        "inactive": INVALID_LOGIN_MESSAGE,
+    }
+
+    def __init__(self, *args, **kwargs):
+        """Adapta el campo de usuario para que pida un correo electrónico."""
+        super().__init__(*args, **kwargs)
+        self.fields["username"].label = "Correo electrónico"
+        self.fields["username"].widget = forms.EmailInput(
+            attrs={
+                "class": "input",
+                "autocomplete": "email",
+                "autofocus": True,
+                "placeholder": "tu@estudio.com",
+            }
+        )
+        self.fields["password"].label = "Contraseña"
+        self.fields["password"].widget = forms.PasswordInput(
+            attrs={
+                "class": "input",
+                "autocomplete": "current-password",
+                "placeholder": "Tu contraseña",
+            }
+        )
+
+    def confirm_login_allowed(self, user):
+        """Rechaza las cuentas inactivas con el mensaje genérico.
+
+        El comportamiento de Django distingue "cuenta inactiva" de
+        "credenciales inválidas", y esa diferencia revela que el correo está
+        registrado. Aquí ambos casos responden lo mismo.
+        """
+        if not user.is_active:
+            raise ValidationError(self.error_messages["inactive"], code="invalid_login")

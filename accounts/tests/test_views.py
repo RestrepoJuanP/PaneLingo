@@ -157,3 +157,189 @@ class RegistrationViewErrorTests(TestCase):
         self.assertEqual(User.objects.count(), 0)
         self.assertEqual(response.status_code, 200)
         self.assertIn("password2", response.context["form"].errors)
+
+
+class LoginViewTests(TestCase):
+    """Inicio de sesión de un traductor (HU-02)."""
+
+    def setUp(self):
+        """Crea la cuenta con la que se prueban los inicios de sesión."""
+        self.password = "TraduccionSegura42"
+        self.user = User.objects.create_user(
+            email="mira@estudio.test",
+            password=self.password,
+            display_name="Mira Okonkwo",
+        )
+        self.login_url = reverse("accounts:login")
+
+    def test_login_form_is_shown(self):
+        """CP-02.1 — El visitante ve el formulario de inicio de sesión."""
+        response = self.client.get(self.login_url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "accounts/login.html")
+        self.assertContains(response, "Iniciar sesión")
+
+    def test_valid_credentials_authenticate_and_redirect_to_panel(self):
+        """CP-02.1 — Credenciales válidas dan acceso al panel — Happy Path."""
+        response = self.client.post(
+            self.login_url,
+            data={"username": self.user.email, "password": self.password},
+        )
+
+        self.assertRedirects(response, reverse("home"))
+        panel = self.client.get(reverse("home"))
+        self.assertEqual(panel.status_code, 200)
+        self.assertTrue(panel.context["user"].is_authenticated)
+        self.assertEqual(panel.context["user"], self.user)
+
+    def test_wrong_password_is_rejected(self):
+        """CP-02.2 — Contraseña incorrecta niega el acceso — Flujo alternativo."""
+        response = self.client.post(
+            self.login_url,
+            data={"username": self.user.email, "password": "ClaveEquivocada99"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context["user"].is_authenticated)
+        self.assertContains(response, "no son correctos")
+
+        panel = self.client.get(reverse("home"))
+        self.assertEqual(panel.status_code, 302)
+
+    def test_unknown_email_gives_the_same_message_as_a_wrong_password(self):
+        """CP-02.2 — El mensaje no revela si el correo está registrado."""
+        wrong_password = self.client.post(
+            self.login_url,
+            data={"username": self.user.email, "password": "ClaveEquivocada99"},
+        )
+        unknown_email = self.client.post(
+            self.login_url,
+            data={"username": "nadie@estudio.test", "password": self.password},
+        )
+
+        self.assertEqual(
+            wrong_password.context["form"].non_field_errors(),
+            unknown_email.context["form"].non_field_errors(),
+        )
+        self.assertFalse(unknown_email.context["user"].is_authenticated)
+
+    def test_inactive_account_gives_the_same_message(self):
+        """CP-02.2 — Una cuenta inactiva tampoco revela que existe."""
+        self.user.is_active = False
+        self.user.save(update_fields=["is_active"])
+
+        response = self.client.post(
+            self.login_url,
+            data={"username": self.user.email, "password": self.password},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context["user"].is_authenticated)
+        self.assertIn(
+            "no son correctos", response.context["form"].non_field_errors()[0]
+        )
+
+    def test_authenticated_user_is_redirected_away_from_login(self):
+        """Quien ya tiene sesión iniciada no vuelve al formulario."""
+        self.client.login(email=self.user.email, password=self.password)
+
+        response = self.client.get(self.login_url)
+
+        self.assertRedirects(response, reverse("home"))
+
+
+class LoginRedirectTests(TestCase):
+    """El panel exige autenticación y conserva el destino original."""
+
+    def setUp(self):
+        """Crea la cuenta con la que se prueban las redirecciones."""
+        self.password = "TraduccionSegura42"
+        self.user = User.objects.create_user(
+            email="mira@estudio.test",
+            password=self.password,
+            display_name="Mira Okonkwo",
+        )
+        self.login_url = reverse("accounts:login")
+
+    def test_anonymous_visitor_reaches_a_real_login_screen(self):
+        """El panel envía al login, que ya no devuelve 404."""
+        response = self.client.get(reverse("home"), follow=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "accounts/login.html")
+
+    def test_panel_redirects_to_login_keeping_next(self):
+        """La redirección al login conserva el destino en next."""
+        response = self.client.get(reverse("home"))
+
+        self.assertRedirects(response, f"{self.login_url}?next={reverse('home')}")
+
+    def test_next_is_honoured_after_authenticating(self):
+        """Tras autenticarse, el usuario llega al destino que pedía.
+
+        Se usa una ruta cualquiera del propio sitio: lo que se comprueba es
+        que next manda sobre el destino por defecto, no el contenido de la
+        página de llegada.
+        """
+        target = reverse("accounts:register")
+
+        response = self.client.post(
+            f"{self.login_url}?next={target}",
+            data={"username": self.user.email, "password": self.password},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, target)
+
+    def test_external_next_is_ignored(self):
+        """Un next hacia otro dominio no se obedece."""
+        response = self.client.post(
+            f"{self.login_url}?next=https://ejemplo-externo.test/robo",
+            data={"username": self.user.email, "password": self.password},
+        )
+
+        self.assertRedirects(response, reverse("home"))
+
+
+class RememberMeTests(TestCase):
+    """Duración de la sesión según la casilla de mantener sesión iniciada."""
+
+    def setUp(self):
+        """Crea la cuenta con la que se prueba la duración de la sesión."""
+        self.password = "TraduccionSegura42"
+        self.user = User.objects.create_user(
+            email="mira@estudio.test",
+            password=self.password,
+            display_name="Mira Okonkwo",
+        )
+        self.login_url = reverse("accounts:login")
+
+    def test_session_ends_with_the_browser_when_unchecked(self):
+        """Sin marcar la casilla, la sesión muere al cerrar el navegador."""
+        self.client.post(
+            self.login_url,
+            data={"username": self.user.email, "password": self.password},
+        )
+
+        self.assertTrue(self.client.session.get_expire_at_browser_close())
+
+    def test_session_persists_when_checked(self):
+        """Marcada la casilla, la sesión sobrevive al cierre del navegador."""
+        self.client.post(
+            self.login_url,
+            data={
+                "username": self.user.email,
+                "password": self.password,
+                "remember_me": "on",
+            },
+        )
+
+        self.assertFalse(self.client.session.get_expire_at_browser_close())
+        self.assertGreater(self.client.session.get_expiry_age(), 0)
+
+    def test_checkbox_is_unchecked_by_default(self):
+        """La casilla se ofrece desmarcada, no marcada como en el mockup."""
+        response = self.client.get(self.login_url)
+
+        self.assertFalse(response.context["form"].fields["remember_me"].initial)
