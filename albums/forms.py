@@ -30,7 +30,7 @@ def clean_album_title(raw_title):
         raise forms.ValidationError("Escribe un título para el álbum.", code="required")
     if len(title) > TITLE_MAX_LENGTH:
         raise forms.ValidationError(
-            f"El título no puede superar los {TITLE_MAX_LENGTH} caracteres.",
+            f"El título no puede superar los {TITLE_MAX_LENGTH} " f"caracteres.",
             code="max_length",
         )
     return title
@@ -66,8 +66,9 @@ class AlbumForm(AccessibleFormMixin, forms.ModelForm):
                     "placeholder": "Por ejemplo: Neon Yokai Bureau vol. 2",
                 }
             ),
-            "source_language": forms.Select(attrs={"class": "select"}),
-            "target_language": forms.Select(attrs={"class": "select"}),
+            # Grupo de radios, no un select: ver _language_pills.html.
+            "source_language": forms.RadioSelect(attrs={"class": "pill-input"}),
+            "target_language": forms.RadioSelect(attrs={"class": "pill-input"}),
         }
         error_messages = {
             "title": {
@@ -85,15 +86,45 @@ class AlbumForm(AccessibleFormMixin, forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        """Ordena el catálogo de idiomas y ajusta el texto vacío."""
+        """Prepara el catálogo de idiomas de ambos selectores."""
         super().__init__(*args, **kwargs)
         for name in ("source_language", "target_language"):
             self.fields[name].queryset = Language.objects.all()
-            self.fields[name].empty_label = "Elige un idioma"
+            # Sin opción vacía: un pill "Elige un idioma" sería una opción
+            # más del grupo, indistinguible de un idioma real. Que no haya
+            # ninguno marcado ya comunica que falta elegir, y el campo es
+            # obligatorio en el servidor.
+            self.fields[name].empty_label = None
 
     def clean_title(self):
         """Valida el título del álbum (HU-06)."""
         return clean_album_title(self.cleaned_data.get("title"))
+
+    def clean(self):
+        """Comprueba que el idioma de destino difiera del de origen (HU-07).
+
+        Un álbum con el mismo idioma de origen y destino no describe ninguna
+        traducción posible: no hay nada que el producto pueda hacer con él, así
+        que es un error del usuario y no una preferencia. El caso legítimo que
+        podría parecerse —de chino simplificado a tradicional— son dos códigos
+        distintos del catálogo, así que esta regla no lo bloquea.
+
+        El error se adjunta a target_language, que es el campo que el usuario
+        va a cambiar para corregirlo.
+        """
+        cleaned_data = super().clean()
+        source = cleaned_data.get("source_language")
+        target = cleaned_data.get("target_language")
+        if source and target and source == target:
+            self.add_error(
+                "target_language",
+                forms.ValidationError(
+                    "El idioma de destino debe ser distinto del de origen. "
+                    "Elige otro idioma de destino.",
+                    code="same_language",
+                ),
+            )
+        return cleaned_data
 
 
 class AlbumRenameForm(AccessibleFormMixin, forms.ModelForm):

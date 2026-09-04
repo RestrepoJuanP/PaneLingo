@@ -37,6 +37,12 @@ class AccessibleFormMixin:
         """Asocia cada control con su descripción y marca los que fallaron."""
         for name, field in self.fields.items():
             widget = field.widget
+            if isinstance(widget, forms.RadioSelect):
+                # Un grupo de radios renderiza un input por opción. Anotar cada
+                # uno haría que el lector de pantalla repitiera el error en
+                # todas las opciones; la anotación va en el fieldset que los
+                # agrupa, desde la plantilla del campo.
+                continue
             described_by = []
             if name in self.errors:
                 described_by.append(f"id_{name}-error")

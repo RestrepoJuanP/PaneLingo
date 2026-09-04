@@ -1998,3 +1998,66 @@ textarea {
 .album-form__languages .field {
   margin-bottom: 0;
 }
+
+/* =============================================================================
+   22. Selector de idioma con apariencia de pill
+   -----------------------------------------------------------------------------
+   Grupo de radios nativo: el input queda oculto visualmente pero enfocable, y
+   la apariencia la pone su <label>. Ver templates/albums/_language_pills.html.
+   ========================================================================== */
+
+.pill-field {
+  min-width: 0;
+  margin: 0 0 var(--sp-8);
+  padding: 0;
+  border: none;
+}
+
+.pill-field > .field__label {
+  padding: 0;
+  margin-bottom: var(--sp-2);
+}
+
+.pill-option {
+  display: inline-flex;
+  position: relative;
+}
+
+/* Oculto a la vista, presente para el teclado y los lectores de pantalla.
+   No uses display:none ni visibility:hidden: dejarían de ser enfocables. */
+.pill-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.pill-option .pill {
+  cursor: pointer;
+  user-select: none;
+}
+
+.pill-input:checked + .pill {
+  background: var(--pill-selected-bg);
+  border-color: var(--pill-selected-border);
+  color: var(--pill-selected-fg);
+}
+
+/* El foco se pinta sobre la etiqueta, porque el input no se ve. */
+.pill-input:focus-visible + .pill {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.pill-field[aria-invalid="true"] .pill-group {
+  padding: var(--sp-1);
+  margin: calc(var(--sp-1) * -1);
+  border-radius: var(--r-xl);
+  box-shadow: 0 0 0 1px var(--danger-border);
+}

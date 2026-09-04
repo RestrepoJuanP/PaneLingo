@@ -151,7 +151,7 @@ pip-audit -r requirements.txt   # 7. Auditoría de vulnerabilidades
 
 El orden importa: Ruff aplica primero sus correcciones seguras, Black da el formato final, y los pasos 3 y 4 verifican que ninguna de las dos herramientas deshaga el trabajo de la otra.
 
-Para no copiar las salidas a mano, `./scripts/quality_gate.sh <NN>` ejecuta los siete pasos y guarda la evidencia de la etapa `<NN>` en `docs/evidence/sprint-1/etapa-<NN>/`, junto con un resumen en Markdown listo para la wiki:
+Para no copiar las salidas a mano, `./scripts/quality_gate.sh <NN>` ejecuta los siete pasos y guarda la evidencia de la etapa `<NN>` en `docs/evidence/sprint-1/etapa-<NN>/`, junto con un resumen en Markdown listo para la wiki. Si una etapa se reparte en varias ramas, admite un sufijo de una letra (`08`, `08b`):
 
 ```bash
 ./scripts/quality_gate.sh 01

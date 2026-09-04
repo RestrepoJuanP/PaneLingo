@@ -49,6 +49,14 @@ DESIGN_SYSTEM_COLORS = [
     ("--track", "#eeebe3"),
 ]
 
+# Idiomas de ejemplo del pill selector de la página de referencia.
+DESIGN_SYSTEM_PILL_LANGUAGES = [
+    ("ja", "Japonés"),
+    ("ko", "Coreano"),
+    ("fr", "Francés"),
+    ("zh-hans", "Chino simplificado"),
+]
+
 
 @debug_only
 @private_view
@@ -63,4 +71,11 @@ def design_system(request):
     datos de ningún usuario, pero el fallo realista no es que alguien la
     encuentre en desarrollo, sino desplegar con DEBUG activado por descuido.
     """
-    return render(request, "design_system.html", {"colors": DESIGN_SYSTEM_COLORS})
+    return render(
+        request,
+        "design_system.html",
+        {
+            "colors": DESIGN_SYSTEM_COLORS,
+            "pill_languages": DESIGN_SYSTEM_PILL_LANGUAGES,
+        },
+    )

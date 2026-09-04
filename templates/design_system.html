@@ -168,13 +168,36 @@
         usa los colores semánticos. La <strong>tarjeta de opción</strong> sí
         usa el índigo de marca.
       </p>
-      <div class="pill-group" data-pill-target="ds-lang" style="margin-bottom: var(--sp-8)">
-        <button type="button" class="pill" aria-pressed="true" data-value="ja">Japonés</button>
-        <button type="button" class="pill" aria-pressed="false" data-value="ko">Coreano</button>
-        <button type="button" class="pill" aria-pressed="false" data-value="fr">Francés</button>
-        <button type="button" class="pill" aria-pressed="false" data-value="zh">Chino</button>
-      </div>
-      <input type="hidden" id="ds-lang" value="ja" />
+      <p class="ds__note">
+        <strong>El pill selector es un grupo de radios nativo, no botones.</strong>
+        Y es deliberado: las flechas del teclado recorren el grupo por sí solas
+        —que es lo que un lector de pantalla espera de una elección única— y el
+        formulario se envía sin JavaScript. Con botones habría que programar la
+        navegación a mano y depender de un input oculto que rellena un script.
+        <strong>No lo &laquo;simplifiques&raquo; a botones:</strong> se perderían
+        ambas cosas sin que ninguna prueba lo delate. El input está oculto a la
+        vista pero sigue siendo enfocable; la apariencia la pone su
+        <code>&lt;label&gt;</code>. Ver
+        <code>templates/albums/_language_pills.html</code>.
+      </p>
+      <fieldset class="pill-field">
+        <legend class="field__label">Idioma de origen</legend>
+        <div class="pill-group">
+          {% for value, label in pill_languages %}
+            <span class="pill-option">
+              <input
+                class="pill-input"
+                type="radio"
+                name="ds-lang"
+                id="ds-lang-{{ value }}"
+                value="{{ value }}"
+                {% if forloop.first %}checked{% endif %}
+              />
+              <label class="pill" for="ds-lang-{{ value }}">{{ label }}</label>
+            </span>
+          {% endfor %}
+        </div>
+      </fieldset>
 
       <div class="tabs" style="max-width: 394px; margin-bottom: var(--sp-8)">
         <button type="button" class="tabs__tab" aria-selected="true">Iniciar sesión</button>
