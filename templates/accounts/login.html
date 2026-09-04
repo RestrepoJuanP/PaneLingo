@@ -11,8 +11,8 @@
      debería ser una decisión consciente y no algo que el usuario se lleva sin
      advertirlo, sobre todo en equipos compartidos.
 
-   El enlace "¿Olvidaste tu contraseña?" queda sin destino hasta la Etapa 6
-   (HU-04, recuperación de contraseña). #}
+   El enlace "¿Olvidaste tu contraseña?" lleva al flujo de recuperación
+   (HU-04). #}
 
 {% block title %}Iniciar sesión · PaneLingo{% endblock %}
 
@@ -47,8 +47,9 @@
         <label class="field__label" for="{{ form.password.id_for_label }}">
           {{ form.password.label }}
         </label>
-        {# Sin destino hasta la Etapa 6 (HU-04). #}
-        <span class="field__hint">¿Olvidaste tu contraseña?</span>
+        <a class="field__hint" href="{% url 'accounts:password_reset' %}"
+          >¿Olvidaste tu contraseña?</a
+        >
       </div>
       {{ form.password }}
       {% if form.password.errors %}

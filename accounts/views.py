@@ -4,11 +4,26 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.views import LoginView as DjangoLoginView
 from django.contrib.auth.views import LogoutView as DjangoLogoutView
+from django.contrib.auth.views import (
+    PasswordResetCompleteView as DjangoPasswordResetCompleteView,
+)
+from django.contrib.auth.views import (
+    PasswordResetConfirmView as DjangoPasswordResetConfirmView,
+)
+from django.contrib.auth.views import (
+    PasswordResetDoneView as DjangoPasswordResetDoneView,
+)
+from django.contrib.auth.views import PasswordResetView as DjangoPasswordResetView
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
 
-from accounts.forms import EmailAuthenticationForm, UserRegistrationForm
+from accounts.forms import (
+    EmailAuthenticationForm,
+    NewPasswordForm,
+    PasswordResetRequestForm,
+    UserRegistrationForm,
+)
 
 
 class RegistrationView(CreateView):
@@ -89,3 +104,54 @@ class LogoutView(DjangoLogoutView):
         if request.user.is_authenticated:
             messages.success(request, "Cerraste sesión. Hasta pronto.")
         return super().post(request, *args, **kwargs)
+
+
+class PasswordResetView(DjangoPasswordResetView):
+    """Paso 1 de 4: solicitar el restablecimiento de la contraseña (HU-04).
+
+    La vista de Django envía el mensaje solo si existe una cuenta activa con
+    ese correo, pero redirige siempre a la misma pantalla. La respuesta es por
+    tanto idéntica exista o no la cuenta: mismo código, misma redirección y
+    mismo texto. Es lo que exige CA-04.2.
+    """
+
+    form_class = PasswordResetRequestForm
+    template_name = "accounts/password_reset_form.html"
+    email_template_name = "accounts/emails/password_reset_email.txt"
+    html_email_template_name = "accounts/emails/password_reset_email.html"
+    subject_template_name = "accounts/emails/password_reset_subject.txt"
+    success_url = reverse_lazy("accounts:password_reset_done")
+
+
+class PasswordResetDoneView(DjangoPasswordResetDoneView):
+    """Paso 2 de 4: confirmación de envío (HU-04).
+
+    Estado informativo sin formulario. Su texto no puede afirmar que el correo
+    se envió a una cuenta existente, porque eso revelaría si está registrada.
+    """
+
+    template_name = "accounts/password_reset_done.html"
+
+
+class PasswordResetConfirmView(DjangoPasswordResetConfirmView):
+    """Paso 3 de 4: definir la nueva contraseña (HU-04).
+
+    Django valida el uid y el token antes de mostrar el formulario. Si
+    cualquiera de los dos falla —manipulado, ya usado o caducado— pasa
+    validlink=False al contexto y la plantilla muestra el estado de enlace
+    inválido, sin error del servidor.
+
+    Al guardar la contraseña cambia el hash del usuario, y con él el session
+    auth hash: todas las demás sesiones de esa cuenta quedan invalidadas. Lo
+    garantiza el framework; hay una prueba que lo fija.
+    """
+
+    form_class = NewPasswordForm
+    template_name = "accounts/password_reset_confirm.html"
+    success_url = reverse_lazy("accounts:password_reset_complete")
+
+
+class PasswordResetCompleteView(DjangoPasswordResetCompleteView):
+    """Paso 4 de 4: resultado correcto (HU-04)."""
+
+    template_name = "accounts/password_reset_complete.html"

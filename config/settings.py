@@ -113,6 +113,15 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": f"{_PASSWORD_VALIDATION}.NumericPasswordValidator"},
 ]
 
+# Caducidad del enlace de recuperación de contraseña, en segundos.
+# Django trae 259 200 (tres días). Se reduce a una hora a propósito: el enlace
+# es una credencial al portador que concede la toma completa de la cuenta y
+# viaja por correo, un canal que no controlamos y donde el mensaje queda
+# archivado. Quien solicita el restablecimiento está delante del ordenador en
+# ese momento y no necesita tres días. La pantalla de enlace caducado ofrece
+# volver a solicitarlo, así que el coste de acortarlo es un clic.
+PASSWORD_RESET_TIMEOUT = 3600
+
 LOGIN_URL = "/cuentas/ingresar/"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/cuentas/ingresar/"
