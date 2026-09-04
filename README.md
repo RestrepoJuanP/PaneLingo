@@ -98,6 +98,43 @@ python manage.py runserver
 
 La aplicación queda disponible en <http://127.0.0.1:8000/>.
 
+## Recuperación de contraseña en desarrollo
+
+PaneLingo no usa un proveedor de correo real: está fuera del alcance del MVP. En desarrollo, `EMAIL_BACKEND` es el backend de consola, así que **el mensaje de recuperación se imprime en la terminal donde corre `runserver`**, no se envía a ninguna parte.
+
+Para ejecutar el caso de prueba de recuperación a mano:
+
+1. Con el servidor levantado, ve a <http://127.0.0.1:8000/cuentas/recuperar/> y envía el correo de una cuenta registrada.
+2. Vuelve a la terminal del `runserver`. Verás algo así:
+
+```
+Content-Type: text/plain; charset="utf-8"
+Subject: PaneLingo: enlace para restablecer tu contraseña
+From: PaneLingo <no-responder@panelingo.local>
+To: mira@estudio.test
+
+Hola, Mira Okonkwo:
+
+Recibimos una solicitud para restablecer la contraseña de tu cuenta de
+PaneLingo (mira@estudio.test).
+
+Abre este enlace para elegir una contraseña nueva:
+
+http://127.0.0.1:8000/cuentas/recuperar/MQ/dee5tm-00a74134bc7fcf290dac307ac82f8eca/
+
+El enlace caduca en una hora y solo sirve una vez. Al usarlo se cerrarán las
+demás sesiones abiertas de tu cuenta.
+```
+
+3. Copia esa dirección completa en el navegador y elige la contraseña nueva.
+
+Dos detalles al leer la consola:
+
+- El mensaje sale **dos veces**, en texto plano y en HTML. El enlace es el mismo; toma el de la primera parte, que se lee mejor.
+- El enlace **caduca en una hora y solo sirve una vez**. Si lo reutilizas o tardas, la pantalla dirá que ya no sirve y tendrás que solicitar otro. Es intencionado, no un fallo.
+
+Si envías un correo que no corresponde a ninguna cuenta, la aplicación mostrará la misma pantalla de confirmación pero **no aparecerá nada en la consola**: la respuesta visible no revela si la cuenta existe.
+
 ## Comandos de calidad
 
 El **Quality Gate** debe ejecutarse completo al final de cada etapa. Los siete pasos, en este orden:

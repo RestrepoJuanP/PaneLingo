@@ -18,6 +18,13 @@ from accounts.models import User
 PUBLIC_ROUTES = [
     "accounts:login",
     "accounts:register",
+    # Recuperación de contraseña: quien olvidó la suya no puede autenticarse
+    # para recuperarla, así que las cuatro pantallas son necesariamente
+    # públicas.
+    "accounts:password_reset",
+    "accounts:password_reset_done",
+    "accounts:password_reset_confirm",
+    "accounts:password_reset_complete",
 ]
 
 # Rutas que exigen sesión iniciada y devuelven una página.
@@ -32,9 +39,24 @@ ACTION_ROUTES = [
     "accounts:logout",
 ]
 
+# Argumentos con los que resolver las rutas que llevan parámetros en la URL.
+# Sin esto, reverse() falla y la auditoría no podría comprobarlas. Los valores
+# no tienen que ser válidos: basta con que permitan construir la dirección.
+ROUTE_ARGS = {
+    "accounts:password_reset_confirm": {
+        "uidb64": "MQ",
+        "token": "set-password",
+    },
+}
+
 # El panel de administración trae sus propias rutas y su propio control de
 # acceso, mantenidos por Django. Quedan fuera de esta auditoría.
 EXCLUDED_NAMESPACES = ("admin",)
+
+
+def route_url(name):
+    """Construye la dirección de una ruta, con sus argumentos si los lleva."""
+    return reverse(name, kwargs=ROUTE_ARGS.get(name))
 
 
 def registered_route_names():
@@ -84,6 +106,22 @@ class RouteClassificationTests(TestCase):
             with self.subTest(route=name):
                 self.assertIn(name, registered)
 
+    def test_every_route_can_be_resolved(self):
+        """Toda ruta clasificada se puede construir con los datos de aquí.
+
+        Si una ruta nueva lleva parámetros en la URL, hay que declararlos en
+        ROUTE_ARGS. Sin eso, la auditoría no podría visitarla.
+        """
+        for name in PUBLIC_ROUTES + PRIVATE_ROUTES + ACTION_ROUTES:
+            with self.subTest(route=name):
+                try:
+                    route_url(name)
+                except NoReverseMatch as error:  # pragma: no cover - guía
+                    self.fail(
+                        f"No se pudo construir la ruta {name}: {error}. "
+                        f"Si lleva parámetros, añádela a ROUTE_ARGS."
+                    )
+
 
 @override_settings(DEBUG=True)
 class PrivateRouteAccessTests(TestCase):
@@ -95,7 +133,7 @@ class PrivateRouteAccessTests(TestCase):
 
         for name in PRIVATE_ROUTES:
             with self.subTest(route=name):
-                response = self.client.get(reverse(name))
+                response = self.client.get(route_url(name))
 
                 self.assertEqual(response.status_code, 302)
                 self.assertTrue(
@@ -115,7 +153,7 @@ class PrivateRouteAccessTests(TestCase):
         for name in PRIVATE_ROUTES:
             with self.subTest(route=name):
                 try:
-                    response = self.client.get(reverse(name))
+                    response = self.client.get(route_url(name))
                 except NoReverseMatch:  # pragma: no cover - defensivo
                     continue
                 if response.status_code != 200:
@@ -131,7 +169,7 @@ class PublicRouteAccessTests(TestCase):
         """Toda ruta pública responde sin sesión iniciada."""
         for name in PUBLIC_ROUTES:
             with self.subTest(route=name):
-                response = self.client.get(reverse(name))
+                response = self.client.get(route_url(name))
 
                 self.assertEqual(response.status_code, 200)
 
@@ -144,6 +182,6 @@ class ActionRouteAccessTests(TestCase):
         """Un GET a una ruta de acción responde 405, no la ejecuta."""
         for name in ACTION_ROUTES:
             with self.subTest(route=name):
-                response = self.client.get(reverse(name))
+                response = self.client.get(route_url(name))
 
                 self.assertEqual(response.status_code, 405)

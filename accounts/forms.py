@@ -2,7 +2,11 @@
 
 from django import forms
 from django.contrib.auth import password_validation
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import (
+    AuthenticationForm,
+    PasswordResetForm,
+    SetPasswordForm,
+)
 from django.core.exceptions import ValidationError
 
 from accounts.models import User
@@ -231,3 +235,102 @@ class EmailAuthenticationForm(AccessibleFormMixin, AuthenticationForm):
         """
         if not user.is_active:
             raise ValidationError(self.error_messages["inactive"], code="invalid_login")
+
+
+class PasswordResetRequestForm(AccessibleFormMixin, PasswordResetForm):
+    """Solicitud de recuperación de contraseña (HU-04).
+
+    Se apoya en el formulario de Django, que solo envía el mensaje si existe
+    una cuenta activa con ese correo. La vista responde igual en ambos casos,
+    de modo que el formulario no revela si la cuenta está registrada.
+    """
+
+    def __init__(self, *args, **kwargs):
+        """Adapta la etiqueta y el widget del campo de correo."""
+        super().__init__(*args, **kwargs)
+        self.fields["email"].label = "Correo electrónico"
+        self.fields["email"].widget = forms.EmailInput(
+            attrs={
+                "class": "input",
+                "autocomplete": "email",
+                "autofocus": True,
+                "placeholder": "tu@estudio.com",
+            }
+        )
+        self.fields["email"].error_messages = {
+            "required": "Escribe el correo de tu cuenta.",
+            "invalid": (
+                "Escribe un correo electrónico válido, "
+                "por ejemplo nombre@estudio.com."
+            ),
+        }
+
+
+class NewPasswordForm(AccessibleFormMixin, SetPasswordForm):
+    """Definición de la nueva contraseña tras seguir el enlace (HU-04).
+
+    Hereda de SetPasswordForm, que ya comprueba que ambas contraseñas
+    coincidan y que la nueva supere los AUTH_PASSWORD_VALIDATORS.
+    """
+
+    error_messages = {
+        "password_mismatch": (
+            "Las dos contraseñas no coinciden. Vuelve a escribirlas."
+        ),
+    }
+
+    def __init__(self, *args, **kwargs):
+        """Adapta etiquetas y widgets de los dos campos de contraseña."""
+        super().__init__(*args, **kwargs)
+        self.fields["new_password1"].label = "Nueva contraseña"
+        self.fields["new_password1"].help_text = None
+        self.fields["new_password1"].widget = forms.PasswordInput(
+            attrs={
+                "class": "input",
+                "autocomplete": "new-password",
+                "autofocus": True,
+                "placeholder": "Al menos 8 caracteres",
+            }
+        )
+        self.fields["new_password2"].label = "Confirmar nueva contraseña"
+        self.fields["new_password2"].widget = forms.PasswordInput(
+            attrs={
+                "class": "input",
+                "autocomplete": "new-password",
+                "placeholder": "Repite la contraseña",
+            }
+        )
+        self.fields["new_password1"].error_messages = {
+            "required": "Escribe la nueva contraseña."
+        }
+        self.fields["new_password2"].error_messages = {
+            "required": "Repite la nueva contraseña para confirmarla."
+        }
+
+    def clean_new_password2(self):
+        """Comprueba únicamente que las dos contraseñas coincidan.
+
+        SetPasswordForm valida aquí también los AUTH_PASSWORD_VALIDATORS, de
+        modo que "la contraseña es demasiado corta" aparecería bajo el campo
+        de confirmación en lugar de bajo el campo donde se escribió. Esa
+        validación se traslada a _post_clean.
+        """
+        password1 = self.cleaned_data.get("new_password1")
+        password2 = self.cleaned_data.get("new_password2")
+        if password1 and password2 and password1 != password2:
+            raise ValidationError(
+                self.error_messages["password_mismatch"],
+                code="password_mismatch",
+            )
+        return password2
+
+    def _post_clean(self):
+        """Valida la contraseña y adjunta los errores al primer campo."""
+        super()._post_clean()
+        password = self.cleaned_data.get("new_password1")
+        if not password:
+            return
+        try:
+            password_validation.validate_password(password, self.user)
+        except ValidationError as error:
+            self.add_error("new_password1", error)
