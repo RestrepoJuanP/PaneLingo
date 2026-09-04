@@ -1,6 +1,7 @@
 """Vistas del proyecto que no pertenecen a ninguna app de negocio."""
 
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 from django.http import Http404
 from django.shortcuts import render
 
@@ -36,3 +37,15 @@ def design_system(request):
     if not settings.DEBUG:
         raise Http404("La página de sistema de diseño solo existe en desarrollo.")
     return render(request, "design_system.html", {"colors": DESIGN_SYSTEM_COLORS})
+
+
+@login_required
+def home(request):
+    """Panel del usuario. VISTA PUENTE TEMPORAL.
+
+    La biblioteca de álbumes se construye en una etapa posterior. Esta vista
+    existe solo para dar un destino real a la redirección posterior al
+    registro y al usuario ya autenticado que visita /registro/. Sustitúyela
+    por la lista de álbumes cuando llegue su historia de usuario.
+    """
+    return render(request, "home.html")

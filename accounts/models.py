@@ -71,3 +71,11 @@ class User(AbstractUser):
     def __str__(self):
         """Devuelve el nombre visible del usuario."""
         return self.display_name or self.email
+
+    @property
+    def initials(self):
+        """Devuelve hasta dos iniciales para el avatar de la barra lateral."""
+        parts = [part for part in (self.display_name or "").split() if part]
+        if not parts:
+            return (self.email or "?")[:1].upper()
+        return "".join(part[0] for part in parts[:2]).upper()
