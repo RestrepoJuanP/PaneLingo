@@ -1,0 +1,41 @@
+{# Selector de idioma con apariencia de pill, construido sobre un grupo de
+   radios NATIVO. No son botones, y es deliberado:
+
+   - Las flechas del teclado recorren el grupo por sí solas, que es lo que un
+     lector de pantalla espera de una elección única. Con botones habría que
+     programarlo a mano, y es fácil equivocarse.
+   - El formulario se envía sin JavaScript.
+   - El campo obligatorio lo aplica el servidor sobre un valor real, no sobre
+     un input oculto que rellena un script.
+
+   El input está oculto visualmente pero sigue siendo enfocable: la apariencia
+   la pone su <label>, con los tokens --pill-* de DESIGN_TOKENS.md.
+   NO lo conviertas en botones creyendo que lo simplificas. #}
+<fieldset
+  class="pill-field"
+  {% if field.errors %}
+    aria-describedby="{{ field.auto_id }}-error"
+    aria-invalid="true"
+  {% endif %}
+>
+  <legend class="field__label">
+    {{ field.label }}{% if field.field.required %} <span class="field__required" aria-hidden="true">*</span>{% endif %}
+  </legend>
+
+  <div class="pill-group">
+    {% for option in field %}
+      <span class="pill-option">
+        {{ option.tag }}
+        <label class="pill" for="{{ option.id_for_label }}">{{ option.choice_label }}</label>
+      </span>
+    {% endfor %}
+  </div>
+
+  {% if field.errors %}
+    <div class="field__error" id="{{ field.auto_id }}-error">
+      {% for error in field.errors %}
+        <p class="field__error-item">{{ error }}</p>
+      {% endfor %}
+    </div>
+  {% endif %}
+</fieldset>

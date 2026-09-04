@@ -2,7 +2,7 @@
    PaneLingo — JavaScript de interfaz
    -----------------------------------------------------------------------------
    Vanilla, sin dependencias. Solo interacciones: modales, toasts, medidor de
-   fuerza de contraseña y pills. Ninguna lógica de negocio.
+   fuerza de contraseña y estado de envío. Ninguna lógica de negocio.
    ========================================================================== */
 
 (function () {
@@ -205,30 +205,10 @@
   }
 
   /* ---------------------------------------------------------------------------
-     Pills de selección única dentro de un grupo.
-     El estado real lo guarda un input oculto, para que el formulario funcione
-     igual si el JavaScript no llega a cargar.
+     Los selectores de idioma NO llevan JavaScript: son grupos de radios
+     nativos, con navegación por flechas y envío sin scripts. Ver
+     templates/albums/_language_pills.html.
      ------------------------------------------------------------------------ */
-
-  function bindPillGroup(group) {
-    var target = document.getElementById(group.dataset.pillTarget);
-
-    group.addEventListener("click", function (event) {
-      var pill = event.target.closest(".pill");
-      if (!pill || !group.contains(pill)) {
-        return;
-      }
-      Array.prototype.forEach.call(
-        group.querySelectorAll(".pill"),
-        function (other) {
-          other.setAttribute("aria-pressed", String(other === pill));
-        },
-      );
-      if (target) {
-        target.value = pill.dataset.value || pill.textContent.trim();
-      }
-    });
-  }
 
   /* ---------------------------------------------------------------------------
      Estado de carga al enviar un formulario.
@@ -269,10 +249,6 @@
     Array.prototype.forEach.call(
       document.querySelectorAll("[data-strength-for]"),
       bindStrength,
-    );
-    Array.prototype.forEach.call(
-      document.querySelectorAll("[data-pill-target]"),
-      bindPillGroup,
     );
     Array.prototype.forEach.call(
       document.querySelectorAll("[data-submit-busy]"),

@@ -1,0 +1,20 @@
+==============================================================================
+PaneLingo — Evidencia del Quality Gate
+==============================================================================
+Etapa           : 08b
+Paso            : 4 de 7 — Black — verificacion de formato
+Comando         : black --check .
+Herramienta     : black, 25.12.0 (compiled: yes)
+Fecha y hora    : 2026-09-04T18:44:22-05:00
+Rama            : feature/HU-07-album-languages
+Commit          : b61e21f69afc65bc061db293d6dce40937e0b2e2
+Arbol de trabajo: con cambios sin versionar
+Directorio      : /f/PaneLingo
+==============================================================================
+
+All done! ✨ 🍰 ✨
+43 files would be left unchanged.
+
+==============================================================================
+Codigo de salida: 0  (CORRECTO)
+==============================================================================

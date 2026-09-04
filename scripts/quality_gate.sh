@@ -7,10 +7,11 @@
 # resumen en Markdown listo para pegar en la wiki del proyecto.
 #
 # Uso:
-#   ./scripts/quality_gate.sh <NN>
+#   ./scripts/quality_gate.sh <NN[x]>
 #
 # Ejemplo:
 #   ./scripts/quality_gate.sh 01
+#   ./scripts/quality_gate.sh 08b   (etapa repartida en varias ramas)
 #
 # El script NO hace commit ni push: solo genera archivos. Versionarlos es una
 # decision manual.
@@ -29,13 +30,15 @@
 
 usage() {
     cat <<'USAGE'
-Uso: ./scripts/quality_gate.sh <NN>
+Uso: ./scripts/quality_gate.sh <NN[x]>
 
   <NN>  Numero de etapa en dos digitos (01 a 99).
+  [x]   Letra minuscula opcional, para una etapa dividida en varias ramas.
 
 Ejemplos:
   ./scripts/quality_gate.sh 01
-  ./scripts/quality_gate.sh 07
+  ./scripts/quality_gate.sh 08
+  ./scripts/quality_gate.sh 08b
 
 Genera docs/evidence/sprint-1/etapa-<NN>/ con la salida de los siete pasos
 del Quality Gate y un resumen en Markdown.
@@ -63,8 +66,11 @@ if [ "$STAGE" = "-h" ] || [ "$STAGE" = "--help" ]; then
     exit 0
 fi
 
-if ! [[ "$STAGE" =~ ^[0-9]{2}$ ]]; then
-    echo "ERROR: '$STAGE' no tiene formato de dos digitos (por ejemplo: 01)." >&2
+# Dos digitos, con una letra minuscula opcional para las etapas que se
+# reparten en varias ramas, como 08 y 08b cuando una etapa cubre dos
+# historias de usuario y la wiki exige una rama por historia.
+if ! [[ "$STAGE" =~ ^[0-9]{2}[a-z]?$ ]]; then
+    echo "ERROR: '$STAGE' no tiene el formato esperado (01, 08 o 08b)." >&2
     echo >&2
     usage >&2
     exit 2

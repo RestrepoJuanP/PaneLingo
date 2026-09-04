@@ -13,6 +13,6 @@
 {% include "components/form_field.html" with field=form.title %}
 
 <div class="album-form__languages">
-  {% include "components/form_field.html" with field=form.source_language %}
-  {% include "components/form_field.html" with field=form.target_language %}
+  {% include "albums/_language_pills.html" with field=form.source_language %}
+  {% include "albums/_language_pills.html" with field=form.target_language %}
 </div>

@@ -5,7 +5,7 @@ Esta carpeta guarda la evidencia reproducible de la asignatura de **Calidad del 
 Las evidencias no se copian a mano. Se generan con el script del repositorio, de forma que la salida sea idéntica y trazable en todas las etapas:
 
 ```bash
-./scripts/quality_gate.sh <NN>
+./scripts/quality_gate.sh <NN[x]>
 ```
 
 El script ejecuta los siete pasos del Quality Gate definidos en [`CLAUDE.md`](../../../CLAUDE.md), guarda la salida completa de cada uno y produce un resumen en Markdown listo para pegar en la wiki. **No hace commit ni push:** versionar los archivos generados es una decisión manual.
@@ -40,6 +40,8 @@ Una carpeta `etapa-<NN>/` contiene nueve o más archivos:
 ## Convención de nombres
 
 Todo archivo empieza por `E<NN>`, donde `<NN>` es el número de etapa en **dos dígitos** (`01`, `02`, … `12`). El prefijo permite ordenar y localizar la evidencia sin ambigüedad cuando se adjunta a la wiki, fuera de su carpeta.
+
+Cuando una etapa cubre **más de una historia de usuario**, la wiki exige una rama por historia, y cada rama tiene su propio Quality Gate y su propio commit. En ese caso las subetapas se numeran con una letra minúscula: la primera conserva el número a secas y las siguientes lo llevan sufijado. Así, la Etapa 8 cubre HU-06 en `etapa-08/` y HU-07 en `etapa-08b/`.
 
 Los archivos del Quality Gate llevan además el número de paso en dos dígitos y un nombre corto: `01-ruff-fix`, `02-black`, `03-ruff-check`, `04-black-check`, `05-django-check`, `06-django-test`, `07-pip-audit`. El número de paso corresponde al orden fijado en `CLAUDE.md` y no debe alterarse.
 
