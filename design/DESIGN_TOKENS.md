@@ -324,6 +324,19 @@ Formas abstractas de la ilustración del panel de autenticación. Tipografía `-
 |---|---|---|
 | `--avatar-gradient` | `linear-gradient(140deg, #4c3fd9, #f2765a)` | Fondo del avatar con iniciales |
 
+## Originalidad del contenido ilustrativo
+
+Todo el contenido ilustrativo de la interfaz es original del equipo.
+
+- **No hay imágenes empaquetadas.** La aplicación no distribuye ningún archivo `.png`, `.jpg`, `.svg` ni equivalente como contenido decorativo. El CSS no contiene una sola función `url()`: las viñetas del panel de autenticación y las portadas de álbum se dibujan con `linear-gradient`, `radial-gradient` y `repeating-linear-gradient` sobre una retícula CSS.
+- **No hay personajes ni figuras.** Las composiciones son rectángulos con degradado. No representan personas, criaturas ni escenas.
+- **No se reproduce obra de terceros.** Ni imagen, ni viñeta, ni texto procedente de un cómic, manga o webtoon publicado.
+- **El lettering está escrito para PaneLingo.** Los tres textos de la ilustración son originales: el globo "Espera. Esta frase no es así.", la caja de narración "Cada viñeta hereda el contexto de la anterior." y la onomatopeya "TZONK". El globo evoca el trabajo de traducir —la duda ante una línea— y la caja de narración describe lo que hace el producto. "TZONK" es una acuñación propia, no una onomatopeya convencional ni una expresión tomada de una obra concreta.
+- **Los únicos recursos externos son dos tipografías**, Plus Jakarta Sans y Archivo, servidas desde Google Fonts bajo licencia abierta.
+- **Las únicas imágenes que muestra la aplicación son las que sube el propio usuario**: las páginas de sus álbumes, servidas desde `media/` con control de acceso por propietario.
+
+Las capturas de `design/screenshots/` y el mockup `PaneLingo.dc.html` son material de referencia interno del proyecto y no se distribuyen con la aplicación.
+
 ---
 
 ## Desviaciones deliberadas respecto al mockup
