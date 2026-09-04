@@ -3,6 +3,7 @@
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.views import LoginView as DjangoLoginView
+from django.contrib.auth.views import LogoutView as DjangoLogoutView
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
@@ -66,3 +67,25 @@ class LoginView(DjangoLoginView):
         remember_me = form.cleaned_data.get("remember_me")
         self.request.session.set_expiry(None if remember_me else 0)
         return super().form_valid(form)
+
+
+class LogoutView(DjangoLogoutView):
+    """Cierre de sesión de un traductor (HU-03).
+
+    La vista de Django solo acepta POST, así que un GET a esta URL no cierra
+    la sesión. Al salir, invalida la sesión y redirige al inicio de sesión,
+    que es una pantalla pública.
+    """
+
+    http_method_names = ["post", "options"]
+
+    def post(self, request, *args, **kwargs):
+        """Cierra la sesión y confirma con un mensaje.
+
+        El mensaje se añade antes de llamar a super(), porque ahí es donde
+        Django vacía la sesión: después, el almacén de mensajes ya no
+        conservaría nada.
+        """
+        if request.user.is_authenticated:
+            messages.success(request, "Cerraste sesión. Hasta pronto.")
+        return super().post(request, *args, **kwargs)

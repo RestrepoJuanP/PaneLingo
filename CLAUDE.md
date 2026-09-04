@@ -68,6 +68,7 @@ Si algún paso falla, corrígelo antes de continuar.
 - **Aislamiento por propietario:** un usuario solo puede ver o modificar sus propios álbumes y páginas. Filtra siempre los querysets por `request.user`; si un objeto pertenece a otra cuenta, responde **404** (no 403, para no revelar existencia).
 - Contraseñas con el hasher de Django y los validadores `AUTH_PASSWORD_VALIDATORS` activos.
 - Las imágenes cargadas se guardan en `media/` organizadas por usuario y no se sirven públicamente sin control de acceso.
+- **Patrón obligatorio de vista privada:** toda vista que muestre datos de un usuario usa `private_view` (función) o `PrivateViewMixin` (clase), de `accounts/access.py`. Combinan `login_required` y `never_cache`. No apiles los decoradores a mano: olvidar `never_cache` no rompe ninguna prueba y deja contenido privado en la caché del navegador tras cerrar sesión. Al añadir una ruta, clasifícala en `PUBLIC_ROUTES` o `PRIVATE_ROUTES` de `config/tests/test_route_access.py`; esa prueba falla si aparece una ruta sin clasificar.
 
 ## Accesibilidad (WCAG 2.1 AA — requisito no funcional de la wiki)
 - **Foco visible:** todo elemento interactivo muestra `:focus-visible` con `outline: 2px solid var(--brand)`, `outline-offset: 2px` y el halo `var(--focus-ring)`. Nunca uses `outline: none` sin un reemplazo visible.
@@ -94,7 +95,7 @@ El mockup **no es código ejecutable**: usa plantillas propietarias con `sc-if`,
 |---|---|---|---|
 | Auth split (panel oscuro + pestañas Log in / Create account) | Sí | HU-01, HU-02 | Iniciar sesión / Crear cuenta |
 | Recuperación de contraseña (4 pantallas) | Sí | HU-04 | **No existe en el mockup.** Diseñar por extensión del layout de autenticación |
-| Barra lateral — bloque de perfil con "Cerrar sesión" | Sí | HU-03 | El resto de la barra lateral queda fuera (ver fila siguiente) |
+| Barra lateral — bloque de perfil con "Cerrar sesión" | Sí | HU-03 | Botón visible bajo el perfil. En móvil ocupa el hueco que el mockup da a Configuración, que está fuera de alcance |
 | Barra lateral — créditos mensuales, SSO, badge de plan | No | — | Funcionalidad de facturación y equipo, fuera del MVP |
 | Dashboard con tarjetas de álbum | Sí | — | Mis álbumes |
 | Modal "Create new album" | Sí (simplificado) | — | Modal "Crear álbum" |

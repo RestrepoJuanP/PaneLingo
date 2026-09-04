@@ -1864,6 +1864,19 @@ textarea {
     border-top: 1px solid var(--border);
   }
 
+  /* Cerrar sesión va por POST, así que en la navegación inferior el ítem es
+     un formulario con un botón dentro, no un enlace. El formulario ocupa el
+     mismo hueco que los demás ítems y el botón lo rellena por completo. */
+  .mobile-nav__form {
+    flex: 1;
+    display: flex;
+  }
+
+  .mobile-nav__form .mobile-nav__item {
+    width: 100%;
+    cursor: pointer;
+  }
+
   .mobile-nav__item {
     flex: 1;
     display: flex;
