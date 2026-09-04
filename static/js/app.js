@@ -32,9 +32,26 @@
     );
   }
 
-  function openModal(modal) {
+  /* Rellena un modal compartido con los datos del elemento que lo abrió.
+     Permite usar un único modal para toda una rejilla de tarjetas en lugar de
+     repetir uno por elemento. */
+  function fillModalFrom(modal, trigger) {
+    var form = modal.querySelector("form");
+    if (form && trigger.dataset.modalAction) {
+      form.setAttribute("action", trigger.dataset.modalAction);
+    }
+    var field = modal.querySelector("[data-modal-field]");
+    if (field && typeof trigger.dataset.modalValue === "string") {
+      field.value = trigger.dataset.modalValue;
+    }
+  }
+
+  function openModal(modal, trigger) {
     if (!modal) {
       return;
+    }
+    if (trigger) {
+      fillModalFrom(modal, trigger);
     }
     modal.hidden = false;
     document.body.style.overflow = "hidden";
@@ -70,7 +87,7 @@
     if (opener) {
       event.preventDefault();
       lastTrigger = opener;
-      openModal(document.getElementById(opener.dataset.modalOpen));
+      openModal(document.getElementById(opener.dataset.modalOpen), opener);
       return;
     }
 
