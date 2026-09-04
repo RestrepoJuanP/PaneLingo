@@ -5,18 +5,15 @@ Etapa           : 08b
 Paso            : 2 de 7 — Black — formato
 Comando         : black .
 Herramienta     : black, 25.12.0 (compiled: yes)
-Fecha y hora    : 2026-09-04T18:44:22-05:00
+Fecha y hora    : 2026-09-04T18:45:58-05:00
 Rama            : feature/HU-07-album-languages
-Commit          : b61e21f69afc65bc061db293d6dce40937e0b2e2
-Arbol de trabajo: con cambios sin versionar
+Commit          : 1a33ffbc35aecf4a17ab6cf9c1f8dab816a16056
+Arbol de trabajo: limpio
 Directorio      : /f/PaneLingo
 ==============================================================================
 
-reformatted F:\PaneLingo\albums\forms.py
-reformatted F:\PaneLingo\albums\tests\test_languages.py
-
 All done! ✨ 🍰 ✨
-2 files reformatted, 41 files left unchanged.
+43 files left unchanged.
 
 ==============================================================================
 Codigo de salida: 0  (CORRECTO)
