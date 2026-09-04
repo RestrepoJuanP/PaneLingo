@@ -1,7 +1,7 @@
 """Pruebas de las vistas de la app accounts (HU-01)."""
 
 from django.contrib.messages import get_messages
-from django.test import TestCase
+from django.test import Client, TestCase
 from django.urls import reverse
 
 from accounts.models import User
@@ -343,3 +343,78 @@ class RememberMeTests(TestCase):
         response = self.client.get(self.login_url)
 
         self.assertFalse(response.context["form"].fields["remember_me"].initial)
+
+
+class LogoutViewTests(TestCase):
+    """Cierre de sesión de un traductor (HU-03)."""
+
+    def setUp(self):
+        """Crea la cuenta y deja la sesión iniciada."""
+        self.password = "TraduccionSegura42"
+        self.user = User.objects.create_user(
+            email="mira@estudio.test",
+            password=self.password,
+            display_name="Mira Okonkwo",
+        )
+        self.logout_url = reverse("accounts:logout")
+        self.client.login(email=self.user.email, password=self.password)
+
+    def test_post_ends_the_session_and_redirects_to_login(self):
+        """CP-03.1 — Cerrar sesión finaliza la sesión — Happy Path."""
+        response = self.client.post(self.logout_url)
+
+        self.assertEqual(list(self.client.session.items()), [])
+        self.assertNotIn("_auth_user_id", self.client.session)
+        self.assertRedirects(response, reverse("accounts:login"))
+
+    def test_confirmation_message_is_shown(self):
+        """CP-03.1 — El sistema confirma que la sesión quedó cerrada."""
+        response = self.client.post(self.logout_url, follow=True)
+
+        texts = [str(message) for message in get_messages(response.wsgi_request)]
+
+        self.assertEqual(len(texts), 1)
+        self.assertIn("Cerraste sesión", texts[0])
+
+    def test_panel_is_unreachable_after_logging_out(self):
+        """CP-03.2 — Tras cerrar sesión, el panel deja de ser accesible."""
+        self.client.post(self.logout_url)
+
+        response = self.client.get(reverse("home"))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith(reverse("accounts:login")))
+        self.assertNotContains(response, "Mira Okonkwo", status_code=302)
+
+    def test_get_does_not_end_the_session(self):
+        """Un GET a la URL de salida no cierra la sesión."""
+        response = self.client.get(self.logout_url)
+
+        self.assertEqual(response.status_code, 405)
+        self.assertIn("_auth_user_id", self.client.session)
+        self.assertEqual(self.client.get(reverse("home")).status_code, 200)
+
+    def test_post_without_csrf_token_is_rejected(self):
+        """Un POST sin token CSRF no cierra la sesión."""
+        csrf_client = Client(enforce_csrf_checks=True)
+        csrf_client.login(email=self.user.email, password=self.password)
+
+        response = csrf_client.post(self.logout_url)
+
+        self.assertEqual(response.status_code, 403)
+        self.assertIn("_auth_user_id", csrf_client.session)
+
+    def test_private_response_is_not_stored_by_the_browser(self):
+        """Volver atrás tras salir no debe reexponer contenido privado.
+
+        Se verifica en la respuesta HTTP: la página privada se marca como no
+        almacenable, de modo que el navegador no puede servirla desde su
+        historial, y una vez cerrada la sesión ya solo devuelve la redirección.
+        """
+        panel = self.client.get(reverse("home"))
+        self.assertEqual(panel.status_code, 200)
+        self.assertIn("no-store", panel.headers["Cache-Control"])
+
+        self.client.post(self.logout_url)
+
+        self.assertEqual(self.client.get(reverse("home")).status_code, 302)

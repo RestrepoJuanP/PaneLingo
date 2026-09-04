@@ -9,8 +9,9 @@
      pero solo Álbumes y Cargar páginas son funcionales. El resto va en estado
      deshabilitado con aria-disabled.
    - Sin badge numérico en Revisión: ese dato no existe.
-   - El bloque inferior conserva avatar, nombre, correo y "Cerrar sesión".
-     Se eliminan los créditos mensuales y el badge de plan: son facturación.
+   - El bloque inferior conserva avatar, nombre, correo y "Cerrar sesión"
+     (HU-03). Se eliminan los créditos mensuales y el badge de plan: son
+     facturación, fuera de alcance.
    - La miga de pan no lleva el nivel de estudio del mockup, que es una
      función de equipo fuera de alcance. #}
 
@@ -40,9 +41,7 @@
           <span class="sidebar__user-mail">{{ user.email }}</span>
         </span>
       </div>
-      {% block sign_out %}
-        <a class="btn btn--secondary sidebar__signout" href="#">Cerrar sesión</a>
-      {% endblock %}
+      {% include "components/logout_form.html" with form_class="sidebar__signout" button_class="btn btn--secondary btn--block" %}
     </aside>
 
     <div class="main">
@@ -66,7 +65,11 @@
       {% include "components/mobile_nav_item.html" with label="Cargar" icon="upload" url=nav_upload_url current=nav_current|default:"" key="upload" %}
       {% include "components/mobile_nav_item.html" with label="Traducción" icon="workspace" disabled=True %}
       {% include "components/mobile_nav_item.html" with label="Revisión" icon="review" disabled=True %}
-      {% include "components/mobile_nav_item.html" with label="Ajustes" icon="settings" disabled=True %}
+      {# "Salir" ocupa el hueco que en el mockup lleva a Configuración. Esa
+         pantalla está fuera del alcance del Sprint 1, así que su ítem no
+         representaba nada; cerrar sesión, en cambio, debe ser alcanzable en
+         móvil, donde no existe la barra lateral. #}
+      {% include "components/logout_form.html" with form_class="mobile-nav__form" button_class="mobile-nav__item" with_icon=True %}
     </nav>
   </div>
 {% endblock %}
