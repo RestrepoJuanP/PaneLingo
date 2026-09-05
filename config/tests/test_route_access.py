@@ -34,6 +34,7 @@ PRIVATE_ROUTES = [
     "albums:detail",
     "albums:edit",
     "albums:rename",
+    "albums:page_delete",
     "albums:upload",
     "albums:upload_choose",
     "design_system",
@@ -52,6 +53,7 @@ ROUTE_ARGS = {
     "albums:detail": {"pk": 1},
     "albums:edit": {"pk": 1},
     "albums:rename": {"pk": 1},
+    "albums:page_delete": {"pk": 1},
     "albums:upload": {"pk": 1},
     "accounts:password_reset_confirm": {
         "uidb64": "MQ",

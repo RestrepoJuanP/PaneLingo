@@ -2319,3 +2319,69 @@ textarea {
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+/* =============================================================================
+   26. Eliminar página (HU-10)
+   ========================================================================== */
+
+.page-thumb__delete {
+  position: absolute;
+  top: var(--sp-2);
+  left: var(--sp-2);
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-badge);
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--danger-border-soft);
+  color: var(--danger);
+  backdrop-filter: blur(4px);
+  transition:
+    background var(--t-fast) ease,
+    color var(--t-fast) ease;
+}
+
+.page-thumb__delete:hover {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+  text-decoration: none;
+}
+
+/* Cuando la página lleva advertencia de resolución, el aviso ocupa la esquina
+   superior izquierda y la acción de borrar baja para no taparlo. */
+.page-thumb__warning ~ .page-thumb__delete {
+  top: calc(var(--sp-2) + 22px);
+}
+
+.page-delete__preview {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-6);
+  margin-bottom: var(--sp-8);
+  padding: var(--sp-5);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  background: var(--surface-subtle);
+}
+
+.page-delete__thumb {
+  width: 46px;
+  flex: none;
+  aspect-ratio: var(--ratio-page);
+  object-fit: cover;
+  border: 1px solid var(--divider);
+  border-radius: var(--r-thumb);
+}
+
+.page-delete__thumb[hidden] {
+  display: none;
+}
+
+.page-delete__label {
+  font-size: var(--fs-ui);
+  font-weight: 700;
+  color: var(--ink-900);
+}

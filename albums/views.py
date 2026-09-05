@@ -6,6 +6,7 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import (
     CreateView,
+    DeleteView,
     DetailView,
     ListView,
     TemplateView,
@@ -14,7 +15,7 @@ from django.views.generic import (
 
 from accounts.access import PrivateViewMixin
 from albums.forms import AlbumForm, AlbumRenameForm
-from albums.models import Album
+from albums.models import Album, ComicPage
 from albums.services import create_pages_from_upload
 
 
@@ -254,4 +255,62 @@ class AlbumUpdateView(OwnedAlbumMixin, UpdateView):
         """Guarda los cambios y confirma con un mensaje."""
         response = super().form_valid(form)
         messages.success(self.request, "Álbum actualizado correctamente.")
+        return response
+
+
+class PageDeleteView(PrivateViewMixin, DeleteView):
+    """Eliminación de una página de un álbum propio (HU-10).
+
+    Solo el POST elimina. Un GET muestra la página de confirmación sin tocar
+    nada, que es además la degradación del modal cuando no hay JavaScript.
+
+    El queryset filtra por album__owner, de modo que una página de otra cuenta
+    responde 404 tanto en la confirmación como en el POST.
+    """
+
+    model = ComicPage
+    template_name = "albums/page_confirm_delete.html"
+    context_object_name = "page"
+
+    def get_queryset(self):
+        """Restringe el borrado a las páginas de álbumes del usuario."""
+        return ComicPage.objects.filter(album__owner=self.request.user).select_related(
+            "album"
+        )
+
+    def get_context_data(self, **kwargs):
+        """Marca el destino activo de la navegación lateral."""
+        context = super().get_context_data(**kwargs)
+        context["nav_current"] = "albums"
+        return context
+
+    def get_success_url(self):
+        """Vuelve al detalle del álbum del que se eliminó la página."""
+        return self.album.get_absolute_url()
+
+    def form_valid(self, form):
+        """Elimina la página y confirma con un mensaje.
+
+        Las páginas restantes NO se renumeran: un hueco en la secuencia dice
+        la verdad, que a la obra le falta esa página, y renumerar movería la
+        etiqueta de las demás. El mensaje lo explica en el momento en que el
+        salto podría parecer un error.
+        """
+        page_number = self.object.page_number
+        self.album = self.object.album
+
+        response = super().form_valid(form)
+
+        if self.album.pages.exists():
+            messages.success(
+                self.request,
+                f"Se eliminó la página {page_number}. "
+                f"Las demás conservan su número.",
+            )
+        else:
+            messages.success(
+                self.request,
+                f"Se eliminó la página {page_number}. "
+                f"El álbum se quedó sin páginas.",
+            )
         return response

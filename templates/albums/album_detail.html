@@ -72,10 +72,48 @@
   {% if album.pages.exists %}
     <div class="page-grid">
       {% for page in album.pages.all %}
-        {% include "components/page_thumb.html" with number=page.page_number image_url=page.display_image.url alt=page.original_filename status_label=page.get_status_display status_variant="neutral" warning=page.has_low_resolution %}
+        {% include "components/page_thumb.html" with number=page.page_number image_url=page.display_image.url alt=page.original_filename status_label=page.get_status_display status_variant="neutral" warning=page.has_low_resolution delete_url=page.get_delete_url %}
       {% endfor %}
     </div>
   {% else %}
     {% include "components/empty_state.html" with title="Este álbum aún no tiene páginas" body="Carga las páginas completas de la obra para empezar a trabajar sobre ellas. Podrás añadir más en cualquier momento." action_label="Cargar páginas" action_url=album.get_upload_url %}
   {% endif %}
+  {# Modal de confirmación de borrado, uno solo para toda la rejilla. El
+     JavaScript lo rellena con el número y la miniatura de la página pulsada;
+     sin JavaScript, el enlace navega a la página de confirmación. #}
+  <div
+    class="modal"
+    id="eliminar-pagina"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="eliminar-pagina-title"
+    hidden
+  >
+    <div class="modal__dialog modal__dialog--sm">
+      <h2 class="modal__title" id="eliminar-pagina-title">¿Eliminar esta página?</h2>
+
+      <div class="page-delete__preview">
+        <img class="page-delete__thumb" data-modal-image src="" alt="" hidden />
+        <p class="page-delete__label" data-modal-text></p>
+      </div>
+
+      <p class="modal__body">
+        Se eliminará la imagen del álbum y no se podrá recuperar. Las demás
+        páginas conservan su número.
+      </p>
+
+      <form method="post" action="">
+        {% csrf_token %}
+        <div class="modal__foot">
+          <button type="button" class="btn btn--secondary" data-modal-close>
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn--danger-solid" data-submit-busy>
+            <span class="btn__spinner" hidden aria-hidden="true"></span>
+            <span data-submit-label data-busy-label="Eliminando…">Eliminar página</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 {% endblock %}

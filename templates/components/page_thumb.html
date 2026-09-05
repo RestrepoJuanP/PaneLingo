@@ -28,6 +28,27 @@
         {% include "components/badge.html" with label=status_label variant=status_variant %}
       </span>
     {% endif %}
+    {% if delete_url %}
+      {# Enlace de verdad: sin JavaScript navega a la página de confirmación.
+         El JavaScript lo intercepta para abrir el modal compartido, al que
+         pasa el número y la miniatura para que identifique sin ambigüedad
+         qué página se va a eliminar. #}
+      <a
+        class="page-thumb__delete"
+        href="{{ delete_url }}"
+        data-modal-open="eliminar-pagina"
+        data-modal-action="{{ delete_url }}"
+        data-modal-text="Página {{ number }}"
+        data-modal-image="{{ image_url }}"
+        aria-label="Eliminar la página {{ number }}"
+        title="Eliminar"
+      >
+        <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false" width="14" height="14">
+          <path d="M2.5 4h11M6 4V2.5h4V4M4 4l.7 9.2A1 1 0 0 0 5.7 14h4.6a1 1 0 0 0 1-.8L12 4"
+                stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    {% endif %}
   </figure>
   <div class="page-thumb__body">
     <div class="page-thumb__row">

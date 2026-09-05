@@ -8,6 +8,7 @@ from albums.views import (
     AlbumListView,
     AlbumRenameView,
     AlbumUpdateView,
+    PageDeleteView,
     PageUploadView,
     UploadChooseView,
 )
@@ -20,6 +21,11 @@ urlpatterns = [
     path("albumes/cargar/", UploadChooseView.as_view(), name="upload_choose"),
     path("albumes/<int:pk>/", AlbumDetailView.as_view(), name="detail"),
     path("albumes/<int:pk>/cargar/", PageUploadView.as_view(), name="upload"),
+    path(
+        "paginas/<int:pk>/eliminar/",
+        PageDeleteView.as_view(),
+        name="page_delete",
+    ),
     path("albumes/<int:pk>/editar/", AlbumUpdateView.as_view(), name="edit"),
     path(
         "albumes/<int:pk>/renombrar/",
