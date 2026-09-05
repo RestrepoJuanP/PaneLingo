@@ -1,0 +1,32 @@
+==============================================================================
+PaneLingo — Evidencia del Quality Gate
+==============================================================================
+Etapa           : 10b
+Paso            : 6 de 7 — Django — pruebas automaticas
+Comando         : python manage.py test
+Herramienta     : Python 3.12.10 / Django 5.2.17
+Fecha y hora    : 2026-09-04T21:47:16-05:00
+Rama            : fix/BUG-043-upload-queue-feedback
+Commit          : 8e0cd88ce0bc59b1767f4eb3f3c1af97ab5b502f
+Arbol de trabajo: limpio
+Directorio      : /f/PaneLingo
+==============================================================================
+
+Creating test database for alias 'default'...
+..................................................................................................................................................................................................Method Not Allowed (GET): /cuentas/salir/
+.Not Found: /albumes/1/
+Not Found: /albumes/1/editar/
+Not Found: /albumes/1/renombrar/
+Not Found: /albumes/1/cargar/
+......
+----------------------------------------------------------------------
+Ran 201 tests in 107.867s
+
+OK
+Destroying test database for alias 'default'...
+Found 201 test(s).
+System check identified no issues (0 silenced).
+
+==============================================================================
+Codigo de salida: 0  (CORRECTO)
+==============================================================================

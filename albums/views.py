@@ -189,6 +189,12 @@ class PageUploadView(OwnedAlbumMixin, DetailView):
             extension.lstrip(".").upper()
             for extension in settings.ALLOWED_IMAGE_EXTENSIONS
         )
+        # Los límites viajan también en crudo, para emitirlos como atributos
+        # de datos en el input. El aviso temprano del navegador los lee de
+        # ahí en lugar de llevarlos escritos, de modo que settings sigue
+        # siendo la única fuente y cliente y servidor no pueden divergir.
+        context["max_file_size_bytes"] = settings.MAX_FILE_SIZE
+        context["allowed_extensions_raw"] = ",".join(settings.ALLOWED_IMAGE_EXTENSIONS)
         context["nav_current"] = "upload"
         return context
 

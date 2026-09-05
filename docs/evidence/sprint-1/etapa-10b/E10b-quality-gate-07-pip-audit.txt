@@ -1,0 +1,22 @@
+==============================================================================
+PaneLingo — Evidencia del Quality Gate
+==============================================================================
+Etapa           : 10b
+Paso            : 7 de 7 — pip-audit — auditoria de dependencias
+Comando         : pip-audit -r requirements.txt
+Herramienta     : pip-audit 2.10.1
+Fecha y hora    : 2026-09-04T21:47:16-05:00
+Rama            : fix/BUG-043-upload-queue-feedback
+Commit          : 8e0cd88ce0bc59b1767f4eb3f3c1af97ab5b502f
+Arbol de trabajo: limpio
+Directorio      : /f/PaneLingo
+==============================================================================
+
+WARNING:venv:Actual environment location may have moved due to redirects, links or junctions.
+  Requested location: "C:\Users\TOMMYS~1\AppData\Local\Temp\tmpvlyk38z9\Scripts\python.exe"
+  Actual location:    "C:\Users\Tommysepf\AppData\Local\Temp\tmpvlyk38z9\Scripts\python.exe"
+No known vulnerabilities found
+
+==============================================================================
+Codigo de salida: 0  (CORRECTO)
+==============================================================================
