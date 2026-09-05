@@ -2,7 +2,7 @@
 
 from django.contrib import messages
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, ListView, UpdateView
+from django.views.generic import CreateView, DetailView, ListView, UpdateView
 
 from accounts.access import PrivateViewMixin
 from albums.forms import AlbumForm, AlbumRenameForm
@@ -108,4 +108,64 @@ class AlbumRenameView(PrivateViewMixin, UpdateView):
         messages.success(
             self.request, f"El álbum ahora se llama «{self.object.title}»."
         )
+        return response
+
+
+class OwnedAlbumMixin(PrivateViewMixin):
+    """Restringe una vista a los álbumes de quien hace la petición.
+
+    Al filtrar el queryset por propietario, un álbum ajeno sencillamente no se
+    encuentra y la vista responde 404, no 403: un 403 confirmaría que ese
+    álbum existe y a quién pertenece.
+    """
+
+    model = Album
+
+    def get_queryset(self):
+        """Devuelve solo los álbumes del usuario autenticado."""
+        return Album.objects.filter(owner=self.request.user).select_related(
+            "source_language", "target_language"
+        )
+
+    def get_context_data(self, **kwargs):
+        """Marca el destino activo de la navegación lateral."""
+        context = super().get_context_data(**kwargs)
+        context["nav_current"] = "albums"
+        return context
+
+
+class AlbumDetailView(OwnedAlbumMixin, DetailView):
+    """Detalle de un álbum (HU-08).
+
+    Del mockup quedan fuera el panel de progreso de traducción, los estados de
+    página, los filtros de página y los botones de workspace y exportación:
+    todos dependen de funcionalidad que no entra en el Sprint 1. El área de
+    páginas muestra su estado vacío hasta que HU-09 permita cargarlas.
+    """
+
+    template_name = "albums/album_detail.html"
+
+
+class AlbumUpdateView(OwnedAlbumMixin, UpdateView):
+    """Edición de la información de un álbum (HU-08).
+
+    Reutiliza AlbumForm, así que los campos editables son los que definieron
+    HU-06 y HU-07: título, idioma de origen e idioma de destino. El estado
+    queda fuera a propósito; el motivo está en el cuerpo del pull request.
+
+    Cancelar es un enlace de vuelta al detalle, no un envío: al no haber POST
+    no se escribe nada, ni siquiera updated_at.
+    """
+
+    form_class = AlbumForm
+    template_name = "albums/album_edit.html"
+
+    def get_success_url(self):
+        """Vuelve al detalle del álbum recién actualizado."""
+        return self.object.get_absolute_url()
+
+    def form_valid(self, form):
+        """Guarda los cambios y confirma con un mensaje."""
+        response = super().form_valid(form)
+        messages.success(self.request, "Álbum actualizado correctamente.")
         return response

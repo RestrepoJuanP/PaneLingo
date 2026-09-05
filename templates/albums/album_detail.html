@@ -1,0 +1,72 @@
+{% extends "layouts/app_shell.html" %}
+
+{# Detalle de álbum — HU-08.
+   Referencia visual: design/screenshots/album-detail.png.
+
+   Del mockup quedan fuera, por depender de funcionalidad ajena al Sprint 1:
+   - El panel "Translation progress" y su leyenda de bloques.
+   - Los estados de página (Approved / Needs review / Untranslated) y sus
+     filtros.
+   - Los botones "Open workspace" y "Review & export".
+   El área de páginas muestra su estado vacío hasta que HU-09 permita
+   cargarlas. #}
+
+{% block title %}{{ album.title }} · PaneLingo{% endblock %}
+
+{% block breadcrumb %}
+  <a class="breadcrumb__link" href="{% url 'albums:list' %}">Mis álbumes</a>
+  <span class="breadcrumb__sep" aria-hidden="true">/</span>
+  <span class="breadcrumb__current">{{ album.title }}</span>
+{% endblock %}
+
+{% block content %}
+  <a class="back-link" href="{% url 'albums:list' %}">
+    <span aria-hidden="true">←</span> Todos los álbumes
+  </a>
+
+  <div class="album-detail">
+    {% include "components/album_cover.html" with seed=album.pk lang_pair=album.language_pair extra_class="album-detail__cover" %}
+
+    <div class="album-detail__main">
+      <div class="album-detail__title-row">
+        <h1 class="page-title">{{ album.title }}</h1>
+        <a class="btn btn--secondary btn--compact" href="{{ album.get_rename_url }}">
+          Renombrar
+        </a>
+        {% include "components/badge.html" with label=album.get_status_display variant="neutral" %}
+      </div>
+
+      <p class="album-detail__meta">
+        {{ album.language_pair }} ·
+        {{ album.page_count }} {{ album.page_count|pluralize:"página,páginas" }} ·
+        editado hace {{ album.updated_at|timesince }}
+      </p>
+
+      <div class="album-detail__actions">
+        <a class="btn btn--primary" href="{{ album.get_edit_url }}">Editar álbum</a>
+        {# Eliminar álbum no tiene HU, CA ni CP en el Sprint 1. Se maqueta con
+           el estilo destructivo del mockup pero deshabilitado, con la razón a
+           la vista, para no prometer una acción que no existe. #}
+        <span
+          class="btn btn--danger"
+          aria-disabled="true"
+          title="Disponible en un sprint posterior"
+        >Eliminar</span>
+        <span class="album-detail__note">
+          Eliminar álbumes llega en un sprint posterior.
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-head">
+    <div class="section-head__left">
+      <h2 class="section-title">Páginas</h2>
+      <span class="section-count">
+        {{ album.page_count }} {{ album.page_count|pluralize:"página,páginas" }}
+      </span>
+    </div>
+  </div>
+
+  {% include "components/empty_state.html" with title="Este álbum aún no tiene páginas" body="Carga las páginas completas de la obra para empezar a trabajar sobre ellas. Podrás añadir más en cualquier momento." %}
+{% endblock %}
