@@ -1,9 +1,27 @@
 {# Miniatura de página, con badge de estado opcional.
-   La relación de aspecto 3/4.24 viene del mockup. #}
+   La relación de aspecto 3/4.24 viene del mockup.
+
+   La imagen que se sirve es la miniatura generada al cargar, no el original:
+   la rejilla muestra 146 px y descargar varias páginas de megapíxeles por
+   visita haría la pantalla inservible. Ver albums/services.build_thumbnail.
+
+   loading="lazy" evita además descargar las páginas que quedan fuera de la
+   parte visible hasta que se llega a ellas. #}
 <article class="page-thumb">
   <figure class="page-thumb__figure">
     {% if image_url %}
-      <img class="page-thumb__img" src="{{ image_url }}" alt="{{ alt|default:'' }}" />
+      <img
+        class="page-thumb__img"
+        src="{{ image_url }}"
+        alt="Página {{ number }}{% if alt %} — {{ alt }}{% endif %}"
+        loading="lazy"
+        decoding="async"
+      />
+    {% endif %}
+    {% if warning %}
+      <span class="page-thumb__warning" title="Resolución baja">
+        Resolución baja
+      </span>
     {% endif %}
     {% if status_label %}
       <span class="page-thumb__badge">

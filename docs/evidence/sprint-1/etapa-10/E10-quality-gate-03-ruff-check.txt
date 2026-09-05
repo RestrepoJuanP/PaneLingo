@@ -1,0 +1,19 @@
+==============================================================================
+PaneLingo — Evidencia del Quality Gate
+==============================================================================
+Etapa           : 10
+Paso            : 3 de 7 — Ruff — verificacion de analisis estatico
+Comando         : ruff check .
+Herramienta     : ruff 0.16.6
+Fecha y hora    : 2026-09-04T20:58:54-05:00
+Rama            : feature/HU-09-upload-pages
+Commit          : 32038f20cfbb041f4e99591054fc10d06cef8471
+Arbol de trabajo: con cambios sin versionar
+Directorio      : /f/PaneLingo
+==============================================================================
+
+All checks passed!
+
+==============================================================================
+Codigo de salida: 0  (CORRECTO)
+==============================================================================

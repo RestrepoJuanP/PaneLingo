@@ -1,12 +1,21 @@
 """Vistas de la app albums."""
 
+from django.conf import settings
 from django.contrib import messages
+from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DetailView, ListView, UpdateView
+from django.views.generic import (
+    CreateView,
+    DetailView,
+    ListView,
+    TemplateView,
+    UpdateView,
+)
 
 from accounts.access import PrivateViewMixin
 from albums.forms import AlbumForm, AlbumRenameForm
 from albums.models import Album
+from albums.services import create_pages_from_upload
 
 
 class AlbumListView(PrivateViewMixin, ListView):
@@ -131,6 +140,77 @@ class OwnedAlbumMixin(PrivateViewMixin):
         """Marca el destino activo de la navegación lateral."""
         context = super().get_context_data(**kwargs)
         context["nav_current"] = "albums"
+        return context
+
+
+class PageUploadView(OwnedAlbumMixin, DetailView):
+    """Carga de páginas de un álbum propio (HU-09).
+
+    Del mockup queda fuera todo el panel de ajustes de escaneo, el orden de
+    lectura y el botón de traducir: pertenecen al OCR y a la traducción. Aquí
+    solo se cargan archivos y se informa del resultado de cada uno.
+
+    Hereda de OwnedAlbumMixin, así que cargar en un álbum ajeno responde 404:
+    la comprobación ocurre en el servidor y no depende de que la interfaz
+    oculte el enlace.
+    """
+
+    template_name = "albums/page_upload.html"
+
+    def post(self, request, *args, **kwargs):
+        """Procesa el lote y vuelve a mostrar la pantalla con el resultado."""
+        self.object = self.get_object()
+        uploaded_files = request.FILES.getlist("pages")
+
+        if not uploaded_files:
+            messages.error(request, "No seleccionaste ningún archivo.")
+            return redirect(self.object.get_upload_url())
+
+        created, rejected = create_pages_from_upload(self.object, uploaded_files)
+
+        if created:
+            if len(created) == 1:
+                messages.success(request, "Se cargó 1 página.")
+            else:
+                messages.success(request, f"Se cargaron {len(created)} páginas.")
+        for rejection in rejected:
+            messages.error(request, f"«{rejection.filename}»: {rejection.reason}")
+
+        context = self.get_context_data(object=self.object)
+        context["created_pages"] = created
+        context["rejected_uploads"] = rejected
+        return self.render_to_response(context)
+
+    def get_context_data(self, **kwargs):
+        """Añade los límites de carga para poder mostrarlos en la pantalla."""
+        context = super().get_context_data(**kwargs)
+        context["max_file_size_mb"] = settings.MAX_FILE_SIZE // 1_000_000
+        context["allowed_extensions"] = ", ".join(
+            extension.lstrip(".").upper()
+            for extension in settings.ALLOWED_IMAGE_EXTENSIONS
+        )
+        context["nav_current"] = "upload"
+        return context
+
+
+class UploadChooseView(PrivateViewMixin, TemplateView):
+    """Elección del álbum al que cargar páginas (HU-09).
+
+    Es el destino de "Cargar páginas" de la navegación, que no puede saber a
+    qué álbum se refiere. Se descartó adivinarlo —el único que existe, o el
+    último editado— porque acertaría a veces y el resto serían cargas en el
+    álbum equivocado, caras de deshacer mientras no exista eliminar páginas.
+    """
+
+    template_name = "albums/upload_choose.html"
+
+    def get_context_data(self, **kwargs):
+        """Lista los álbumes del usuario para escoger destino."""
+        context = super().get_context_data(**kwargs)
+        context["albums"] = Album.objects.filter(
+            owner=self.request.user
+        ).select_related("source_language", "target_language")
+        context["nav_current"] = "upload"
         return context
 
 

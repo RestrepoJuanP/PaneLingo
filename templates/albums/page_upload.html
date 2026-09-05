@@ -1,0 +1,104 @@
+{% extends "layouts/app_shell.html" %}
+
+{# Cargar páginas — HU-09.
+   Referencia visual: design/screenshots/upload-and-scan.png.
+
+   Del mockup queda fuera todo lo que pertenece a OCR y traducción: el panel
+   "Scan settings" completo, el orden de lectura, "Why we ask for whole pages"
+   y el botón "Start translating". Aquí solo se cargan archivos y se informa
+   del resultado de cada uno. #}
+
+{% block title %}Cargar páginas · {{ album.title }} · PaneLingo{% endblock %}
+
+{% block breadcrumb %}
+  <a class="breadcrumb__link" href="{% url 'albums:list' %}">Mis álbumes</a>
+  <span class="breadcrumb__sep" aria-hidden="true">/</span>
+  <a class="breadcrumb__link" href="{{ album.get_absolute_url }}">{{ album.title }}</a>
+  <span class="breadcrumb__sep" aria-hidden="true">/</span>
+  <span class="breadcrumb__current">Cargar páginas</span>
+{% endblock %}
+
+{% block content %}
+  <div class="page-head">
+    <div>
+      <h1 class="page-title">Cargar páginas</h1>
+      <p class="page-subtitle">
+        Añadiendo a <strong>{{ album.title }}</strong>. Sube la página
+        completa, no globos recortados.
+      </p>
+    </div>
+  </div>
+
+  <form method="post" action="{{ album.get_upload_url }}" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <label class="dropzone" for="id_pages">
+      <span class="dropzone__mark" aria-hidden="true"></span>
+      <span class="dropzone__title">Arrastra aquí las páginas completas</span>
+      <span class="dropzone__body">
+        {{ allowed_extensions }}, hasta {{ max_file_size_mb }} MB por archivo.
+        Puedes seleccionar varias a la vez.
+      </span>
+      <span class="dropzone__actions">
+        <span class="btn btn--primary">Elegir archivos</span>
+      </span>
+    </label>
+
+    <input
+      class="sr-only"
+      type="file"
+      id="id_pages"
+      name="pages"
+      multiple
+      accept="image/png,image/jpeg,image/webp"
+    />
+
+    <div class="album-form__actions upload-actions">
+      <a class="btn btn--secondary" href="{{ album.get_absolute_url }}">
+        Volver al álbum
+      </a>
+      <button type="submit" class="btn btn--primary" data-submit-busy>
+        <span class="btn__spinner" hidden aria-hidden="true"></span>
+        <span data-submit-label data-busy-label="Cargando…">Cargar páginas</span>
+      </button>
+    </div>
+  </form>
+
+  {% if created_pages or rejected_uploads %}
+    <div class="card upload-queue">
+      <h2 class="card__title">Resultado de la carga</h2>
+
+      {% for page in created_pages %}
+        <div class="upload-row">
+          <span class="upload-row__mark upload-row__mark--ok" aria-hidden="true">✓</span>
+          <div class="upload-row__body">
+            <p class="upload-row__name">{{ page.original_filename }}</p>
+            <p class="upload-row__state upload-row__state--ok">
+              Página {{ page.page_number }} · {{ page.width }} × {{ page.height }} ·
+              {{ page.get_status_display }}
+            </p>
+            {% if page.has_low_resolution %}
+              <p class="upload-row__warning">
+                Resolución baja ({{ page.width }} × {{ page.height }}). Las
+                onomatopeyas pequeñas pueden perderse al procesarla. La página
+                se cargó igualmente.
+              </p>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+
+      {% for rejection in rejected_uploads %}
+        <div class="upload-row">
+          <span class="upload-row__mark upload-row__mark--error" aria-hidden="true">!</span>
+          <div class="upload-row__body">
+            <p class="upload-row__name">{{ rejection.filename }}</p>
+            <p class="upload-row__state upload-row__state--error">
+              {{ rejection.reason }}
+            </p>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endblock %}

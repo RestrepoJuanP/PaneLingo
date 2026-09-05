@@ -16,6 +16,7 @@
      función de equipo fuera de alcance. #}
 
 {% url 'albums:list' as albums_url %}
+{% url 'albums:upload_choose' as upload_url %}
 
 {% block body %}
   <div class="app">
@@ -27,7 +28,7 @@
 
       <nav class="sidebar__nav" aria-label="Principal">
         {% include "components/nav_item.html" with label="Álbumes" icon="library" url=albums_url current=nav_current|default:"" key="albums" %}
-        {% include "components/nav_item.html" with label="Cargar páginas" icon="upload" url=nav_upload_url current=nav_current|default:"" key="upload" %}
+        {% include "components/nav_item.html" with label="Cargar páginas" icon="upload" url=upload_url current=nav_current|default:"" key="upload" %}
         {% include "components/nav_item.html" with label="Traducción" icon="workspace" disabled=True %}
         {% include "components/nav_item.html" with label="Revisión y exportación" icon="review" disabled=True %}
         {% include "components/nav_item.html" with label="Terminología" icon="terms" disabled=True %}
@@ -64,7 +65,7 @@
 
     <nav class="mobile-nav" aria-label="Principal">
       {% include "components/mobile_nav_item.html" with label="Álbumes" icon="library" url=albums_url current=nav_current|default:"" key="albums" %}
-      {% include "components/mobile_nav_item.html" with label="Cargar" icon="upload" url=nav_upload_url current=nav_current|default:"" key="upload" %}
+      {% include "components/mobile_nav_item.html" with label="Cargar" icon="upload" url=upload_url current=nav_current|default:"" key="upload" %}
       {% include "components/mobile_nav_item.html" with label="Traducción" icon="workspace" disabled=True %}
       {% include "components/mobile_nav_item.html" with label="Revisión" icon="review" disabled=True %}
       {# "Salir" ocupa el hueco que en el mockup lleva a Configuración. Esa

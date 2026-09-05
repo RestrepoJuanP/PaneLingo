@@ -1,0 +1,32 @@
+{% extends "layouts/app_shell.html" %}
+
+{# Elegir álbum al que cargar páginas — HU-09.
+   Es el destino de "Cargar páginas" de la navegación, que no puede saber a
+   qué álbum se refiere. #}
+
+{% block title %}Cargar páginas · PaneLingo{% endblock %}
+
+{% block breadcrumb %}
+  <span class="breadcrumb__current">Cargar páginas</span>
+{% endblock %}
+
+{% block content %}
+  {% url 'albums:create' as create_url %}
+
+  <div class="page-head">
+    <div>
+      <h1 class="page-title">Cargar páginas</h1>
+      <p class="page-subtitle">Elige el álbum al que quieres añadir páginas.</p>
+    </div>
+  </div>
+
+  {% if albums %}
+    <div class="album-grid">
+      {% for album in albums %}
+        {% include "components/album_card.html" with seed=album.pk title=album.title page_count=album.page_count edited_label=album.updated_at|timesince lang_pair=album.language_pair status_label=album.get_status_display status_variant="neutral" album_url=album.get_upload_url %}
+      {% endfor %}
+    </div>
+  {% else %}
+    {% include "components/empty_state.html" with title="Todavía no tienes álbumes" body="Las páginas se cargan dentro de un álbum. Crea el primero y podrás añadirle sus páginas." action_label="Crear mi primer álbum" action_url=create_url %}
+  {% endif %}
+{% endblock %}
