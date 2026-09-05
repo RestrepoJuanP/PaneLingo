@@ -1,0 +1,55 @@
+{% extends "layouts/app_shell.html" %}
+
+{# Editar álbum — HU-08.
+   Reutiliza AlbumForm, así que los campos editables son los que definieron
+   HU-06 y HU-07: título e idiomas.
+
+   "Cancelar" es un enlace de vuelta al detalle, NO un botón de envío. Al no
+   producirse ningún POST, no se escribe nada en la base de datos, ni siquiera
+   updated_at, que es lo que exige CA-08.2. #}
+
+{% block title %}Editar {{ album.title }} · PaneLingo{% endblock %}
+
+{% block breadcrumb %}
+  <a class="breadcrumb__link" href="{% url 'albums:list' %}">Mis álbumes</a>
+  <span class="breadcrumb__sep" aria-hidden="true">/</span>
+  <a class="breadcrumb__link" href="{{ album.get_absolute_url }}">{{ album.title }}</a>
+  <span class="breadcrumb__sep" aria-hidden="true">/</span>
+  <span class="breadcrumb__current">Editar</span>
+{% endblock %}
+
+{% block content %}
+  <div class="page-head">
+    <div>
+      <h1 class="page-title">Editar álbum</h1>
+      <p class="page-subtitle">
+        Cambia el título o el par de idiomas. Los cambios se aplican al mismo
+        álbum, sin crear uno nuevo.
+      </p>
+    </div>
+  </div>
+
+  <div class="card album-form">
+    {% if form.non_field_errors %}
+      <div class="form-errors" role="alert">
+        <span class="form-errors__icon" aria-hidden="true">!</span>
+        <ul class="form-errors__list">
+          {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <form method="post" action="{{ album.get_edit_url }}" novalidate>
+      {% csrf_token %}
+      {% include "albums/_album_form_fields.html" %}
+
+      <div class="album-form__actions">
+        <a class="btn btn--secondary" href="{{ album.get_absolute_url }}">Cancelar</a>
+        <button type="submit" class="btn btn--primary" data-submit-busy>
+          <span class="btn__spinner" hidden aria-hidden="true"></span>
+          <span data-submit-label data-busy-label="Guardando…">Guardar cambios</span>
+        </button>
+      </div>
+    </form>
+  </div>
+{% endblock %}

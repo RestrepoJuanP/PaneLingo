@@ -31,6 +31,8 @@ PUBLIC_ROUTES = [
 PRIVATE_ROUTES = [
     "albums:list",
     "albums:create",
+    "albums:detail",
+    "albums:edit",
     "albums:rename",
     "design_system",
 ]
@@ -45,6 +47,8 @@ ACTION_ROUTES = [
 # Sin esto, reverse() falla y la auditoría no podría comprobarlas. Los valores
 # no tienen que ser válidos: basta con que permitan construir la dirección.
 ROUTE_ARGS = {
+    "albums:detail": {"pk": 1},
+    "albums:edit": {"pk": 1},
     "albums:rename": {"pk": 1},
     "accounts:password_reset_confirm": {
         "uidb64": "MQ",

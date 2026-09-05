@@ -98,6 +98,14 @@ class Album(models.Model):
         """Devuelve el título del álbum."""
         return self.title
 
+    def get_absolute_url(self):
+        """Devuelve la dirección del detalle de este álbum."""
+        return reverse("albums:detail", kwargs={"pk": self.pk})
+
+    def get_edit_url(self):
+        """Devuelve la dirección para editar este álbum."""
+        return reverse("albums:edit", kwargs={"pk": self.pk})
+
     def get_rename_url(self):
         """Devuelve la dirección para renombrar este álbum."""
         return reverse("albums:rename", kwargs={"pk": self.pk})

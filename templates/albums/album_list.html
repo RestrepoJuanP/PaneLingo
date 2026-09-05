@@ -51,7 +51,7 @@
 
     <div class="album-grid">
       {% for album in albums %}
-        {% include "components/album_card.html" with seed=album.pk title=album.title page_count=album.page_count edited_label=album.updated_at|timesince lang_pair=album.language_pair status_label=album.get_status_display status_variant="neutral" album_url="#" rename_url=album.get_rename_url %}
+        {% include "components/album_card.html" with seed=album.pk title=album.title page_count=album.page_count edited_label=album.updated_at|timesince lang_pair=album.language_pair status_label=album.get_status_display status_variant="neutral" album_url=album.get_absolute_url rename_url=album.get_rename_url %}
       {% endfor %}
     </div>
   {% else %}
