@@ -2,10 +2,10 @@
 
 | Campo | Valor |
 |---|---|
-| Fecha y hora | `2026-09-04T19:10:30-05:00` |
+| Fecha y hora | `2026-09-04T19:12:41-05:00` |
 | Rama | `feature/HU-08-edit-album` |
-| Commit | `2bef438ace7f34ecfa7ef54b36cf4ffdaf871807` |
-| Arbol de trabajo | con cambios sin versionar |
+| Commit | `bd735964c3f81974920f2e6489df0139b33b4098` |
+| Arbol de trabajo | limpio |
 | Resultado global | **PASA (7/7)** (verde) |
 
 ## Pasos
