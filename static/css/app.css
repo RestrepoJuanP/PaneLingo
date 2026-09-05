@@ -2136,3 +2136,100 @@ textarea {
   font-weight: 500;
   color: var(--muted);
 }
+
+/* =============================================================================
+   24. Cola de carga de páginas
+   ========================================================================== */
+
+.upload-actions {
+  margin-top: var(--sp-8);
+}
+
+.upload-queue {
+  margin-top: var(--sp-10);
+  padding: 0;
+}
+
+.upload-queue .card__title {
+  padding: 13px 15px;
+  margin: 0;
+  border-bottom: 1px solid var(--track);
+}
+
+.upload-row {
+  display: flex;
+  gap: var(--sp-6);
+  padding: 13px 15px;
+  border-bottom: 1px solid var(--surface-muted);
+}
+
+.upload-row:last-child {
+  border-bottom: none;
+}
+
+.upload-row__mark {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  border-radius: var(--r-full);
+  color: #fff;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+}
+
+.upload-row__mark--ok {
+  background: var(--success);
+}
+
+.upload-row__mark--error {
+  background: var(--danger-strong);
+}
+
+.upload-row__name {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--ink-900);
+  word-break: break-all;
+}
+
+.upload-row__state {
+  margin-top: var(--sp-1);
+  font-size: var(--fs-label-sm);
+  font-weight: 600;
+}
+
+.upload-row__state--ok {
+  color: var(--success-fg);
+}
+
+.upload-row__state--error {
+  color: var(--danger);
+}
+
+.upload-row__warning {
+  margin-top: var(--sp-3);
+  padding: var(--sp-4) var(--sp-6);
+  border: 1px solid var(--warning-border);
+  border-radius: var(--r-lg);
+  background: var(--warning-bg);
+  color: var(--warning-fg);
+  font-size: var(--fs-label-sm);
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.page-thumb__warning {
+  position: absolute;
+  top: var(--sp-2);
+  left: var(--sp-2);
+  padding: 3px var(--sp-2);
+  border: 1px solid var(--warning-border-strong);
+  border-radius: var(--r-badge);
+  background: var(--warning-bg);
+  color: var(--warning-fg);
+  font-size: var(--fs-micro);
+  font-weight: 700;
+  line-height: 1.3;
+}

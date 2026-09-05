@@ -43,7 +43,8 @@
       </p>
 
       <div class="album-detail__actions">
-        <a class="btn btn--primary" href="{{ album.get_edit_url }}">Editar álbum</a>
+        <a class="btn btn--primary" href="{{ album.get_upload_url }}">Añadir páginas</a>
+        <a class="btn btn--secondary" href="{{ album.get_edit_url }}">Editar álbum</a>
         {# Eliminar álbum no tiene HU, CA ni CP en el Sprint 1. Se maqueta con
            el estilo destructivo del mockup pero deshabilitado, con la razón a
            la vista, para no prometer una acción que no existe. #}
@@ -68,5 +69,13 @@
     </div>
   </div>
 
-  {% include "components/empty_state.html" with title="Este álbum aún no tiene páginas" body="Carga las páginas completas de la obra para empezar a trabajar sobre ellas. Podrás añadir más en cualquier momento." %}
+  {% if album.pages.exists %}
+    <div class="page-grid">
+      {% for page in album.pages.all %}
+        {% include "components/page_thumb.html" with number=page.page_number image_url=page.display_image.url alt=page.original_filename status_label=page.get_status_display status_variant="neutral" warning=page.has_low_resolution %}
+      {% endfor %}
+    </div>
+  {% else %}
+    {% include "components/empty_state.html" with title="Este álbum aún no tiene páginas" body="Carga las páginas completas de la obra para empezar a trabajar sobre ellas. Podrás añadir más en cualquier momento." action_label="Cargar páginas" action_url=album.get_upload_url %}
+  {% endif %}
 {% endblock %}

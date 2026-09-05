@@ -1,9 +1,13 @@
 """Modelos de dominio de la app albums: catálogo de idiomas y álbumes."""
 
+import uuid
+
 from django.conf import settings
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+
+from albums.validators import is_low_resolution
 
 
 class Language(models.Model):
@@ -106,6 +110,10 @@ class Album(models.Model):
         """Devuelve la dirección para editar este álbum."""
         return reverse("albums:edit", kwargs={"pk": self.pk})
 
+    def get_upload_url(self):
+        """Devuelve la dirección para cargar páginas en este álbum."""
+        return reverse("albums:upload", kwargs={"pk": self.pk})
+
     def get_rename_url(self):
         """Devuelve la dirección para renombrar este álbum."""
         return reverse("albums:rename", kwargs={"pk": self.pk})
@@ -119,23 +127,136 @@ class Album(models.Model):
 
     @property
     def page_count(self):
-        """Número de páginas cargadas en el álbum.
-
-        Devuelve 0 mientras no exista el modelo Page, que llega con HU-09.
-        """
-        return 0
+        """Número de páginas cargadas en el álbum."""
+        return self.pages.count()
 
     @property
     def progress_percentage(self):
-        """Porcentaje de traducción aprobada, de 0 a 100.
+        """Porcentaje de páginas aprobadas, de 0 a 100.
 
-        Devuelve 0 en el Sprint 1: la traducción llega en un sprint posterior.
-        La guarda contra la división por cero queda escrita porque un álbum
-        recién creado siempre tiene cero páginas, y es el caso que romperá en
-        cuanto el numerador deje de ser constante.
+        En el Sprint 1 devuelve siempre 0, porque ninguna página llega a
+        aprobarse: eso ocurre tras la revisión de la traducción, que es de un
+        sprint posterior. La guarda contra la división por cero protege el
+        caso de un álbum sin páginas, que es el habitual nada más crearlo.
         """
         total = self.page_count
         if not total:
             return 0
-        translated = 0
-        return round(translated / total * 100)
+        approved = self.pages.filter(status=ComicPage.Status.APPROVED).count()
+        return round(approved / total * 100)
+
+
+def page_image_path(instance, filename):
+    """Devuelve la ruta en disco de la imagen de una página.
+
+    El nombre del archivo lo genera ENTERAMENTE el servidor; el que envió el
+    cliente se descarta. No se sanea, se sustituye, y la diferencia importa:
+    sanear obliga a acertar con una lista de casos —recorrido de rutas,
+    nombres reservados de Windows como CON o NUL, longitudes desmesuradas,
+    unicode ambiguo, doble extensión— y basta fallar en uno. Generando el
+    nombre completo, ninguno de esos casos llega al sistema de archivos.
+
+    El identificador aleatorio evita además que dos usuarios que suban
+    "pagina1.png" colisionen, y que el nombre en disco delate el orden de
+    carga o el número de páginas de un álbum.
+
+    El nombre original se conserva en ComicPage.original_filename para poder
+    mostrarlo, que es otra cosa distinta de escribirlo en disco.
+    """
+    extension = instance.image_extension or ".jpg"
+    return (
+        f"albums/user_{instance.album.owner_id}"
+        f"/album_{instance.album_id}"
+        f"/{uuid.uuid4().hex}{extension}"
+    )
+
+
+def page_thumbnail_path(instance, filename):
+    """Devuelve la ruta en disco de la miniatura de una página."""
+    return (
+        f"albums/user_{instance.album.owner_id}"
+        f"/album_{instance.album_id}"
+        f"/thumbs/{uuid.uuid4().hex}.jpg"
+    )
+
+
+class ComicPage(models.Model):
+    """Página de un álbum: la imagen completa de una plancha del cómic.
+
+    En el Sprint 1 las páginas se cargan y se listan, nada más. El estado
+    queda en PENDING; los demás valores existen para el OCR y la revisión de
+    sprints posteriores, y ninguna historia de este sprint los alcanza.
+    """
+
+    class Status(models.TextChoices):
+        """Estados por los que pasa una página desde que se carga."""
+
+        PENDING = "pending", _("Pendiente de procesamiento")
+        PROCESSING = "processing", _("Procesando")
+        PROCESSED = "processed", _("Procesada")
+        NEEDS_REVIEW = "needs_review", _("Necesita revisión")
+        APPROVED = "approved", _("Aprobada")
+
+    album = models.ForeignKey(
+        Album,
+        on_delete=models.CASCADE,
+        related_name="pages",
+        verbose_name=_("álbum"),
+    )
+    page_number = models.PositiveIntegerField(_("número de página"))
+    image = models.ImageField(_("imagen"), upload_to=page_image_path)
+    thumbnail = models.ImageField(
+        _("miniatura"),
+        upload_to=page_thumbnail_path,
+        blank=True,
+        help_text=_("Versión reducida para la rejilla del álbum. Se genera al cargar."),
+    )
+    status = models.CharField(
+        _("estado"),
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PENDING,
+    )
+    original_filename = models.CharField(_("nombre original"), max_length=255)
+    width = models.PositiveIntegerField(_("ancho en píxeles"))
+    height = models.PositiveIntegerField(_("alto en píxeles"))
+    file_size = models.PositiveIntegerField(_("tamaño en bytes"))
+    created_at = models.DateTimeField(_("creada"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("actualizada"), auto_now=True)
+
+    # No es un campo: lo fija el servicio de carga antes de guardar, para que
+    # page_image_path conozca la extensión del formato realmente detectado.
+    image_extension = None
+
+    class Meta:
+        verbose_name = _("página")
+        verbose_name_plural = _("páginas")
+        ordering = ["page_number"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["album", "page_number"],
+                name="unique_page_number_per_album",
+            )
+        ]
+        indexes = [
+            models.Index(fields=["album", "page_number"], name="page_album_order_idx"),
+        ]
+
+    def __str__(self):
+        """Devuelve la página identificada por su número."""
+        return f"Página {self.page_number}"
+
+    @property
+    def has_low_resolution(self):
+        """Indica si la página lleva advertencia de baja resolución.
+
+        Delega en el validador para que la regla viva en un único sitio: si el
+        umbral se recalibra cuando exista el OCR, no puede quedar una copia
+        con el valor antiguo.
+        """
+        return is_low_resolution(self.width, self.height)
+
+    @property
+    def display_image(self):
+        """Devuelve la miniatura si existe, y si no la imagen original."""
+        return self.thumbnail if self.thumbnail else self.image

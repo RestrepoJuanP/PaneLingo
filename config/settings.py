@@ -162,3 +162,26 @@ MAX_FILE_SIZE = 10_000_000
 
 # Extensiones de imagen admitidas al cargar una página de un álbum.
 ALLOWED_IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp"]
+
+# Límite superior de píxeles de una imagen cargada.
+# Defensa contra "decompression bombs": un archivo de pocos kilobytes puede
+# declarar en su cabecera 50.000 x 50.000 píxeles y agotar la memoria al
+# decodificarlo. Pillow avisa por encima de su propio umbral pero no bloquea,
+# así que aquí se fija uno propio y el aviso se convierte en rechazo.
+# 50 MP deja holgura de sobra: una página A3 escaneada a 300 DPI ronda los
+# 17 MP, y el límite de 10 MB por archivo ya acota lo que puede llegar.
+MAX_IMAGE_PIXELS = 50_000_000
+
+# Umbral por debajo del cual una página se marca con advertencia de baja
+# resolución. Es ADVERTENCIA, nunca bloqueo: la página se carga igual.
+# Se cuentan píxeles totales y no el ancho, porque los webtoons se publican a
+# 800 px de ancho y un umbral por ancho los marcaría todos. El ejemplo de baja
+# resolución del propio mockup, 860x1220, son 1,05 MP y queda marcado.
+# Sin OCR no hay datos sobre la correlación real entre resolución y calidad de
+# reconocimiento: habrá que recalibrarlo cuando exista.
+LOW_RESOLUTION_PIXELS = 2_000_000
+
+# Lado mayor de la miniatura generada para la rejilla del álbum.
+# La rejilla muestra 146 px; 400 cubre pantallas de alta densidad sin obligar
+# a descargar el original de varios megapíxeles.
+THUMBNAIL_MAX_SIDE = 400
