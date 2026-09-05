@@ -2233,3 +2233,89 @@ textarea {
   font-weight: 700;
   line-height: 1.3;
 }
+
+/* =============================================================================
+   25. Cola de archivos seleccionados (BUG-043)
+   -----------------------------------------------------------------------------
+   La rellena el navegador antes de enviar. Sin JavaScript queda oculta y el
+   formulario funciona igual. Ver bindUploadQueue en static/js/app.js.
+   ========================================================================== */
+
+.upload-selection {
+  margin-top: var(--sp-8);
+  border: 1px solid var(--border);
+  border-radius: var(--r-2xl);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.upload-selection[hidden] {
+  display: none;
+}
+
+.upload-selection__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-6);
+  padding: 13px 15px;
+  border-bottom: 1px solid var(--track);
+}
+
+.upload-selection__head .card__title {
+  margin: 0;
+}
+
+.upload-selection__count {
+  font-size: var(--fs-label-sm);
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.upload-selection__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.upload-selection__row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-6);
+  padding: var(--sp-5) 15px;
+  border-bottom: 1px solid var(--surface-muted);
+}
+
+.upload-selection__row:last-child {
+  border-bottom: none;
+}
+
+.upload-selection__thumb {
+  width: 38px;
+  flex: none;
+  aspect-ratio: var(--ratio-page);
+  border: 1px solid var(--divider);
+  border-radius: var(--r-thumb);
+  background: var(--cover-placeholder);
+  overflow: hidden;
+}
+
+.upload-selection__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.upload-selection__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.upload-selection__remove {
+  flex: none;
+}
+
+.upload-selection__remove:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

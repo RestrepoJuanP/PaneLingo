@@ -2,7 +2,8 @@
    PaneLingo — JavaScript de interfaz
    -----------------------------------------------------------------------------
    Vanilla, sin dependencias. Solo interacciones: modales, toasts, medidor de
-   fuerza de contraseña y estado de envío. Ninguna lógica de negocio.
+   fuerza de contraseña, estado de envío y cola de archivos seleccionados.
+   Ninguna lógica de negocio.
    ========================================================================== */
 
 (function () {
@@ -242,6 +243,239 @@
   }
 
   /* ---------------------------------------------------------------------------
+     Cola de archivos seleccionados en la pantalla de carga (BUG-043).
+
+     Es una MEJORA PROGRESIVA. Sin JavaScript el formulario funciona igual: el
+     <label for> abre el selector y el input envía los archivos. Esta cola solo
+     enseña, antes de enviar, lo que se va a enviar.
+
+     NO ESCRIBAS AQUÍ NINGÚN LÍMITE. El tamaño máximo y las extensiones
+     admitidas llegan en los atributos de datos del input, emitidos por el
+     servidor desde settings. Escribirlos aquí crearía una segunda cifra que
+     acabaría divergiendo de la del servidor sin que nada lo delatara.
+     ------------------------------------------------------------------------ */
+
+  function humanSize(bytes) {
+    if (bytes < 1000) {
+      return bytes + " B";
+    }
+    if (bytes < 1000000) {
+      return Math.round(bytes / 1000) + " KB";
+    }
+    return (bytes / 1000000).toFixed(1) + " MB";
+  }
+
+  function fileKey(file) {
+    // Dos archivos se consideran el mismo si coinciden nombre, tamaño y fecha
+    // de modificación. Es una heurística: dos archivos distintos podrían
+    // coincidir en los tres, pero es tan improbable que compensa frente al
+    // caso real, que es volver a elegir el mismo por descuido.
+    return file.name + "|" + file.size + "|" + file.lastModified;
+  }
+
+  function bindUploadQueue(input) {
+    var form = input.form || input.closest("form");
+    var panel = document.querySelector("[data-upload-selection]");
+    var list = document.querySelector("[data-upload-list]");
+    var counter = document.querySelector("[data-upload-count]");
+    var dropzone = document.querySelector("[data-dropzone]");
+    if (!form || !panel || !list || !counter) {
+      return;
+    }
+
+    var maxSize = parseInt(input.dataset.maxSize, 10);
+    var allowed = (input.dataset.allowedExtensions || "")
+      .split(",")
+      .filter(Boolean);
+    var entries = [];
+
+    function problemWith(file) {
+      // Aviso temprano, NO autoridad. El servidor revalida siempre y puede
+      // rechazar un archivo que aquí pareciera correcto, porque comprueba el
+      // contenido real y no la extensión. Por eso esto nunca impide enviar.
+      var name = file.name.toLowerCase();
+      var extensionOk = allowed.some(function (extension) {
+        return name.endsWith(extension);
+      });
+      if (!extensionOk) {
+        return "Formato no admitido. Se aceptan " + allowed.join(", ") + ".";
+      }
+      if (maxSize && file.size > maxSize) {
+        return (
+          "Pesa " + humanSize(file.size) + " y el máximo es " + humanSize(maxSize) + "."
+        );
+      }
+      return null;
+    }
+
+    function syncInput() {
+      // input.files es de solo lectura: para quitar un archivo hay que
+      // reconstruir la lista con un DataTransfer y reasignarla.
+      var transfer = new DataTransfer();
+      entries.forEach(function (entry) {
+        transfer.items.add(entry.file);
+      });
+      input.files = transfer.files;
+    }
+
+    function removeEntry(index) {
+      var entry = entries[index];
+      if (entry && entry.preview) {
+        URL.revokeObjectURL(entry.preview);
+      }
+      entries.splice(index, 1);
+      syncInput();
+      render();
+    }
+
+    function buildRow(entry, index) {
+      var item = document.createElement("li");
+      item.className = "upload-selection__row";
+
+      var thumb = document.createElement("span");
+      thumb.className = "upload-selection__thumb";
+      if (entry.preview) {
+        var image = document.createElement("img");
+        image.src = entry.preview;
+        image.alt = "";
+        thumb.appendChild(image);
+      }
+
+      var body = document.createElement("div");
+      body.className = "upload-selection__body";
+
+      var name = document.createElement("p");
+      name.className = "upload-row__name";
+      name.textContent = entry.file.name;
+
+      var state = document.createElement("p");
+      state.className = "upload-row__state";
+      if (entry.problem) {
+        state.classList.add("upload-row__state--error");
+        state.textContent = humanSize(entry.file.size) + " · " + entry.problem;
+      } else {
+        state.classList.add("upload-row__state--ok");
+        state.textContent = humanSize(entry.file.size) + " · Listo para subir";
+      }
+
+      body.appendChild(name);
+      body.appendChild(state);
+
+      var remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "btn-icon upload-selection__remove";
+      remove.setAttribute("aria-label", "Quitar «" + entry.file.name + "»");
+      remove.textContent = "✕";
+      remove.addEventListener("click", function () {
+        removeEntry(index);
+      });
+
+      item.appendChild(thumb);
+      item.appendChild(body);
+      item.appendChild(remove);
+      return item;
+    }
+
+    function countLabel(skipped) {
+      var total = entries.length;
+      var label = total + (total === 1 ? " archivo" : " archivos");
+      var warned = entries.filter(function (entry) {
+        return entry.problem;
+      }).length;
+      if (warned) {
+        label += " · " + warned + (warned === 1 ? " con aviso" : " con avisos");
+      }
+      if (skipped) {
+        label +=
+          " · " +
+          skipped +
+          (skipped === 1 ? " repetido omitido" : " repetidos omitidos");
+      }
+      return label;
+    }
+
+    function render(skipped) {
+      list.textContent = "";
+      entries.forEach(function (entry, index) {
+        list.appendChild(buildRow(entry, index));
+      });
+      panel.hidden = entries.length === 0;
+      counter.textContent = countLabel(skipped);
+    }
+
+    function addFiles(fileList) {
+      var known = entries.map(function (entry) {
+        return fileKey(entry.file);
+      });
+      var skipped = 0;
+
+      Array.prototype.forEach.call(fileList, function (file) {
+        if (known.indexOf(fileKey(file)) !== -1) {
+          // Se ignora en vez de duplicarse: enviarlo dos veces crearía dos
+          // páginas idénticas con números distintos, y volver a elegir el
+          // mismo archivo casi siempre es un descuido.
+          skipped += 1;
+          return;
+        }
+        known.push(fileKey(file));
+        entries.push({
+          file: file,
+          problem: problemWith(file),
+          preview:
+            file.type.indexOf("image/") === 0 ? URL.createObjectURL(file) : null,
+        });
+      });
+
+      syncInput();
+      render(skipped);
+    }
+
+    input.addEventListener("change", function () {
+      addFiles(input.files);
+    });
+
+    if (dropzone) {
+      ["dragenter", "dragover"].forEach(function (name) {
+        dropzone.addEventListener(name, function (event) {
+          event.preventDefault();
+          dropzone.classList.add("dropzone--active");
+        });
+      });
+      ["dragleave", "drop"].forEach(function (name) {
+        dropzone.addEventListener(name, function () {
+          dropzone.classList.remove("dropzone--active");
+        });
+      });
+      dropzone.addEventListener("drop", function (event) {
+        event.preventDefault();
+        if (event.dataTransfer && event.dataTransfer.files.length) {
+          addFiles(event.dataTransfer.files);
+        }
+      });
+    }
+
+    form.addEventListener("submit", function () {
+      // Nunca se llama a preventDefault, ni siquiera con archivos marcados: el
+      // aviso del navegador es una comodidad, y la autoridad es el servidor,
+      // que revalida y responde con su propio mensaje.
+      Array.prototype.forEach.call(
+        list.querySelectorAll(".upload-row__state"),
+        function (state) {
+          state.classList.remove("upload-row__state--ok");
+          state.classList.remove("upload-row__state--error");
+          state.textContent = "Subiendo…";
+        },
+      );
+      Array.prototype.forEach.call(
+        list.querySelectorAll(".upload-selection__remove"),
+        function (button) {
+          button.disabled = true;
+        },
+      );
+    });
+  }
+
+  /* ---------------------------------------------------------------------------
      Arranque
      ------------------------------------------------------------------------ */
 
@@ -253,6 +487,10 @@
     Array.prototype.forEach.call(
       document.querySelectorAll("[data-submit-busy]"),
       bindSubmitBusy,
+    );
+    Array.prototype.forEach.call(
+      document.querySelectorAll("[data-upload-input]"),
+      bindUploadQueue,
     );
   }
 

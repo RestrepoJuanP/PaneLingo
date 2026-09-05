@@ -32,7 +32,7 @@
   <form method="post" action="{{ album.get_upload_url }}" enctype="multipart/form-data">
     {% csrf_token %}
 
-    <label class="dropzone" for="id_pages">
+    <label class="dropzone" for="id_pages" data-dropzone>
       <span class="dropzone__mark" aria-hidden="true"></span>
       <span class="dropzone__title">Arrastra aquí las páginas completas</span>
       <span class="dropzone__body">
@@ -44,6 +44,9 @@
       </span>
     </label>
 
+    {# Los límites se emiten desde el servidor como atributos de datos y el
+       navegador los lee de ahí. Ver el comentario de get_context_data: es lo
+       que impide que cliente y servidor acaben con dos cifras distintas. #}
     <input
       class="sr-only"
       type="file"
@@ -51,7 +54,25 @@
       name="pages"
       multiple
       accept="image/png,image/jpeg,image/webp"
+      data-upload-input
+      data-max-size="{{ max_file_size_bytes }}"
+      data-allowed-extensions="{{ allowed_extensions_raw }}"
     />
+
+    {# Cola de selección. La rellena el navegador antes de enviar; sin
+       JavaScript queda vacía y el formulario funciona igual. #}
+    <div
+      class="upload-selection"
+      data-upload-selection
+      aria-live="polite"
+      hidden
+    >
+      <div class="upload-selection__head">
+        <h2 class="card__title">Archivos seleccionados</h2>
+        <span class="upload-selection__count" data-upload-count></span>
+      </div>
+      <ul class="upload-selection__list" data-upload-list></ul>
+    </div>
 
     <div class="album-form__actions upload-actions">
       <a class="btn btn--secondary" href="{{ album.get_absolute_url }}">

@@ -503,3 +503,137 @@ class AlbumPageCountTests(PageUploadTestCase):
         self.album.delete()
 
         self.assertEqual(ComicPage.objects.count(), 0)
+
+
+class UploadQueueMarkupTests(PageUploadTestCase):
+    """Marcado que necesita la cola de selección en cliente (BUG-043).
+
+    El comportamiento es del navegador y las pruebas de Django no lo ejecutan.
+    Lo que sí se puede custodiar desde el servidor es el contrato entre ambos:
+    que los atributos existen y que los límites que emite el servidor son los
+    de settings.
+    """
+
+    def test_the_input_carries_the_limits_from_settings(self):
+        """Los límites del navegador salen de settings, no están escritos.
+
+        Es la prueba que impide que cliente y servidor acaben con dos cifras
+        distintas: si alguien cambia MAX_FILE_SIZE, el atributo lo sigue. Si
+        en cambio alguien escribiera el número a mano en el JavaScript, esta
+        prueba no lo vería, y por eso el propio archivo lleva la advertencia
+        de no hacerlo.
+        """
+        self.sign_in()
+
+        response = self.client.get(self.album.get_upload_url())
+        content = response.content.decode()
+
+        self.assertIn(f'data-max-size="{settings.MAX_FILE_SIZE}"', content)
+        self.assertIn(
+            f'data-allowed-extensions="{",".join(settings.ALLOWED_IMAGE_EXTENSIONS)}"',
+            content,
+        )
+
+    @override_settings(MAX_FILE_SIZE=5_000_000)
+    def test_changing_the_setting_changes_the_attribute(self):
+        """Cambiar el ajuste cambia lo que ve el navegador."""
+        self.sign_in()
+
+        response = self.client.get(self.album.get_upload_url())
+
+        self.assertContains(response, 'data-max-size="5000000"')
+
+    def test_the_queue_container_is_present_and_announced(self):
+        """La cola existe, arranca oculta y se anuncia a los lectores."""
+        self.sign_in()
+
+        response = self.client.get(self.album.get_upload_url())
+        content = response.content.decode()
+
+        self.assertIn("data-upload-selection", content)
+        self.assertIn('aria-live="polite"', content)
+        self.assertIn("data-upload-list", content)
+        self.assertIn("data-upload-count", content)
+
+    def test_the_dropzone_is_marked_for_drag_and_drop(self):
+        """La zona de carga está marcada para recibir archivos arrastrados."""
+        self.sign_in()
+
+        response = self.client.get(self.album.get_upload_url())
+
+        self.assertContains(response, "data-dropzone")
+
+    def test_the_form_still_works_without_javascript(self):
+        """El formulario sigue funcionando sin ejecutar ningún script.
+
+        El cliente de pruebas de Django no ejecuta JavaScript, así que este
+        POST recorre exactamente el camino de un navegador con los scripts
+        desactivados. La cola es una mejora progresiva, no un requisito.
+        """
+        self.sign_in()
+
+        response = self.upload(files=[make_upload("sin-scripts.png")])
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(ComicPage.objects.count(), 1)
+        self.assertEqual(ComicPage.objects.get().original_filename, "sin-scripts.png")
+
+    def test_the_input_is_still_reachable_by_its_label(self):
+        """El label sigue apuntando al input, que es lo que abre el selector."""
+        self.sign_in()
+
+        content = self.client.get(self.album.get_upload_url()).content.decode()
+
+        self.assertIn('for="id_pages"', content)
+        self.assertIn('id="id_pages"', content)
+        self.assertIn('name="pages"', content)
+        self.assertIn("multiple", content)
+
+
+class ServerValidationIsUnchangedTests(PageUploadTestCase):
+    """La retroalimentación en cliente no relajó la validación del servidor.
+
+    El aviso del navegador es una comodidad; la autoridad sigue siendo el
+    servidor. Estas pruebas repiten los rechazos de HU-09 para demostrar que
+    un archivo enviado sin pasar por el JavaScript se rechaza igual.
+    """
+
+    def test_a_fake_image_is_still_rejected(self):
+        """Un archivo que no es imagen se sigue rechazando."""
+        self.sign_in()
+        fake = SimpleUploadedFile(
+            "trampa.png", b"texto plano", content_type="image/png"
+        )
+
+        response = self.upload(files=[fake])
+
+        self.assertEqual(ComicPage.objects.count(), 0)
+        self.assertContains(response, "no es una imagen")
+
+    def test_an_oversized_file_is_still_rejected(self):
+        """Un archivo por encima del límite se sigue rechazando."""
+        self.sign_in()
+        oversized = SimpleUploadedFile(
+            "enorme.png",
+            b"x" * (settings.MAX_FILE_SIZE + 1),
+            content_type="image/png",
+        )
+
+        response = self.upload(files=[oversized])
+
+        self.assertEqual(ComicPage.objects.count(), 0)
+        self.assertContains(response, "el máximo por archivo")
+
+    def test_a_decompression_bomb_is_still_rejected(self):
+        """Una imagen de dimensiones desmesuradas se sigue rechazando."""
+        self.sign_in()
+        bomb = SimpleUploadedFile(
+            "bomba.png",
+            make_png_declaring_size(60000, 60000),
+            content_type="image/png",
+        )
+
+        response = self.upload(files=[bomb])
+
+        self.assertEqual(ComicPage.objects.count(), 0)
+        self.assertContains(response, "dimensiones desproporcionadas")
