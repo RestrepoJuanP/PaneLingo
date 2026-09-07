@@ -1,12 +1,14 @@
-{# Miniatura de página, con badge de estado opcional.
-   La relación de aspecto 3/4.24 viene del mockup.
+{% comment %}
+Miniatura de página, con badge de estado opcional.
+La relación de aspecto 3/4.24 viene del mockup.
 
-   La imagen que se sirve es la miniatura generada al cargar, no el original:
-   la rejilla muestra 146 px y descargar varias páginas de megapíxeles por
-   visita haría la pantalla inservible. Ver albums/services.build_thumbnail.
+La imagen que se sirve es la miniatura generada al cargar, no el original:
+la rejilla muestra 146 px y descargar varias páginas de megapíxeles por
+visita haría la pantalla inservible. Ver albums/services.build_thumbnail.
 
-   loading="lazy" evita además descargar las páginas que quedan fuera de la
-   parte visible hasta que se llega a ellas. #}
+loading="lazy" evita además descargar las páginas que quedan fuera de la
+parte visible hasta que se llega a ellas.
+{% endcomment %}
 <article class="page-thumb">
   <figure class="page-thumb__figure">
     {% if image_url %}
@@ -23,16 +25,13 @@
         Resolución baja
       </span>
     {% endif %}
-    {% if status_label %}
-      <span class="page-thumb__badge">
-        {% include "components/badge.html" with label=status_label variant=status_variant %}
-      </span>
-    {% endif %}
     {% if delete_url %}
-      {# Enlace de verdad: sin JavaScript navega a la página de confirmación.
-         El JavaScript lo intercepta para abrir el modal compartido, al que
-         pasa el número y la miniatura para que identifique sin ambigüedad
-         qué página se va a eliminar. #}
+      {% comment %}
+      Enlace de verdad: sin JavaScript navega a la página de confirmación.
+      El JavaScript lo intercepta para abrir el modal compartido, al que
+      pasa el número y la miniatura para que identifique sin ambigüedad
+      qué página se va a eliminar.
+      {% endcomment %}
       <a
         class="page-thumb__delete"
         href="{{ delete_url }}"
@@ -53,6 +52,9 @@
   <div class="page-thumb__body">
     <div class="page-thumb__row">
       <span class="page-thumb__label">Página {{ number }}</span>
+      {% if status_label %}
+        {% include "components/badge.html" with label=status_label variant=status_variant %}
+      {% endif %}
     </div>
   </div>
 </article>

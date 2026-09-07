@@ -1,15 +1,17 @@
 {% extends "layouts/app_shell.html" %}
 
-{# Detalle de álbum — HU-08.
-   Referencia visual: design/screenshots/album-detail.png.
+{% comment %}
+Detalle de álbum — HU-08.
+Referencia visual: design/screenshots/album-detail.png.
 
-   Del mockup quedan fuera, por depender de funcionalidad ajena al Sprint 1:
-   - El panel "Translation progress" y su leyenda de bloques.
-   - Los estados de página (Approved / Needs review / Untranslated) y sus
-     filtros.
-   - Los botones "Open workspace" y "Review & export".
-   El área de páginas muestra su estado vacío hasta que HU-09 permita
-   cargarlas. #}
+Del mockup quedan fuera, por depender de funcionalidad ajena al Sprint 1:
+- El panel "Translation progress" y su leyenda de bloques.
+- Los estados de página (Approved / Needs review / Untranslated) y sus
+filtros.
+- Los botones "Open workspace" y "Review & export".
+El área de páginas muestra su estado vacío hasta que HU-09 permita
+cargarlas.
+{% endcomment %}
 
 {% block title %}{{ album.title }} · PaneLingo{% endblock %}
 
@@ -45,9 +47,11 @@
       <div class="album-detail__actions">
         <a class="btn btn--primary" href="{{ album.get_upload_url }}">Añadir páginas</a>
         <a class="btn btn--secondary" href="{{ album.get_edit_url }}">Editar álbum</a>
-        {# Eliminar álbum no tiene HU, CA ni CP en el Sprint 1. Se maqueta con
-           el estilo destructivo del mockup pero deshabilitado, con la razón a
-           la vista, para no prometer una acción que no existe. #}
+        {% comment %}
+        Eliminar álbum no tiene HU, CA ni CP en el Sprint 1. Se maqueta con
+        el estilo destructivo del mockup pero deshabilitado, con la razón a
+        la vista, para no prometer una acción que no existe.
+        {% endcomment %}
         <span
           class="btn btn--danger"
           aria-disabled="true"
@@ -72,15 +76,17 @@
   {% if album.pages.exists %}
     <div class="page-grid">
       {% for page in album.pages.all %}
-        {% include "components/page_thumb.html" with number=page.page_number image_url=page.display_image.url alt=page.original_filename status_label=page.get_status_display status_variant="neutral" warning=page.has_low_resolution delete_url=page.get_delete_url %}
+        {% include "components/page_thumb.html" with number=page.page_number image_url=page.display_image.url alt=page.original_filename status_label=page.short_status_display status_variant="neutral" warning=page.has_low_resolution delete_url=page.get_delete_url %}
       {% endfor %}
     </div>
   {% else %}
     {% include "components/empty_state.html" with title="Este álbum aún no tiene páginas" body="Carga las páginas completas de la obra para empezar a trabajar sobre ellas. Podrás añadir más en cualquier momento." action_label="Cargar páginas" action_url=album.get_upload_url %}
   {% endif %}
-  {# Modal de confirmación de borrado, uno solo para toda la rejilla. El
-     JavaScript lo rellena con el número y la miniatura de la página pulsada;
-     sin JavaScript, el enlace navega a la página de confirmación. #}
+  {% comment %}
+  Modal de confirmación de borrado, uno solo para toda la rejilla. El
+  JavaScript lo rellena con el número y la miniatura de la página pulsada;
+  sin JavaScript, el enlace navega a la página de confirmación.
+  {% endcomment %}
   <div
     class="modal"
     id="eliminar-pagina"

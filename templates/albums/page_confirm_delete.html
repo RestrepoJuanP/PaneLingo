@@ -1,8 +1,10 @@
 {% extends "layouts/app_shell.html" %}
 
-{# Confirmar la eliminación de una página — HU-10, página propia.
-   Es la degradación del modal para cuando el JavaScript no está disponible.
-   Un GET llega aquí y NO borra nada; solo el POST elimina. #}
+{% comment %}
+Confirmar la eliminación de una página — HU-10, página propia.
+Es la degradación del modal para cuando el JavaScript no está disponible.
+Un GET llega aquí y NO borra nada; solo el POST elimina.
+{% endcomment %}
 
 {% block title %}Eliminar página {{ page.page_number }} · PaneLingo{% endblock %}
 

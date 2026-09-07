@@ -1,6 +1,8 @@
-{# Ítem de la navegación lateral.
-   Los destinos fuera del alcance del Sprint 1 se maquetan deshabilitados,
-   con aria-disabled y una indicación textual de que llegan más adelante. #}
+{% comment %}
+Ítem de la navegación lateral.
+Los destinos fuera del alcance del Sprint 1 se maquetan deshabilitados,
+con aria-disabled y una indicación textual de que llegan más adelante.
+{% endcomment %}
 {% if disabled %}
   <span class="nav-item" aria-disabled="true">
     {% include "components/nav_icon.html" with icon=icon %}

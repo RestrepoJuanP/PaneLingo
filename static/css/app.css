@@ -2327,7 +2327,7 @@ textarea {
 .page-thumb__delete {
   position: absolute;
   top: var(--sp-2);
-  left: var(--sp-2);
+  right: var(--sp-2);
   width: 24px;
   height: 24px;
   display: inline-flex;
@@ -2350,10 +2350,13 @@ textarea {
   text-decoration: none;
 }
 
-/* Cuando la página lleva advertencia de resolución, el aviso ocupa la esquina
-   superior izquierda y la acción de borrar baja para no taparlo. */
-.page-thumb__warning ~ .page-thumb__delete {
-  top: calc(var(--sp-2) + 22px);
+/* El chip de estado vive en el cuerpo de la tarjeta, como en el mockup, así
+   que las dos esquinas superiores quedan libres: el aviso de resolución a la
+   izquierda y la acción de eliminar a la derecha, sin solaparse. */
+.page-thumb__row .badge {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .page-delete__preview {

@@ -22,8 +22,10 @@
 
     {% block body %}{% endblock %}
 
-    {# Región de mensajes. aria-live="polite" para que un lector de pantalla
-       anuncie el mensaje sin interrumpir lo que esté leyendo. #}
+    {% comment %}
+    Región de mensajes. aria-live="polite" para que un lector de pantalla
+    anuncie el mensaje sin interrumpir lo que esté leyendo.
+    {% endcomment %}
     <div
       class="toasts"
       role="status"

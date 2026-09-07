@@ -246,6 +246,25 @@ class ComicPage(models.Model):
         """Devuelve la página identificada por su número."""
         return f"Página {self.page_number}"
 
+    # Etiqueta breve para el chip de la rejilla. La celda mide 146 px y la
+    # etiqueta larga de PENDING, "Pendiente de procesamiento", no cabe: con
+    # white-space: nowrap se desbordaba y pisaba las acciones de la miniatura.
+    # El mockup usa etiquetas de entre ocho y doce caracteres por el mismo
+    # motivo. La forma larga se sigue usando donde hay sitio, como la cola de
+    # carga.
+    SHORT_STATUS_LABELS = {
+        "pending": _("Pendiente"),
+        "processing": _("Procesando"),
+        "processed": _("Procesada"),
+        "needs_review": _("Revisar"),
+        "approved": _("Aprobada"),
+    }
+
+    @property
+    def short_status_display(self):
+        """Devuelve la etiqueta breve del estado, para la rejilla."""
+        return self.SHORT_STATUS_LABELS.get(self.status, self.get_status_display())
+
     def get_delete_url(self):
         """Devuelve la dirección para eliminar esta página."""
         return reverse("albums:page_delete", kwargs={"pk": self.pk})

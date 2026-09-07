@@ -1,12 +1,14 @@
-{# Campo de formulario.
-   Toda entrada lleva su <label> asociado por for/id. El placeholder es una
-   ayuda complementaria, nunca la única etiqueta.
+{% comment %}
+Campo de formulario.
+Toda entrada lleva su <label> asociado por for/id. El placeholder es una
+ayuda complementaria, nunca la única etiqueta.
 
-   Los errores van en un ÚNICO contenedor con un solo id, no uno por error:
-   un campo puede fallar varias validaciones a la vez —los validadores de
-   contraseña de Django devuelven varias— y un id repetido rompería el
-   aria-describedby que apunta a él. El propio aria-describedby lo emite el
-   formulario, en UserRegistrationForm._apply_accessibility_attrs. #}
+Los errores van en un ÚNICO contenedor con un solo id, no uno por error:
+un campo puede fallar varias validaciones a la vez —los validadores de
+contraseña de Django devuelven varias— y un id repetido rompería el
+aria-describedby que apunta a él. El propio aria-describedby lo emite el
+formulario, en UserRegistrationForm._apply_accessibility_attrs.
+{% endcomment %}
 <div class="field">
   <label class="field__label" for="{{ field.id_for_label }}">
     {{ field.label }}{% if field.field.required %} <span class="field__required" aria-hidden="true">*</span>{% endif %}

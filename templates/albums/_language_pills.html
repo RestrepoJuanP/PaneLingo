@@ -1,16 +1,18 @@
-{# Selector de idioma con apariencia de pill, construido sobre un grupo de
-   radios NATIVO. No son botones, y es deliberado:
+{% comment %}
+Selector de idioma con apariencia de pill, construido sobre un grupo de
+radios NATIVO. No son botones, y es deliberado:
 
-   - Las flechas del teclado recorren el grupo por sí solas, que es lo que un
-     lector de pantalla espera de una elección única. Con botones habría que
-     programarlo a mano, y es fácil equivocarse.
-   - El formulario se envía sin JavaScript.
-   - El campo obligatorio lo aplica el servidor sobre un valor real, no sobre
-     un input oculto que rellena un script.
+- Las flechas del teclado recorren el grupo por sí solas, que es lo que un
+lector de pantalla espera de una elección única. Con botones habría que
+programarlo a mano, y es fácil equivocarse.
+- El formulario se envía sin JavaScript.
+- El campo obligatorio lo aplica el servidor sobre un valor real, no sobre
+un input oculto que rellena un script.
 
-   El input está oculto visualmente pero sigue siendo enfocable: la apariencia
-   la pone su <label>, con los tokens --pill-* de DESIGN_TOKENS.md.
-   NO lo conviertas en botones creyendo que lo simplificas. #}
+El input está oculto visualmente pero sigue siendo enfocable: la apariencia
+la pone su <label>, con los tokens --pill-* de DESIGN_TOKENS.md.
+NO lo conviertas en botones creyendo que lo simplificas.
+{% endcomment %}
 <fieldset
   class="pill-field"
   {% if field.errors %}
