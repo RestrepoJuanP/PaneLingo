@@ -1,9 +1,11 @@
 {% extends "base.html" %}
 
-{# Layout dividido de autenticación.
-   Referencia: design/screenshots/auth-login.png y auth-create-account.png.
-   El panel oscuro es --surface-navy plano; los degradados están solo en las
-   viñetas de la ilustración. #}
+{% comment %}
+Layout dividido de autenticación.
+Referencia: design/screenshots/auth-login.png y auth-create-account.png.
+El panel oscuro es --surface-navy plano; los degradados están solo en las
+viñetas de la ilustración.
+{% endcomment %}
 
 {% block body %}
   <div class="auth">
@@ -14,13 +16,15 @@
       </div>
 
       <div class="auth__pitch">
-        {# Ilustración de viñetas: composición abstracta propia, generada con
-           CSS. Sin imágenes empaquetadas, sin personajes y sin obra de
-           terceros. Los tres textos del lettering están escritos para
-           PaneLingo y hablan de lo que hace el producto; la onomatopeya es
-           una acuñación nuestra, no una expresión tomada de una obra
-           publicada. Decorativa, por eso queda oculta a los lectores de
-           pantalla. #}
+        {% comment %}
+        Ilustración de viñetas: composición abstracta propia, generada con
+        CSS. Sin imágenes empaquetadas, sin personajes y sin obra de
+        terceros. Los tres textos del lettering están escritos para
+        PaneLingo y hablan de lo que hace el producto; la onomatopeya es
+        una acuñación nuestra, no una expresión tomada de una obra
+        publicada. Decorativa, por eso queda oculta a los lectores de
+        pantalla.
+        {% endcomment %}
         <div class="auth__art" aria-hidden="true">
           <div class="auth__frame auth__frame--1">
             <span class="auth__bubble">Espera. Esta frase no es así.</span>

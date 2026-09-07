@@ -1,18 +1,20 @@
 {% extends "layouts/auth_shell.html" %}
 
-{# Iniciar sesión — HU-02.
-   Referencia visual: design/screenshots/auth-login.png.
+{% comment %}
+Iniciar sesión — HU-02.
+Referencia visual: design/screenshots/auth-login.png.
 
-   Diferencias deliberadas respecto a la captura:
-   - Se omite "Continue with studio SSO" y su separador: el inicio de sesión
-     federado es una función de equipo, fuera del alcance del Sprint 1.
-   - La casilla "Mantener la sesión iniciada" se renderiza DESMARCADA. En la
-     captura aparece marcada, pero una cookie persistente de catorce días
-     debería ser una decisión consciente y no algo que el usuario se lleva sin
-     advertirlo, sobre todo en equipos compartidos.
+Diferencias deliberadas respecto a la captura:
+- Se omite "Continue with studio SSO" y su separador: el inicio de sesión
+federado es una función de equipo, fuera del alcance del Sprint 1.
+- La casilla "Mantener la sesión iniciada" se renderiza DESMARCADA. En la
+captura aparece marcada, pero una cookie persistente de catorce días
+debería ser una decisión consciente y no algo que el usuario se lleva sin
+advertirlo, sobre todo en equipos compartidos.
 
-   El enlace "¿Olvidaste tu contraseña?" lleva al flujo de recuperación
-   (HU-04). #}
+El enlace "¿Olvidaste tu contraseña?" lleva al flujo de recuperación
+(HU-04).
+{% endcomment %}
 
 {% block title %}Iniciar sesión · PaneLingo{% endblock %}
 

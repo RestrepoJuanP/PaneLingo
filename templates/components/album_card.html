@@ -1,8 +1,10 @@
-{# Tarjeta de álbum.
-   Adaptación al Sprint 1: el metadato del mockup ("24 pages · 7 approved ·
-   93 blocks left") se reduce al número de páginas, porque en este sprint no
-   existen bloques, aprobaciones ni traducciones. La barra de progreso está
-   construida en el sistema de diseño pero no se muestra aquí. #}
+{% comment %}
+Tarjeta de álbum.
+Adaptación al Sprint 1: el metadato del mockup ("24 pages · 7 approved ·
+93 blocks left") se reduce al número de páginas, porque en este sprint no
+existen bloques, aprobaciones ni traducciones. La barra de progreso está
+construida en el sistema de diseño pero no se muestra aquí.
+{% endcomment %}
 <article class="album-card">
   <a href="{{ album_url|default:'#' }}" tabindex="-1" aria-hidden="true">
     {% include "components/album_cover.html" with seed=seed cover_image=cover_image lang_pair=lang_pair status_label=status_label status_variant=status_variant extra_class="album-card__cover" %}
@@ -12,12 +14,14 @@
     <div class="album-card__head">
       <a class="album-card__title" href="{{ album_url|default:'#' }}">{{ title }}</a>
       {% if rename_url %}
-        {# Renombrar es la única acción de álbum del Sprint 1: eliminar está
-           deshabilitado, y duplicar y archivar quedan fuera de alcance. Un
-           menú "···" de un solo elemento costaría un clic extra y toda la
-           maquinaria de foco atrapado para nada, así que la acción va
-           directa. El aria-label incluye el título para que un lector de
-           pantalla distinga un "Renombrar" de otro al recorrer la rejilla. #}
+        {% comment %}
+        Renombrar es la única acción de álbum del Sprint 1: eliminar está
+        deshabilitado, y duplicar y archivar quedan fuera de alcance. Un
+        menú "···" de un solo elemento costaría un clic extra y toda la
+        maquinaria de foco atrapado para nada, así que la acción va
+        directa. El aria-label incluye el título para que un lector de
+        pantalla distinga un "Renombrar" de otro al recorrer la rejilla.
+        {% endcomment %}
         <a
           class="btn-icon"
           href="{{ rename_url }}"

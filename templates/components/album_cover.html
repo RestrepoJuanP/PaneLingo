@@ -1,8 +1,10 @@
-{# Portada de álbum.
-   Si el álbum ya tiene páginas cargadas, la primera página es la portada.
-   Si no, se genera una composición abstracta determinista a partir del
-   identificador: mismas viñetas y mismos degradados en cada visita, sin
-   imágenes externas ni obra con derechos. #}
+{% comment %}
+Portada de álbum.
+Si el álbum ya tiene páginas cargadas, la primera página es la portada.
+Si no, se genera una composición abstracta determinista a partir del
+identificador: mismas viñetas y mismos degradados en cada visita, sin
+imágenes externas ni obra con derechos.
+{% endcomment %}
 {% load design %}
 <div class="cover {{ extra_class|default:'' }}">
   {% if cover_image %}

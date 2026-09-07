@@ -1,7 +1,9 @@
-{# Modal de confirmación.
-   Accesible: role="dialog", aria-modal, título asociado por aria-labelledby.
-   El foco queda atrapado dentro y se cierra con Escape; eso lo gestiona
-   static/js/app.js. #}
+{% comment %}
+Modal de confirmación.
+Accesible: role="dialog", aria-modal, título asociado por aria-labelledby.
+El foco queda atrapado dentro y se cierra con Escape; eso lo gestiona
+static/js/app.js.
+{% endcomment %}
 <div
   class="modal"
   id="{{ modal_id }}"

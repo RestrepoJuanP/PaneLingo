@@ -1,12 +1,14 @@
 {% extends "layouts/app_shell.html" %}
 
-{# Cargar páginas — HU-09.
-   Referencia visual: design/screenshots/upload-and-scan.png.
+{% comment %}
+Cargar páginas — HU-09.
+Referencia visual: design/screenshots/upload-and-scan.png.
 
-   Del mockup queda fuera todo lo que pertenece a OCR y traducción: el panel
-   "Scan settings" completo, el orden de lectura, "Why we ask for whole pages"
-   y el botón "Start translating". Aquí solo se cargan archivos y se informa
-   del resultado de cada uno. #}
+Del mockup queda fuera todo lo que pertenece a OCR y traducción: el panel
+"Scan settings" completo, el orden de lectura, "Why we ask for whole pages"
+y el botón "Start translating". Aquí solo se cargan archivos y se informa
+del resultado de cada uno.
+{% endcomment %}
 
 {% block title %}Cargar páginas · {{ album.title }} · PaneLingo{% endblock %}
 
@@ -44,9 +46,11 @@
       </span>
     </label>
 
-    {# Los límites se emiten desde el servidor como atributos de datos y el
-       navegador los lee de ahí. Ver el comentario de get_context_data: es lo
-       que impide que cliente y servidor acaben con dos cifras distintas. #}
+    {% comment %}
+    Los límites se emiten desde el servidor como atributos de datos y el
+    navegador los lee de ahí. Ver el comentario de get_context_data: es lo
+    que impide que cliente y servidor acaben con dos cifras distintas.
+    {% endcomment %}
     <input
       class="sr-only"
       type="file"
@@ -59,8 +63,10 @@
       data-allowed-extensions="{{ allowed_extensions_raw }}"
     />
 
-    {# Cola de selección. La rellena el navegador antes de enviar; sin
-       JavaScript queda vacía y el formulario funciona igual. #}
+    {% comment %}
+    Cola de selección. La rellena el navegador antes de enviar; sin
+    JavaScript queda vacía y el formulario funciona igual.
+    {% endcomment %}
     <div
       class="upload-selection"
       data-upload-selection

@@ -1,18 +1,20 @@
 {% extends "layouts/auth_shell.html" %}
 
-{# Crear cuenta — HU-01.
-   Referencia visual: design/screenshots/auth-create-account.png.
+{% comment %}
+Crear cuenta — HU-01.
+Referencia visual: design/screenshots/auth-create-account.png.
 
-   Dos diferencias deliberadas respecto a la captura:
-   - Se añade el campo de confirmación de contraseña, que el mockup no tiene.
-   - Se omite el selector de perfil ("Freelance translator / Comic creator /
-     Localization team"). No corresponde a ninguna HU, CA ni CP del Sprint 1,
-     y un control deshabilitado dentro de un formulario que hay que completar
-     se lee como un paso obligatorio que no se puede cumplir. Cuando llegue su
-     historia de usuario, va entre la contraseña y la casilla de términos.
+Dos diferencias deliberadas respecto a la captura:
+- Se añade el campo de confirmación de contraseña, que el mockup no tiene.
+- Se omite el selector de perfil ("Freelance translator / Comic creator /
+Localization team"). No corresponde a ninguna HU, CA ni CP del Sprint 1,
+y un control deshabilitado dentro de un formulario que hay que completar
+se lee como un paso obligatorio que no se puede cumplir. Cuando llegue su
+historia de usuario, va entre la contraseña y la casilla de términos.
 
-   La casilla de términos no enlaza a ninguna página: en el Sprint 1 no existe
-   una de términos, y un enlace muerto es peor que texto plano. #}
+La casilla de términos no enlaza a ninguna página: en el Sprint 1 no existe
+una de términos, y un enlace muerto es peor que texto plano.
+{% endcomment %}
 
 {% block title %}Crear cuenta · PaneLingo{% endblock %}
 

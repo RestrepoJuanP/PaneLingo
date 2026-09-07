@@ -1,12 +1,14 @@
 {% extends "layouts/app_shell.html" %}
 
-{# Editar álbum — HU-08.
-   Reutiliza AlbumForm, así que los campos editables son los que definieron
-   HU-06 y HU-07: título e idiomas.
+{% comment %}
+Editar álbum — HU-08.
+Reutiliza AlbumForm, así que los campos editables son los que definieron
+HU-06 y HU-07: título e idiomas.
 
-   "Cancelar" es un enlace de vuelta al detalle, NO un botón de envío. Al no
-   producirse ningún POST, no se escribe nada en la base de datos, ni siquiera
-   updated_at, que es lo que exige CA-08.2. #}
+"Cancelar" es un enlace de vuelta al detalle, NO un botón de envío. Al no
+producirse ningún POST, no se escribe nada en la base de datos, ni siquiera
+updated_at, que es lo que exige CA-08.2.
+{% endcomment %}
 
 {% block title %}Editar {{ album.title }} · PaneLingo{% endblock %}
 

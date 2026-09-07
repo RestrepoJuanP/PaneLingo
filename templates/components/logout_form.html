@@ -1,7 +1,9 @@
-{# Cerrar sesión (HU-03).
-   Siempre por POST y con csrf_token: un GET no debe cerrar la sesión.
-   Se usa tanto en el bloque de perfil de la barra lateral como en la
-   navegación inferior de móvil, con la clase que corresponda a cada sitio. #}
+{% comment %}
+Cerrar sesión (HU-03).
+Siempre por POST y con csrf_token: un GET no debe cerrar la sesión.
+Se usa tanto en el bloque de perfil de la barra lateral como en la
+navegación inferior de móvil, con la clase que corresponda a cada sitio.
+{% endcomment %}
 <form method="post" action="{% url 'accounts:logout' %}" class="{{ form_class|default:'' }}">
   {% csrf_token %}
   <button type="submit" class="{{ button_class|default:'btn btn--secondary' }}">

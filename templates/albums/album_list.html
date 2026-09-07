@@ -1,15 +1,17 @@
 {% extends "layouts/app_shell.html" %}
 
-{# Biblioteca de álbumes — HU-05.
-   Referencia visual: design/screenshots/dashboard-library.png.
+{% comment %}
+Biblioteca de álbumes — HU-05.
+Referencia visual: design/screenshots/dashboard-library.png.
 
-   Adaptaciones al alcance del Sprint 1, ya acordadas en la Etapa 2:
-   - Sin banda "Pick up where you left off": depende del workspace.
-   - Sin tarjetas de estadística: de las cuatro del mockup solo una tendría
-     dato real, y una sola en una grilla de cuatro se lee como un fallo.
-   - Sin barra de progreso en las tarjetas: no hay traducción todavía.
-   - Sin filtros por estado: en este sprint ninguna historia cambia el estado,
-     así que cuatro de los cinco devolverían siempre lista vacía. #}
+Adaptaciones al alcance del Sprint 1, ya acordadas en la Etapa 2:
+- Sin banda "Pick up where you left off": depende del workspace.
+- Sin tarjetas de estadística: de las cuatro del mockup solo una tendría
+dato real, y una sola en una grilla de cuatro se lee como un fallo.
+- Sin barra de progreso en las tarjetas: no hay traducción todavía.
+- Sin filtros por estado: en este sprint ninguna historia cambia el estado,
+así que cuatro de los cinco devolverían siempre lista vacía.
+{% endcomment %}
 
 {% block title %}Mis álbumes · PaneLingo{% endblock %}
 
@@ -29,8 +31,10 @@
       </p>
     </div>
     <div class="page-head__actions">
-      {# Enlace de verdad: sin JavaScript navega a la página propia de
-         creación. El JavaScript lo intercepta para abrir el modal. #}
+      {% comment %}
+      Enlace de verdad: sin JavaScript navega a la página propia de
+      creación. El JavaScript lo intercepta para abrir el modal.
+      {% endcomment %}
       <a
         class="btn btn--primary"
         href="{% url 'albums:create' %}"
@@ -58,9 +62,11 @@
     {% include "components/empty_state.html" with title="Todavía no tienes álbumes" body="Un álbum agrupa las páginas de un cómic, un tomo de manga o una temporada de webtoon. Crea el primero para empezar a organizar tu trabajo." action_label="Crear mi primer álbum" action_url=create_url action_modal="crear-album" %}
   {% endif %}
 
-  {# Modal de renombrado, uno solo para toda la rejilla. El JavaScript lo
-     rellena con la dirección y el título del álbum sobre el que se pulsó; sin
-     JavaScript, el enlace navega a la página propia de renombrado. #}
+  {% comment %}
+  Modal de renombrado, uno solo para toda la rejilla. El JavaScript lo
+  rellena con la dirección y el título del álbum sobre el que se pulsó; sin
+  JavaScript, el enlace navega a la página propia de renombrado.
+  {% endcomment %}
   <div
     class="modal"
     id="renombrar-album"
@@ -102,8 +108,10 @@
     </div>
   </div>
 
-  {# Modal de creación. Sin JavaScript nunca se abre, y el botón de arriba
-     navega a la página propia con el mismo formulario. #}
+  {% comment %}
+  Modal de creación. Sin JavaScript nunca se abre, y el botón de arriba
+  navega a la página propia con el mismo formulario.
+  {% endcomment %}
   <div
     class="modal"
     id="crear-album"

@@ -1,19 +1,21 @@
 {% extends "base.html" %}
 
-{# Shell de la aplicación: barra lateral de 246px, contenido sobre --bg y
-   header sticky con miga de pan.
-   Referencia: design/screenshots/dashboard-library.png.
+{% comment %}
+Shell de la aplicación: barra lateral de 246px, contenido sobre --bg y
+header sticky con miga de pan.
+Referencia: design/screenshots/dashboard-library.png.
 
-   Adaptaciones al alcance del Sprint 1:
-   - Los seis destinos del mockup se maquetan para conservar la composición,
-     pero solo Álbumes y Cargar páginas son funcionales. El resto va en estado
-     deshabilitado con aria-disabled.
-   - Sin badge numérico en Revisión: ese dato no existe.
-   - El bloque inferior conserva avatar, nombre, correo y "Cerrar sesión"
-     (HU-03). Se eliminan los créditos mensuales y el badge de plan: son
-     facturación, fuera de alcance.
-   - La miga de pan no lleva el nivel de estudio del mockup, que es una
-     función de equipo fuera de alcance. #}
+Adaptaciones al alcance del Sprint 1:
+- Los seis destinos del mockup se maquetan para conservar la composición,
+pero solo Álbumes y Cargar páginas son funcionales. El resto va en estado
+deshabilitado con aria-disabled.
+- Sin badge numérico en Revisión: ese dato no existe.
+- El bloque inferior conserva avatar, nombre, correo y "Cerrar sesión"
+(HU-03). Se eliminan los créditos mensuales y el badge de plan: son
+facturación, fuera de alcance.
+- La miga de pan no lleva el nivel de estudio del mockup, que es una
+función de equipo fuera de alcance.
+{% endcomment %}
 
 {% url 'albums:list' as albums_url %}
 {% url 'albums:upload_choose' as upload_url %}
@@ -68,10 +70,12 @@
       {% include "components/mobile_nav_item.html" with label="Cargar" icon="upload" url=upload_url current=nav_current|default:"" key="upload" %}
       {% include "components/mobile_nav_item.html" with label="Traducción" icon="workspace" disabled=True %}
       {% include "components/mobile_nav_item.html" with label="Revisión" icon="review" disabled=True %}
-      {# "Salir" ocupa el hueco que en el mockup lleva a Configuración. Esa
-         pantalla está fuera del alcance del Sprint 1, así que su ítem no
-         representaba nada; cerrar sesión, en cambio, debe ser alcanzable en
-         móvil, donde no existe la barra lateral. #}
+      {% comment %}
+      "Salir" ocupa el hueco que en el mockup lleva a Configuración. Esa
+      pantalla está fuera del alcance del Sprint 1, así que su ítem no
+      representaba nada; cerrar sesión, en cambio, debe ser alcanzable en
+      móvil, donde no existe la barra lateral.
+      {% endcomment %}
       {% include "components/logout_form.html" with form_class="mobile-nav__form" button_class="mobile-nav__item" with_icon=True %}
     </nav>
   </div>

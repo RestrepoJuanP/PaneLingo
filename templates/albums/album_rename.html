@@ -1,8 +1,10 @@
 {% extends "layouts/app_shell.html" %}
 
-{# Renombrar álbum — HU-06, página propia.
-   Es la degradación del modal para cuando el JavaScript no está disponible, y
-   el destino donde aterrizan los errores de validación enviados desde él. #}
+{% comment %}
+Renombrar álbum — HU-06, página propia.
+Es la degradación del modal para cuando el JavaScript no está disponible, y
+el destino donde aterrizan los errores de validación enviados desde él.
+{% endcomment %}
 
 {% block title %}Renombrar {{ album.title }} · PaneLingo{% endblock %}
 

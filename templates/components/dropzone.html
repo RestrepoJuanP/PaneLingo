@@ -1,5 +1,7 @@
-{# Zona de carga de archivos. Referencia: design/screenshots/upload-and-scan.png.
-   Se usará en la HU-09 (cargar páginas). #}
+{% comment %}
+Zona de carga de archivos. Referencia: design/screenshots/upload-and-scan.png.
+Se usará en la HU-09 (cargar páginas).
+{% endcomment %}
 <label class="dropzone" for="{{ input_id|default:'id_pages' }}">
   <span class="dropzone__mark" aria-hidden="true"></span>
   <span class="dropzone__title">{{ title|default:"Arrastra aquí las páginas completas" }}</span>
