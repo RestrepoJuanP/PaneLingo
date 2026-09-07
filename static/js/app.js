@@ -45,6 +45,19 @@
     if (field && typeof trigger.dataset.modalValue === "string") {
       field.value = trigger.dataset.modalValue;
     }
+    // Texto e imagen permiten que un modal compartido identifique sin
+    // ambigüedad el elemento sobre el que se pulsó, y no solo lo apunte en la
+    // acción del formulario.
+    var text = modal.querySelector("[data-modal-text]");
+    if (text && typeof trigger.dataset.modalText === "string") {
+      text.textContent = trigger.dataset.modalText;
+    }
+    var image = modal.querySelector("[data-modal-image]");
+    if (image && trigger.dataset.modalImage) {
+      image.src = trigger.dataset.modalImage;
+      image.alt = trigger.dataset.modalText || "";
+      image.hidden = false;
+    }
   }
 
   function openModal(modal, trigger) {

@@ -1,0 +1,20 @@
+==============================================================================
+PaneLingo — Evidencia del Quality Gate
+==============================================================================
+Etapa           : 11
+Paso            : 2 de 7 — Black — formato
+Comando         : black .
+Herramienta     : black, 25.12.0 (compiled: yes)
+Fecha y hora    : 2026-09-04T22:12:26-05:00
+Rama            : feature/HU-10-delete-page
+Commit          : 18f641551c0775ff019cd87332d36e7678c48a41
+Arbol de trabajo: limpio
+Directorio      : /f/PaneLingo
+==============================================================================
+
+All done! ✨ 🍰 ✨
+51 files left unchanged.
+
+==============================================================================
+Codigo de salida: 0  (CORRECTO)
+==============================================================================

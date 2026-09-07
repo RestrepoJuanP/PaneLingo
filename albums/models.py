@@ -246,6 +246,10 @@ class ComicPage(models.Model):
         """Devuelve la página identificada por su número."""
         return f"Página {self.page_number}"
 
+    def get_delete_url(self):
+        """Devuelve la dirección para eliminar esta página."""
+        return reverse("albums:page_delete", kwargs={"pk": self.pk})
+
     @property
     def has_low_resolution(self):
         """Indica si la página lleva advertencia de baja resolución.

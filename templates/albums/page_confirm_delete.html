@@ -1,0 +1,57 @@
+{% extends "layouts/app_shell.html" %}
+
+{# Confirmar la eliminación de una página — HU-10, página propia.
+   Es la degradación del modal para cuando el JavaScript no está disponible.
+   Un GET llega aquí y NO borra nada; solo el POST elimina. #}
+
+{% block title %}Eliminar página {{ page.page_number }} · PaneLingo{% endblock %}
+
+{% block breadcrumb %}
+  <a class="breadcrumb__link" href="{% url 'albums:list' %}">Mis álbumes</a>
+  <span class="breadcrumb__sep" aria-hidden="true">/</span>
+  <a class="breadcrumb__link" href="{{ page.album.get_absolute_url }}">{{ page.album.title }}</a>
+  <span class="breadcrumb__sep" aria-hidden="true">/</span>
+  <span class="breadcrumb__current">Eliminar página {{ page.page_number }}</span>
+{% endblock %}
+
+{% block content %}
+  <div class="page-head">
+    <div>
+      <h1 class="page-title">¿Eliminar esta página?</h1>
+      <p class="page-subtitle">
+        Se eliminará la imagen del álbum y no se podrá recuperar.
+      </p>
+    </div>
+  </div>
+
+  <div class="card album-form">
+    <div class="page-delete__preview">
+      <img
+        class="page-delete__thumb"
+        src="{{ page.display_image.url }}"
+        alt="Página {{ page.page_number }}"
+      />
+      <p class="page-delete__label">
+        Página {{ page.page_number }} · {{ page.original_filename }}
+      </p>
+    </div>
+
+    <p class="modal__body">
+      Las demás páginas conservan su número: un hueco en la secuencia indica
+      que a la obra le falta esa página.
+    </p>
+
+    <form method="post" action="{{ page.get_delete_url }}">
+      {% csrf_token %}
+      <div class="album-form__actions">
+        <a class="btn btn--secondary" href="{{ page.album.get_absolute_url }}">
+          Cancelar
+        </a>
+        <button type="submit" class="btn btn--danger-solid" data-submit-busy>
+          <span class="btn__spinner" hidden aria-hidden="true"></span>
+          <span data-submit-label data-busy-label="Eliminando…">Eliminar página</span>
+        </button>
+      </div>
+    </form>
+  </div>
+{% endblock %}
