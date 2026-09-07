@@ -1,0 +1,13 @@
+==============================================================================
+PaneLingo — Evidencia de cierre del Sprint 1
+==============================================================================
+Comando         : python manage.py makemigrations --check --dry-run
+Herramienta     : Python 3.12.10 / Django 5.2.17
+Fecha y hora    : 2026-09-07T12:30:52-05:00
+Rama            : docs/sprint-1-evidence
+Commit          : 1eaa4ac25c8f6147081b557cd2d8f61b163e2965
+==============================================================================
+
+No changes detected
+
+[codigo de salida: 0]

@@ -1,0 +1,20 @@
+==============================================================================
+PaneLingo — Evidencia del Quality Gate
+==============================================================================
+Etapa           : 12
+Paso            : 4 de 7 — Black — verificacion de formato
+Comando         : black --check .
+Herramienta     : black, 25.12.0 (compiled: yes)
+Fecha y hora    : 2026-09-07T12:38:50-05:00
+Rama            : docs/sprint-1-evidence
+Commit          : 1eaa4ac25c8f6147081b557cd2d8f61b163e2965
+Arbol de trabajo: con cambios sin versionar
+Directorio      : /f/PaneLingo
+==============================================================================
+
+All done! ✨ 🍰 ✨
+52 files would be left unchanged.
+
+==============================================================================
+Codigo de salida: 0  (CORRECTO)
+==============================================================================
