@@ -17,6 +17,28 @@ Proyecto académico desarrollado para **Proyecto Integrador 2**. El alcance del 
 | Calidad | Ruff, Black, Django Test Framework, pip-audit |
 | Control de versiones | Git + GitHub Flow |
 
+## Pantallas implementadas en el Sprint 1
+
+| Pantalla | Ruta | Historia |
+|---|---|---|
+| Crear cuenta | `/cuentas/registro/` | HU-01 |
+| Iniciar sesión | `/cuentas/ingresar/` | HU-02 |
+| Cerrar sesión | `/cuentas/salir/` (POST) | HU-03 |
+| Recuperar contraseña — solicitar | `/cuentas/recuperar/` | HU-04 |
+| Recuperar contraseña — confirmación de envío | `/cuentas/recuperar/enviado/` | HU-04 |
+| Recuperar contraseña — nueva contraseña | `/cuentas/recuperar/<uid>/<token>/` | HU-04 |
+| Recuperar contraseña — resultado | `/cuentas/recuperar/listo/` | HU-04 |
+| Mis álbumes | `/` | HU-05 |
+| Crear álbum | `/albumes/nuevo/` | HU-05, HU-06, HU-07 |
+| Detalle de álbum | `/albumes/<id>/` | HU-08 |
+| Editar álbum | `/albumes/<id>/editar/` | HU-08 |
+| Renombrar álbum | `/albumes/<id>/renombrar/` | HU-06 |
+| Elegir álbum para cargar | `/albumes/cargar/` | HU-09 |
+| Cargar páginas | `/albumes/<id>/cargar/` | HU-09 |
+| Eliminar página | `/paginas/<id>/eliminar/` | HU-10 |
+
+Más `/design-system/`, la referencia de estilos, que **solo existe en desarrollo**.
+
 ## Requisitos previos
 
 - Python 3.12 o superior
@@ -215,6 +237,27 @@ Con el servidor de desarrollo levantado, <http://127.0.0.1:8000/design-system/> 
 
 Requisito no funcional: la aplicación cumple **WCAG 2.1 nivel AA**. Las desviaciones deliberadas respecto al mockup están documentadas en `DESIGN_TOKENS.md`.
 
+## Qué queda fuera del Sprint 1
+
+Estas funcionalidades **no están implementadas** y no deben esperarse en esta entrega:
+
+| Fuera de alcance | Motivo |
+|---|---|
+| OCR y detección de burbujas | Sprint posterior |
+| Traducción con IA | Sprint posterior |
+| Workspace de traducción dividido | Sprint posterior |
+| Revisión y exportación | Sprint posterior |
+| Terminología y glosario | Sprint posterior |
+| Colaboración en equipo y SSO | Fuera del MVP |
+| Pagos, créditos y planes | Fuera del MVP |
+| Pantalla de perfil y preferencias | Fuera del MVP |
+| **Eliminar álbumes** | Sin HU, CA ni CP. El botón se maqueta deshabilitado |
+| **Envío real de correo** | En desarrollo va a la consola. Ver la sección de recuperación |
+| Filtros por estado en la biblioteca | Dependen de que el estado sea editable, que no lo es |
+| Reordenar o insertar páginas | Sin historia de usuario |
+
+Las páginas cargadas quedan en estado **Pendiente de procesamiento** y ahí se quedan: no hay nada que las procese todavía.
+
 ## Documentación
 
 La documentación completa del proyecto —visión de producto, arquitectura, historias de usuario, criterios de aceptación y casos de prueba— vive en la wiki del repositorio:
@@ -222,3 +265,9 @@ La documentación completa del proyecto —visión de producto, arquitectura, hi
 **[Wiki del proyecto PaneLingo](../../wiki)**
 
 Las reglas permanentes que sigue el equipo al escribir código están en [`CLAUDE.md`](CLAUDE.md).
+
+Documentos de cierre del Sprint 1:
+
+- **[`docs/TRACEABILITY.md`](docs/TRACEABILITY.md)** — matriz HU → CA → CP → prueba automática → evidencia.
+- **[`docs/WIKI_SPRINT_1_DESARROLLO.md`](docs/WIKI_SPRINT_1_DESARROLLO.md)** — borrador para la wiki, con decisiones técnicas, deudas y propuestas abiertas.
+- **`docs/evidence/sprint-1/`** — salida del Quality Gate de las 14 etapas.

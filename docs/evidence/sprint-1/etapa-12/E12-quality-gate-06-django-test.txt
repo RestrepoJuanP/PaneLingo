@@ -1,0 +1,33 @@
+==============================================================================
+PaneLingo — Evidencia del Quality Gate
+==============================================================================
+Etapa           : 12
+Paso            : 6 de 7 — Django — pruebas automaticas
+Comando         : python manage.py test
+Herramienta     : Python 3.12.10 / Django 5.2.17
+Fecha y hora    : 2026-09-07T12:41:35-05:00
+Rama            : docs/sprint-1-evidence
+Commit          : b9007f00926806e75dccd3e126a26067f0dcf1a1
+Arbol de trabajo: limpio
+Directorio      : /f/PaneLingo
+==============================================================================
+
+Creating test database for alias 'default'...
+.........................................................................................................................................................................................................................Method Not Allowed (GET): /cuentas/salir/
+.Not Found: /albumes/1/
+Not Found: /albumes/1/editar/
+Not Found: /albumes/1/renombrar/
+Not Found: /paginas/1/eliminar/
+Not Found: /albumes/1/cargar/
+.........
+----------------------------------------------------------------------
+Ran 227 tests in 129.098s
+
+OK
+Destroying test database for alias 'default'...
+Found 227 test(s).
+System check identified no issues (0 silenced).
+
+==============================================================================
+Codigo de salida: 0  (CORRECTO)
+==============================================================================

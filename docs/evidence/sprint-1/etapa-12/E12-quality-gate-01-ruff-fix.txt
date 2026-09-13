@@ -1,0 +1,19 @@
+==============================================================================
+PaneLingo — Evidencia del Quality Gate
+==============================================================================
+Etapa           : 12
+Paso            : 1 de 7 — Ruff — correcciones seguras
+Comando         : ruff check . --fix
+Herramienta     : ruff 0.16.6
+Fecha y hora    : 2026-09-07T12:41:35-05:00
+Rama            : docs/sprint-1-evidence
+Commit          : b9007f00926806e75dccd3e126a26067f0dcf1a1
+Arbol de trabajo: limpio
+Directorio      : /f/PaneLingo
+==============================================================================
+
+All checks passed!
+
+==============================================================================
+Codigo de salida: 0  (CORRECTO)
+==============================================================================
