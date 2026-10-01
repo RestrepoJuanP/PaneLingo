@@ -1,6 +1,8 @@
 # Sprint 1 — Desarrollo
 
-Borrador listo para copiar a la wiki del proyecto.
+**Objetivo del sprint:** habilitar el acceso del usuario, la creación y configuración de proyectos, y la gestión inicial de páginas, incluyendo su carga y eliminación.
+
+**Resultado:** objetivo cumplido. Las diez historias comprometidas están cerradas en el [hito Sprint 1](https://github.com/RestrepoJuanP/PaneLingo/milestone/1?closed=1).
 
 ---
 
@@ -18,7 +20,7 @@ El Sprint 1 entrega el MVP de **autenticación y gestión de álbumes y páginas
 | Módulos Python | 51 |
 | Plantillas | 38 |
 
-Trazabilidad completa en [`docs/TRACEABILITY.md`](../TRACEABILITY.md). Evidencia por etapa en `docs/evidence/sprint-1/`.
+Trazabilidad completa en [Sprint 1 — Trazabilidad](https://github.com/RestrepoJuanP/PaneLingo/wiki/Sprint-1-Trazabilidad). Evidencia por etapa en [`docs/evidence/sprint-1/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-1).
 
 ---
 
@@ -26,16 +28,16 @@ Trazabilidad completa en [`docs/TRACEABILITY.md`](../TRACEABILITY.md). Evidencia
 
 | HU | Título | Entregado |
 |---|---|---|
-| HU-01 | Crear cuenta | Registro con nombre, correo, contraseña con confirmación y aceptación de términos. Validación completa y autenticación automática tras el alta. |
-| HU-02 | Iniciar sesión | Autenticación por correo. Mensaje de error genérico e idéntico para credenciales inválidas, correo inexistente y cuenta inactiva. Casilla de sesión persistente funcional. |
-| HU-03 | Cerrar sesión | Cierre por POST desde el bloque de perfil, en escritorio y en móvil. Auditoría completa de acceso a vistas privadas. |
-| HU-04 | Recuperar contraseña | Flujo de cuatro pantallas sobre las vistas nativas de Django, con correo en texto plano y HTML. Enlace de un solo uso con caducidad de una hora. |
-| HU-05 | Crear álbum | Modelo de dominio (`Language`, `Album`), biblioteca con rejilla de tarjetas, portada determinista y creación como modal con degradación a página. |
-| HU-06 | Título del álbum | Validación reforzada y renombrado rápido desde la biblioteca. |
-| HU-07 | Idiomas del álbum | Selectores con apariencia de pill sobre grupos de radios nativos. Regla de origen distinto de destino. |
-| HU-08 | Editar álbum | Pantalla de detalle completa y edición de la información. Cancelar sin escritura. |
-| HU-09 | Cargar páginas | Modelo `ComicPage`, carga múltiple, validación real con Pillow, generación de miniaturas y cola de resultados por archivo. |
-| HU-10 | Eliminar páginas | Borrado con confirmación, limpieza de archivos en disco y cobertura del borrado en cascada. |
+| [HU-01](https://github.com/RestrepoJuanP/PaneLingo/issues/1) | Crear cuenta | Registro con nombre, correo, contraseña con confirmación y aceptación de términos. Validación completa y autenticación automática tras el alta. |
+| [HU-02](https://github.com/RestrepoJuanP/PaneLingo/issues/2) | Iniciar sesión | Autenticación por correo. Mensaje de error genérico e idéntico para credenciales inválidas, correo inexistente y cuenta inactiva. Casilla de sesión persistente funcional. |
+| [HU-03](https://github.com/RestrepoJuanP/PaneLingo/issues/3) | Cerrar sesión | Cierre por POST desde el bloque de perfil, en escritorio y en móvil. Auditoría completa de acceso a vistas privadas. |
+| [HU-04](https://github.com/RestrepoJuanP/PaneLingo/issues/4) | Recuperar contraseña | Flujo de cuatro pantallas sobre las vistas nativas de Django, con correo en texto plano y HTML. Enlace de un solo uso con caducidad de una hora. |
+| [HU-05](https://github.com/RestrepoJuanP/PaneLingo/issues/5) | Crear álbum | Modelo de dominio (`Language`, `Album`), biblioteca con rejilla de tarjetas, portada determinista y creación como modal con degradación a página. |
+| [HU-06](https://github.com/RestrepoJuanP/PaneLingo/issues/6) | Título del álbum | Validación reforzada y renombrado rápido desde la biblioteca. |
+| [HU-07](https://github.com/RestrepoJuanP/PaneLingo/issues/7) | Idiomas del álbum | Selectores con apariencia de pill sobre grupos de radios nativos. Regla de origen distinto de destino. |
+| [HU-08](https://github.com/RestrepoJuanP/PaneLingo/issues/8) | Editar álbum | Pantalla de detalle completa y edición de la información. Cancelar sin escritura. |
+| [HU-09](https://github.com/RestrepoJuanP/PaneLingo/issues/9) | Cargar páginas | Modelo `ComicPage`, carga múltiple, validación real con Pillow, generación de miniaturas y cola de resultados por archivo. |
+| [HU-10](https://github.com/RestrepoJuanP/PaneLingo/issues/10) | Eliminar páginas | Borrado con confirmación, limpieza de archivos en disco y cobertura del borrado en cascada. |
 
 ### Pantallas construidas
 
@@ -136,10 +138,10 @@ La captura de evidencias está automatizada en `scripts/quality_gate.sh`, que ej
 
 | | |
 |---|---|
-| Issue | #43 |
+| Issue | [#43](https://github.com/RestrepoJuanP/PaneLingo/issues/43) |
 | Detectado en | HU-09, durante la ejecución manual de CP-09.1 |
 | Rama | `fix/BUG-043-upload-queue-feedback` |
-| PR | #44 |
+| PR | [#44](https://github.com/RestrepoJuanP/PaneLingo/issues/44) |
 
 **Síntoma:** tras pulsar "Elegir archivos" y seleccionar, la pantalla seguía mostrando el texto inicial.
 
@@ -151,10 +153,10 @@ La captura de evidencias está automatizada en `scripts/quality_gate.sh`, que ej
 
 | | |
 |---|---|
-| Issue | #46 |
+| Issue | [#46](https://github.com/RestrepoJuanP/PaneLingo/issues/46) |
 | Detectado en | HU-10, revisión de la rejilla de páginas |
 | Rama | `fix/BUG-046-template-comments` |
-| PR | #47 |
+| PR | [#47](https://github.com/RestrepoJuanP/PaneLingo/issues/47) |
 
 **Síntoma:** los comentarios `{# ... #}` de varias líneas aparecían como texto en la interfaz. La sintaxis breve de Django solo funciona en una línea.
 
@@ -218,6 +220,17 @@ Estas decisiones se dejaron deliberadamente sin tomar. **Ninguna es un olvido**:
 **Situación actual.** No se construyeron. La única acción del bloque de perfil es cerrar sesión.
 
 **Nota técnica.** Los idiomas predeterminados que muestra el mockup vivirían en `accounts.User` y crearían una clave foránea de `accounts` hacia `albums`, invirtiendo la dependencia actual. Cuando llegue esa historia conviene decidir si esos valores van en el usuario, en un modelo de preferencias aparte o en la sesión.
+
+---
+
+### 6.6 Solicitudes del PO en la review del 9 de septiembre
+
+En la Sprint Review el Product Owner pidió dos funciones nuevas, ya registradas en el backlog:
+
+- [HU-49 — Cambiar la imagen de portada del álbum](https://github.com/RestrepoJuanP/PaneLingo/issues/49)
+- [HU-50 — Buscar álbumes por título](https://github.com/RestrepoJuanP/PaneLingo/issues/50)
+
+Quedan para estimar y asignar en la planificación del Sprint 2.
 
 ---
 
