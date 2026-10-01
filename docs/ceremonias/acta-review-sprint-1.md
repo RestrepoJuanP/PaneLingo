@@ -6,8 +6,9 @@
 | Ceremonia | Sprint Review |
 | Sprint | 1 |
 | Fecha | 9 de septiembre de 2026 |
+| Modalidad | Videollamada |
+| Duración | Aproximadamente 12 minutos |
 | Grabación | Entregada en el formulario habilitado por el docente |
-| Estado del sprint | Cerrado |
 
 ## Asistentes
 
@@ -20,72 +21,64 @@
 | Andres Felipe Velez | Responsable de OCR e IA |
 | Juan Pablo Restrepo | Diseñador UX/UI |
 
-## Objetivo del sprint
+## 1. Contexto del producto
 
-> Habilitar el acceso del usuario, la creación y configuración de proyectos, y la gestión inicial de páginas, incluyendo su carga y eliminación.
+El equipo recordó el problema que resuelve PaneLingo: los traductores de cómics usan varios programas desconectados para traducir, guardar y editar. PaneLingo los integra en una sola herramienta y conserva el trabajo para poder retomarlo.
 
-## Resultados presentados al Product Owner
+## 2. Alcance del Sprint 1
 
-Se demostró la aplicación en funcionamiento con las diez historias comprometidas:
+Se presentaron las historias comprometidas, agrupadas por épica:
 
-| HU | Funcionalidad demostrada |
+| Épica | Historias |
 |---|---|
-| HU-01 | Crear cuenta con validación completa y acceso automático tras el registro |
-| HU-02 | Iniciar sesión por correo, con mensaje de error que no revela si la cuenta existe |
-| HU-03 | Cerrar sesión y bloqueo de las vistas privadas |
-| HU-04 | Recuperar contraseña en cuatro pantallas, con enlace de un solo uso que caduca en una hora |
-| HU-05 | Crear álbum, con biblioteca de tarjetas y portada propia |
-| HU-06 | Título del álbum, con validación y renombrado rápido |
-| HU-07 | Idiomas de origen y destino, con la regla de que deben ser distintos |
-| HU-08 | Detalle del álbum y edición de su información |
-| HU-09 | Carga múltiple de páginas, con validación real de imagen y miniaturas |
-| HU-10 | Eliminar páginas, con confirmación y limpieza de los archivos en disco |
+| EP-01 Gestión de acceso y cuenta | HU-01 Crear cuenta · HU-02 Iniciar sesión · HU-03 Cerrar sesión · HU-04 Recuperar contraseña |
+| EP-02 Gestión de álbumes y proyectos | HU-05 Crear álbum · HU-06 Título del álbum · HU-07 Idiomas del álbum · HU-08 Editar álbum |
+| EP-03 Gestión de páginas | HU-09 Cargar páginas · HU-10 Eliminar páginas |
 
-Indicadores presentados:
+## 3. Demostración en vivo
 
-- 10 de 10 historias de usuario entregadas.
-- 20 de 20 casos de prueba ejecutados, cubiertos además por 227 pruebas automáticas.
-- Quality Gate de 7 pasos en verde en las 14 etapas del sprint.
-- 2 errores detectados, corregidos y cerrados durante el sprint (BUG-043 y BUG-046).
+| Qué se mostró | HU |
+|---|---|
+| Pantalla de inicio de sesión y creación de cuenta | HU-01, HU-02 |
+| Registro de una cuenta nueva, con contraseña de mínimo 8 caracteres y medidor de seguridad; mensaje de bienvenida con el nombre del usuario | HU-01 |
+| Opciones de la interfaz marcadas como "próximo sprint", visibles pero sin implementar | — |
+| Creación del álbum "Prueba", de japonés a español; la tarjeta muestra título, número de páginas y par de idiomas, con mensaje de confirmación | HU-05, HU-06, HU-07 |
+| Renombrado del álbum desde su tarjeta | HU-06 |
+| Opciones de edición del álbum en su detalle, como cambiar los idiomas | HU-08 |
+| Carga de varias imágenes a la vez, con la cola de archivos seleccionados, el aviso de baja resolución y las páginas visibles después en el álbum | HU-09 |
+| Acceso a la carga desde el botón "Cargar páginas" del menú, que lleva al mismo flujo | HU-09 |
 
-## Observaciones del Product Owner y compromisos
+Se presentaron como implementadas, pero no se demostraron de forma explícita en la reunión: iniciar sesión con una cuenta existente (HU-02), cerrar sesión (HU-03), recuperar contraseña (HU-04) y eliminar páginas (HU-10).
 
-El Product Owner aceptó el avance presentado y solicitó dos funcionalidades para mejorar la comodidad de uso:
+## 4. Prueba realizada por el Product Owner
 
-| # | Compromiso | Tipo | Estado | Responsable |
+El Product Owner pidió poner como título del álbum "Prueba" un texto largo con caracteres de idiomas asiáticos, que envió por la llamada. **El título se guardó y se mostró correctamente**, sin caracteres rotos.
+
+Motivo de la prueba: si una aplicación no soporta los caracteres del japonés, el chino o el coreano, se muestran como cuadros vacíos.
+
+## 5. Observaciones del Product Owner
+
+1. **Sobre lo implementado:** no tiene observaciones. Considera que el avance está bien para el alcance del sprint y que las dificultades aparecerán cuando avance el proyecto.
+2. **Imagen de portada:** preguntó si la imagen de portada del álbum se puede cambiar. Hoy es una imagen fija que el usuario no puede modificar.
+3. **Búsqueda de álbumes:** con muchos trabajos, encontrar uno es difícil. Explicó que hoy tiene más de 200 trabajos en su computador, que muchos títulos tienen caracteres complejos o empiezan por la misma palabra, y que para encontrarlos depende de la vista previa de Windows que muestra la primera página. Propone poder buscar por título o reconocer los álbumes por su imagen.
+
+El equipo coincidió en que ambas mejoras hacen la herramienta más intuitiva cuando el usuario tiene muchos proyectos.
+
+## 6. Aclaraciones del equipo
+
+1. Los cambios acordados en la primera reunión con el Product Owner, como el OCR y la opción de dejar las páginas en blanco, corresponden a un sprint posterior.
+2. Un integrante propuso adelantar lo previsto para el siguiente sprint; se acordó presentarlo en la próxima review.
+
+## Compromisos
+
+| # | Compromiso | Origen | Plazo | Responsable |
 |---|---|---|---|---|
-| 1 | Búsqueda de los álbumes del usuario por título | Historia nueva | Por dar de alta en el backlog | Por asignar en la planificación del Sprint 2 |
-| 2 | Edición de la imagen de portada de cada álbum | Historia nueva | Por dar de alta en el backlog | Por asignar en la planificación del Sprint 2 |
+| 1 | Permitir cambiar la imagen de portada de cada álbum | Solicitud del Product Owner | Implementación futura | Por asignar en la planificación |
+| 2 | Buscar los álbumes del usuario por título | Solicitud del Product Owner | Implementación futura | Por asignar en la planificación |
+| 3 | Presentar el alcance del siguiente sprint | Equipo | Próxima review | Equipo |
 
-## Decisiones que quedaron abiertas para el Product Owner
+## Acuerdos
 
-El equipo planteó estos puntos y se acordó que los decide el Product Owner antes de planificarlos:
-
-1. ¿El estado del álbum se deriva del avance o lo declara el usuario como etiqueta?
-2. ¿Se construyen los filtros de la biblioteca? Dependen de la decisión anterior.
-3. ¿Se habilita la eliminación de álbumes? Hoy el botón está visible y deshabilitado.
-4. ¿Se permite reordenar o insertar páginas? Hoy no se renumera al borrar, así que pueden quedar huecos.
-5. ¿Se construyen el perfil y las preferencias del usuario?
-6. Alcance de la exportación: el Product Owner espera imágenes PNG con la traducción insertada, pero el alcance del producto mínimo viable contempla exportar el texto por región, sin recomponer la imagen.
-
-## Deudas técnicas registradas
-
-| ID | Deuda | Gravedad | Momento de resolverla |
-|---|---|---|---|
-| DT-01 | Sin pruebas de navegador para el JavaScript | Media | Cuando se decida el stack de pruebas de cliente |
-| DT-02 | Los archivos de `media/` no tienen control de acceso | Alta | Antes del primer despliegue |
-| DT-03 | Umbral de baja resolución sin calibrar | Baja | Cuando exista el OCR |
-| DT-04 | Cuatro advertencias de HTTPS en `check --deploy` | Alta | Antes del primer despliegue |
-| DT-05 | Sin paginación en la biblioteca ni en la rejilla de páginas | Media | Cuando un álbum supere las 100 páginas |
-| DT-06 | Sin límite de archivos por lote de carga | Baja | Junto con DT-05 |
-
-## Fuera del alcance del Sprint 1
-
-OCR, detección de burbujas, traducción con inteligencia artificial, espacio de trabajo de traducción, exportación, eliminación de álbumes, colaboración en equipo, envío real de correo en producción y pagos.
-
-## Acuerdos de cierre
-
-1. El Sprint 1 se cierra con las diez historias comprometidas terminadas y sus casos de prueba ejecutados.
-2. Las dos funcionalidades solicitadas por el Product Owner entran al backlog como historias nuevas, pendientes de estimar en la planificación del Sprint 2.
-3. Las seis decisiones abiertas se resuelven con el Product Owner antes de planificar las historias que dependen de ellas.
-4. DT-02 y DT-04 se resuelven antes de cualquier despliegue.
+1. El Product Owner da por bueno el avance del Sprint 1, sin observaciones sobre lo implementado.
+2. La portada editable y la búsqueda por título se incorporan al backlog para un sprint futuro.
+3. El OCR y la opción de dejar las páginas en blanco se mantienen para un sprint posterior.
