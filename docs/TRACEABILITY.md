@@ -1,4 +1,6 @@
-# Sprint 1 — Trazabilidad
+# Anexo — Detalle de pruebas automáticas del Sprint 1
+
+> Anexo de la sección [Casos de prueba](https://github.com/RestrepoJuanP/PaneLingo/wiki/Sprint-1#casos-de-prueba) de la página [Sprint 1](https://github.com/RestrepoJuanP/PaneLingo/wiki/Sprint-1). Para cada criterio y caso de prueba indica qué prueba automática lo verifica y en qué etapa quedó su evidencia. Los criterios, los casos de prueba, su ejecución y los bugs están en la página Sprint 1.
 
 Relaciona cada historia de usuario con sus criterios de aceptación, sus casos de prueba, la prueba automática que los verifica y la evidencia del Quality Gate.
 
@@ -230,37 +232,35 @@ Apoyo: numeración tras borrar (3), último borrado (4), cascada de álbum y de 
 
 ## Casos de prueba adicionales
 
-Además de los 20 casos diseñados y ejecutados manualmente, cada historia del Sprint 1 tiene en su issue criterios adicionales: reglas que ya estaban implementadas y probadas pero que no figuraban como criterio. Se registran aquí como casos de prueba.
+Los criterios, el tipo y el resultado de estos casos están en [Sprint 1 › Casos de prueba adicionales](https://github.com/RestrepoJuanP/PaneLingo/wiki/Sprint-1#7-casos-de-prueba-adicionales). Aquí solo se indica qué prueba los verifica.
 
-**Ejecución:** pipeline de integración continua sobre `main`, commit `13934c4`, 12/09/2026 a las 21:58 (hora de Colombia): 227 pruebas, todas en verde. Evidencia: [`E12-quality-gate-06-django-test.txt`](https://github.com/RestrepoJuanP/PaneLingo/blob/main/docs/evidence/sprint-1/etapa-12/E12-quality-gate-06-django-test.txt).
+| CP | Prueba automática |
+|---|---|
+| [CP-01.3](https://github.com/RestrepoJuanP/PaneLingo/wiki/Sprint-1#7-casos-de-prueba-adicionales) | `RegistrationViewErrorTests::test_duplicate_email_creates_no_second_user` |
+| [CP-01.4](https://github.com/RestrepoJuanP/PaneLingo/wiki/Sprint-1#7-casos-de-prueba-adicionales) | `RegistrationViewGetTests::test_authenticated_user_is_sent_to_the_panel` |
+| [CP-02.3](https://github.com/RestrepoJuanP/PaneLingo/wiki/Sprint-1#7-casos-de-prueba-adicionales) | `RememberMeTests` (3) |
+| [CP-02.4](https://github.com/RestrepoJuanP/PaneLingo/wiki/Sprint-1#7-casos-de-prueba-adicionales) | `LoginRedirectTests` (4) |
+| [CP-02.5](https://github.com/RestrepoJuanP/PaneLingo/wiki/Sprint-1#7-casos-de-prueba-adicionales) | `LoginViewTests::test_authenticated_user_is_redirected_away_from_login` |
+| [CP-03.3](https://github.com/RestrepoJuanP/PaneLingo/wiki/Sprint-1#7-casos-de-prueba-adicionales) | `LogoutViewTests::test_private_response_is_not_stored_by_the_browser` |
+| [CP-04.3](https://github.com/RestrepoJuanP/PaneLingo/wiki/Sprint-1#7-casos-de-prueba-adicionales) | `PasswordResetTokenTests` (4) |
+| [CP-04.4](https://github.com/RestrepoJuanP/PaneLingo/wiki/Sprint-1#7-casos-de-prueba-adicionales) | `NewPasswordValidationTests` (2) |
+| [CP-04.5](https://github.com/RestrepoJuanP/PaneLingo/wiki/Sprint-1#7-casos-de-prueba-adicionales) | `OtherSessionsTests::test_another_open_session_is_invalidated` |
+| [CP-05.3](https://github.com/RestrepoJuanP/PaneLingo/wiki/Sprint-1#7-casos-de-prueba-adicionales) | `AlbumOwnershipTests` (2) |
+| [CP-06.3](https://github.com/RestrepoJuanP/PaneLingo/wiki/Sprint-1#7-casos-de-prueba-adicionales) | `AlbumRenameSuccessTests::test_a_single_character_title_is_accepted` |
+| [CP-06.4](https://github.com/RestrepoJuanP/PaneLingo/wiki/Sprint-1#7-casos-de-prueba-adicionales) | `AlbumRenameSuccessTests::test_renaming_leaves_languages_and_status_untouched` |
+| [CP-06.5](https://github.com/RestrepoJuanP/PaneLingo/wiki/Sprint-1#7-casos-de-prueba-adicionales) | `AlbumRenameIsolationTests` (4) |
+| [CP-07.3](https://github.com/RestrepoJuanP/PaneLingo/wiki/Sprint-1#7-casos-de-prueba-adicionales) | `SameLanguageRuleTests` (3) |
+| [CP-08.3](https://github.com/RestrepoJuanP/PaneLingo/wiki/Sprint-1#7-casos-de-prueba-adicionales) | `AlbumEditErrorTests` (2) |
+| [CP-08.4](https://github.com/RestrepoJuanP/PaneLingo/wiki/Sprint-1#7-casos-de-prueba-adicionales) | `AlbumEditIsolationTests` (4), `AlbumStatusIsNotEditableTests` (2) |
+| [CP-09.3](https://github.com/RestrepoJuanP/PaneLingo/wiki/Sprint-1#7-casos-de-prueba-adicionales) | `PageRejectionTests::test_a_batch_with_one_bad_file_still_loads_the_good_ones` |
+| [CP-09.4](https://github.com/RestrepoJuanP/PaneLingo/wiki/Sprint-1#7-casos-de-prueba-adicionales) | Sin prueba automática |
+| [CP-09.5](https://github.com/RestrepoJuanP/PaneLingo/wiki/Sprint-1#7-casos-de-prueba-adicionales) | `LowResolutionWarningTests` (3) |
+| [CP-09.6](https://github.com/RestrepoJuanP/PaneLingo/wiki/Sprint-1#7-casos-de-prueba-adicionales) | Verificación manual en el navegador, tras corregir BUG-043 (04/09/2026) |
+| [CP-09.7](https://github.com/RestrepoJuanP/PaneLingo/wiki/Sprint-1#7-casos-de-prueba-adicionales) | `PageUploadIsolationTests` (4) |
+| [CP-10.3](https://github.com/RestrepoJuanP/PaneLingo/wiki/Sprint-1#7-casos-de-prueba-adicionales) | `PageDeleteIsolationTests` (3) |
+| [CP-10.4](https://github.com/RestrepoJuanP/PaneLingo/wiki/Sprint-1#7-casos-de-prueba-adicionales) | `PageDeleteCancelTests::test_a_get_does_not_delete_anything` |
 
-| HU | CA | CP | Qué verifica | Tipo | Prueba | Resultado |
-|---|---|---|---|---|---|---|
-| [HU-01](https://github.com/RestrepoJuanP/PaneLingo/issues/1) | CA-01.3 | CP-01.3 | Correo ya registrado, sin distinguir mayúsculas | Alternativo | `RegistrationViewErrorTests::test_duplicate_email_creates_no_second_user` | Aprobada |
-| [HU-01](https://github.com/RestrepoJuanP/PaneLingo/issues/1) | CA-01.4 | CP-01.4 | Un usuario con sesión no ve el registro | Alternativo | `RegistrationViewGetTests::test_authenticated_user_is_sent_to_the_panel` | Aprobada |
-| [HU-02](https://github.com/RestrepoJuanP/PaneLingo/issues/2) | CA-02.3 | CP-02.3 | Mantener la sesión iniciada en el dispositivo | Happy path | `RememberMeTests` (3) | Aprobada |
-| [HU-02](https://github.com/RestrepoJuanP/PaneLingo/issues/2) | CA-02.4 | CP-02.4 | Volver a la página privada pedida; se ignora un retorno a otro sitio | Happy path | `LoginRedirectTests` (4) | Aprobada |
-| [HU-02](https://github.com/RestrepoJuanP/PaneLingo/issues/2) | CA-02.5 | CP-02.5 | Un usuario con sesión no ve el formulario de inicio | Alternativo | `LoginViewTests::test_authenticated_user_is_redirected_away_from_login` | Aprobada |
-| [HU-03](https://github.com/RestrepoJuanP/PaneLingo/issues/3) | CA-03.3 | CP-03.3 | El botón Atrás no muestra contenido privado | Alternativo | `LogoutViewTests::test_private_response_is_not_stored_by_the_browser` | Aprobada |
-| [HU-04](https://github.com/RestrepoJuanP/PaneLingo/issues/4) | CA-04.3 | CP-04.3 | Enlace ya usado, manipulado, caducado o con identificador inválido | Alternativo | `PasswordResetTokenTests` (4) | Aprobada |
-| [HU-04](https://github.com/RestrepoJuanP/PaneLingo/issues/4) | CA-04.4 | CP-04.4 | Nueva contraseña débil o que no coincide | Alternativo | `NewPasswordValidationTests` (2) | Aprobada |
-| [HU-04](https://github.com/RestrepoJuanP/PaneLingo/issues/4) | CA-04.5 | CP-04.5 | Las demás sesiones se cierran al cambiar la contraseña | Happy path | `OtherSessionsTests::test_another_open_session_is_invalidated` | Aprobada |
-| [HU-05](https://github.com/RestrepoJuanP/PaneLingo/issues/5) | CA-05.3 | CP-05.3 | El propietario es siempre la cuenta con sesión | Alternativo | `AlbumOwnershipTests` (2) | Aprobada |
-| [HU-06](https://github.com/RestrepoJuanP/PaneLingo/issues/6) | CA-06.3 | CP-06.3 | Título de un solo carácter | Happy path | `AlbumRenameSuccessTests::test_a_single_character_title_is_accepted` | Aprobada |
-| [HU-06](https://github.com/RestrepoJuanP/PaneLingo/issues/6) | CA-06.4 | CP-06.4 | Renombrar no altera idiomas ni estado | Alternativo | `AlbumRenameSuccessTests::test_renaming_leaves_languages_and_status_untouched` | Aprobada |
-| [HU-06](https://github.com/RestrepoJuanP/PaneLingo/issues/6) | CA-06.5 | CP-06.5 | No se renombran álbumes de otra cuenta | Alternativo | `AlbumRenameIsolationTests` (4) | Aprobada |
-| [HU-07](https://github.com/RestrepoJuanP/PaneLingo/issues/7) | CA-07.3 | CP-07.3 | El idioma de destino debe ser distinto del de origen | Alternativo | `SameLanguageRuleTests` (3) | Aprobada |
-| [HU-08](https://github.com/RestrepoJuanP/PaneLingo/issues/8) | CA-08.3 | CP-08.3 | Datos inválidos no producen cambios parciales | Alternativo | `AlbumEditErrorTests` (2) | Aprobada |
-| [HU-08](https://github.com/RestrepoJuanP/PaneLingo/issues/8) | CA-08.4 | CP-08.4 | No se editan álbumes de otra cuenta; el estado no es editable | Alternativo | `AlbumEditIsolationTests` (4), `AlbumStatusIsNotEditableTests` (2) | Aprobada |
-| [HU-09](https://github.com/RestrepoJuanP/PaneLingo/issues/9) | CA-09.3 | CP-09.3 | Lote con archivos válidos e inválidos | Alternativo | `PageRejectionTests::test_a_batch_with_one_bad_file_still_loads_the_good_ones` | Aprobada |
-| [HU-09](https://github.com/RestrepoJuanP/PaneLingo/issues/9) | CA-09.5 | CP-09.5 | Imagen de baja resolución: se carga con aviso | Alternativo | `LowResolutionWarningTests` (3) | Aprobada |
-| [HU-09](https://github.com/RestrepoJuanP/PaneLingo/issues/9) | CA-09.7 | CP-09.7 | No se cargan páginas en álbumes de otra cuenta | Alternativo | `PageUploadIsolationTests` (4) | Aprobada |
-| [HU-10](https://github.com/RestrepoJuanP/PaneLingo/issues/10) | CA-10.3 | CP-10.3 | No se eliminan páginas de álbumes de otra cuenta | Alternativo | `PageDeleteIsolationTests` (3) | Aprobada |
-| [HU-10](https://github.com/RestrepoJuanP/PaneLingo/issues/10) | CA-10.4 | CP-10.4 | Abrir la dirección de eliminación no borra nada | Alternativo | `PageDeleteCancelTests::test_a_get_does_not_delete_anything` | Aprobada |
-| [HU-09](https://github.com/RestrepoJuanP/PaneLingo/issues/9) | CA-09.6 | CP-09.6 | Ver los archivos elegidos antes de cargarlos | Happy path | Verificación manual en el navegador, tras corregir BUG-043 (04/09/2026) | Aprobada |
-| [HU-09](https://github.com/RestrepoJuanP/PaneLingo/issues/9) | CA-09.4 | CP-09.4 | Enviar el formulario sin archivos | Alternativo | Sin prueba automática | Pendiente |
-
-**Pendiente:** CP-09.4 no tiene prueba automática. Además, las pruebas de esta tabla citan en su docstring el caso de prueba original de su historia; actualizarlas para que citen su CP nuevo queda para la próxima etapa de código.
+Estas pruebas citan hoy en su docstring el caso de prueba original de su historia; actualizarlas para que citen su CP nuevo queda para la próxima etapa de código.
 
 ---
 
@@ -275,56 +275,3 @@ Se verificaron adicionalmente a mano, sin prueba automática que los cubra:
 | Comportamiento de la cola de archivos en el navegador (previsualización, quitar archivo, arrastre, deduplicación) | Requiere navegador; el cliente de pruebas de Django no ejecuta JavaScript | Deuda técnica DT-01 |
 | Aspecto visual frente a las capturas del mockup | Comparación visual | `/design-system/` |
 | Flujo de recuperación con el enlace tomado de la consola | Complementa a `test_password_reset.py`, que ya lo cubre de extremo a extremo | README |
-
----
-
-## Bugs corregidos durante el Sprint 1
-
-> **Sobre la numeración:** los identificadores de bug no son consecutivos porque el contador de *issues* de GitHub es **compartido con los pull requests**. Entre BUG-043 y BUG-046 hay números consumidos por PR. No falta ningún bug: son los dos únicos registrados en el sprint.
-
-| Bug | Issue | Detectado en | Rama | PR | Estado |
-|---|---|---|---|---|---|
-| BUG-043 — La zona de carga no muestra los archivos seleccionados | [#43](https://github.com/RestrepoJuanP/PaneLingo/issues/43) | HU-09, durante la ejecución manual de **CP-09.1** | `fix/BUG-043-upload-queue-feedback` | [#44](https://github.com/RestrepoJuanP/PaneLingo/pull/44) | Cerrado |
-| BUG-046 — Comentarios de plantilla renderizados como texto visible | [#46](https://github.com/RestrepoJuanP/PaneLingo/issues/46) | HU-10, revisión de la rejilla de páginas del detalle de álbum | `fix/BUG-046-template-comments` | [#47](https://github.com/RestrepoJuanP/PaneLingo/pull/47) | Cerrado |
-
-### BUG-043 — Detalle
-
-La zona de carga no mostraba nada tras seleccionar archivos: la pantalla seguía con el texto inicial.
-
-Corregido con una cola de selección en cliente que muestra miniatura, nombre, tamaño y estado, permite quitar archivos y avisa de extensión o tamaño no admitidos. Los límites los emite el servidor como atributos de datos, de modo que `settings` sigue siendo la única fuente. El aviso del navegador **no bloquea el envío**: la autoridad es el servidor.
-
-Evidencia: [`etapa-10b/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-1/etapa-10b).
-
-### BUG-046 — Detalle
-
-Los comentarios `{# ... #}` de Django solo funcionan en una línea; escritos en varias se renderizaban literalmente. **46 comentarios en 35 plantillas**, prácticamente todas las escritas desde la Etapa 2.
-
-Corregido convirtiéndolos a `{% comment %} … {% endcomment %}`. Se añadió `config/tests/test_template_hygiene.py` con tres pruebas que verifican que ni los delimitadores ni el texto de los comentarios llegan al HTML de las 14 pantallas principales, y que ninguna plantilla del repositorio usa la sintaxis breve en varias líneas.
-
-Se corrigió además un problema **independiente** descubierto al revisar la captura del issue: la etiqueta `Pendiente de procesamiento` desbordaba la celda de 146 px y pisaba el botón de eliminar. El chip de estado pasó al cuerpo de la tarjeta, como en el mockup, y se añadieron etiquetas breves.
-
-Evidencia: [`etapa-11b/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-1/etapa-11b).
-
----
-
-## Índice de evidencias
-
-| Etapa | Contenido | Carpeta |
-|---|---|---|
-| 01 | Bootstrap del proyecto e infraestructura de calidad | [`etapa-01/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-1/etapa-01) |
-| 02 | Sistema de diseño y layout base | [`etapa-02/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-1/etapa-02) |
-| 03 | HU-01 Crear cuenta | [`etapa-03/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-1/etapa-03) |
-| 04 | HU-02 Iniciar sesión | [`etapa-04/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-1/etapa-04) |
-| 05 | HU-03 Cerrar sesión y auditoría de vistas privadas | [`etapa-05/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-1/etapa-05) |
-| 06 | HU-04 Recuperar contraseña | [`etapa-06/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-1/etapa-06) |
-| 07 | HU-05 Crear álbum y modelo de dominio | [`etapa-07/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-1/etapa-07) |
-| 08 | HU-06 Título del álbum | [`etapa-08/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-1/etapa-08) |
-| 08b | HU-07 Idiomas del álbum | [`etapa-08b/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-1/etapa-08b) |
-| 09 | HU-08 Editar álbum | [`etapa-09/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-1/etapa-09) |
-| 10 | HU-09 Cargar páginas | [`etapa-10/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-1/etapa-10) |
-| 10b | BUG-043 | [`etapa-10b/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-1/etapa-10b) |
-| 11 | HU-10 Eliminar páginas | [`etapa-11/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-1/etapa-11) |
-| 11b | BUG-046 | [`etapa-11b/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-1/etapa-11b) |
-| 12 | Cierre del sprint, `check --deploy` y `makemigrations --check` | [`etapa-12/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-1/etapa-12) |
-
-Cada carpeta contiene la salida de los siete pasos del Quality Gate y un resumen en Markdown con la rama, el commit y el estado del árbol de trabajo en el momento de generarla.
