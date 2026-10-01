@@ -66,16 +66,16 @@ El equipo coincidió en que ambas mejoras hacen la herramienta más intuitiva cu
 
 ## 6. Aclaraciones del equipo
 
-1. Los cambios acordados en la primera reunión con el Product Owner, como el OCR y la opción de dejar las páginas en blanco, corresponden a un sprint posterior.
+1. Los cambios acordados en la primera reunión con el Product Owner, el 4 de agosto, como el OCR y la opción de dejar las páginas en blanco, corresponden a un sprint posterior.
 2. Un integrante propuso adelantar lo previsto para el siguiente sprint; se acordó presentarlo en la próxima review.
 
 ## Compromisos
 
-| # | Compromiso | Origen | Plazo | Responsable |
+| # | Compromiso | Origen | Plazo | Seguimiento |
 |---|---|---|---|---|
-| 1 | Permitir cambiar la imagen de portada de cada álbum | Solicitud del Product Owner | Implementación futura | Por asignar en la planificación |
-| 2 | Buscar los álbumes del usuario por título | Solicitud del Product Owner | Implementación futura | Por asignar en la planificación |
-| 3 | Presentar el alcance del siguiente sprint | Equipo | Próxima review | Equipo |
+| 1 | Permitir cambiar la imagen de portada de cada álbum | Solicitud del Product Owner | Implementación futura | HU-49 (#49) |
+| 2 | Buscar los álbumes del usuario por título | Solicitud del Product Owner | Implementación futura | HU-50 (#50) |
+| 3 | Presentar el alcance del siguiente sprint | Equipo | Próxima review | — |
 
 ## Acuerdos
 

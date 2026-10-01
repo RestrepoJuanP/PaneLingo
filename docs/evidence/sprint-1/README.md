@@ -1,6 +1,6 @@
 # Evidencias del Sprint 1
 
-Esta carpeta guarda la evidencia reproducible de la asignatura de **Calidad del Software** para las doce etapas del Sprint 1 de PaneLingo.
+Esta carpeta guarda la evidencia reproducible de la asignatura de **Calidad del Software** para las etapas del Sprint 1 de PaneLingo.
 
 Las evidencias no se copian a mano. Se generan con el script del repositorio, de forma que la salida sea idéntica y trazable en todas las etapas:
 
@@ -22,20 +22,26 @@ docs/evidence/sprint-1/
 
 ## Qué contiene cada carpeta de etapa
 
-Una carpeta `etapa-<NN>/` contiene nueve o más archivos:
+Cada carpeta `etapa-<NN>/` contiene los ocho archivos que genera el script:
 
-| Archivo | Origen | Contenido |
-|---|---|---|
-| `E<NN>-quality-gate-01-ruff-fix.txt` | script | Salida de `ruff check . --fix` |
-| `E<NN>-quality-gate-02-black.txt` | script | Salida de `black .` |
-| `E<NN>-quality-gate-03-ruff-check.txt` | script | Salida de `ruff check .` |
-| `E<NN>-quality-gate-04-black-check.txt` | script | Salida de `black --check .` |
-| `E<NN>-quality-gate-05-django-check.txt` | script | Salida de `python manage.py check` |
-| `E<NN>-quality-gate-06-django-test.txt` | script | Salida de `python manage.py test` |
-| `E<NN>-quality-gate-07-pip-audit.txt` | script | Salida de `pip-audit -r requirements.txt` |
-| `E<NN>-quality-gate-RESUMEN.md` | script | Tabla de resultados; **este es el que se pega en la wiki** |
-| `E<NN>-ci-action-verde.png` | manual | Captura del workflow de CI en verde |
-| `E<NN>-pr-aprobado.png` | manual | Captura del pull request aprobado |
+| Archivo | Contenido |
+|---|---|
+| `E<NN>-quality-gate-01-ruff-fix.txt` | Salida de `ruff check . --fix` |
+| `E<NN>-quality-gate-02-black.txt` | Salida de `black .` |
+| `E<NN>-quality-gate-03-ruff-check.txt` | Salida de `ruff check .` |
+| `E<NN>-quality-gate-04-black-check.txt` | Salida de `black --check .` |
+| `E<NN>-quality-gate-05-django-check.txt` | Salida de `python manage.py check` |
+| `E<NN>-quality-gate-06-django-test.txt` | Salida de `python manage.py test` |
+| `E<NN>-quality-gate-07-pip-audit.txt` | Salida de `pip-audit -r requirements.txt` |
+| `E<NN>-quality-gate-RESUMEN.md` | Tabla de resultados; **este es el que se pega en la wiki** |
+
+La carpeta `etapa-12/`, de cierre del sprint, añade tres comprobaciones:
+
+| Archivo | Contenido |
+|---|---|
+| `E12-check-deploy-debug-off.txt` | Salida de `python manage.py check --deploy` con `DEBUG` desactivado |
+| `E12-check-deploy-debug-on.txt` | Salida de `python manage.py check --deploy` con `DEBUG` activado |
+| `E12-makemigrations-check.txt` | Salida de `python manage.py makemigrations --check --dry-run` |
 
 ## Convención de nombres
 
@@ -47,13 +53,12 @@ Los archivos del Quality Gate llevan además el número de paso en dos dígitos 
 
 ### Capturas de pantalla
 
-Las capturas se toman a mano y se nombran exactamente así:
+Las capturas no se versionan en esta carpeta: están publicadas en la wiki del proyecto.
 
-| Archivo | Qué debe mostrar |
+| Evidencia | Dónde está |
 |---|---|
-| `E<NN>-ci-action-verde.png` | La ejecución del workflow en GitHub Actions con los siete pasos en verde, para el pull request de esa etapa |
-| `E<NN>-pr-aprobado.png` | El pull request de esa etapa con la revisión aprobada y el check requerido en verde |
-| `E00-ruleset-main.png` | La configuración del ruleset de la rama `main`. Es única para todo el sprint, por eso usa el prefijo `E00` y vive en la raíz de esta carpeta, no dentro de una etapa |
+| Workflow de CI en verde y pull request aprobado, una sección por etapa | Wiki, página "Integración continua y PR aprobados por pares" |
+| Configuración del ruleset de la rama `main` | Wiki, página Sprint 1, sección "Protección de la rama `main`" |
 
 ## Cabecera de los archivos de evidencia
 
