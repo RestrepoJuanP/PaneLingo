@@ -12,6 +12,16 @@ Por ejemplo: `acta-review-sprint-1.md`, `acta-planning-sprint-2.md`.
 
 Para redactar un acta nueva, copia [`plantilla-acta.md`](plantilla-acta.md).
 
+## Publicación en la wiki
+
+Cada acta está publicada también como página de la wiki, enlazada desde el índice [Ceremonias](https://github.com/RestrepoJuanP/PaneLingo/wiki/Ceremonias):
+
+- [Acta de la reunión con el PO — Sprint 0](https://github.com/RestrepoJuanP/PaneLingo/wiki/Acta-reuni%C3%B3n-con-el-PO-Sprint-0)
+- [Registro de coordinación — Sprint 1](https://github.com/RestrepoJuanP/PaneLingo/wiki/Registro-de-coordinaci%C3%B3n-Sprint-1)
+- [Acta de la Sprint Review — Sprint 1](https://github.com/RestrepoJuanP/PaneLingo/wiki/Acta-Sprint-Review-Sprint-1)
+
+Si se modifica un acta, hay que actualizar las dos copias.
+
 ## Evidencias audiovisuales
 
 Las grabaciones, las transcripciones y las capturas de chat no se versionan en el repositorio: son archivos pesados o contienen datos personales. Cada acta indica dónde está su evidencia y resume las ideas principales.
