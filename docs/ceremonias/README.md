@@ -18,7 +18,7 @@ Cada acta está publicada también como página de la wiki, enlazada desde el í
 
 - [Acta de la reunión con el PO — Sprint 0](https://github.com/RestrepoJuanP/PaneLingo/wiki/Acta-reuni%C3%B3n-con-el-PO-Sprint-0)
 - [Registro de coordinación — Sprint 1](https://github.com/RestrepoJuanP/PaneLingo/wiki/Registro-de-coordinaci%C3%B3n-Sprint-1)
-- [Acta de la Sprint Review — Sprint 1](https://github.com/RestrepoJuanP/PaneLingo/wiki/Acta-Sprint-Review-Sprint-1)
+- [Acta de la Sprint Review — Sprint 1](https://github.com/RestrepoJuanP/PaneLingo/wiki/Acta-Review-Sprint-1)
 
 Si se modifica un acta, hay que actualizar las dos copias.
 
