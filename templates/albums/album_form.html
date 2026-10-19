@@ -35,7 +35,7 @@ el modal.
       </div>
     {% endif %}
 
-    <form method="post" action="{% url 'albums:create' %}" novalidate>
+    <form method="post" action="{% url 'albums:create' %}" enctype="multipart/form-data" novalidate>
       {% csrf_token %}
       {% include "albums/_album_form_fields.html" %}
 

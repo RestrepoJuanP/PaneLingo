@@ -1,9 +1,12 @@
 """Formularios de la app albums."""
 
 from django import forms
+from django.core.files.uploadedfile import UploadedFile
 
 from accounts.forms import AccessibleFormMixin
 from albums.models import Album, Language
+from albums.signals import delete_stored_name
+from albums.validators import InvalidPageImageError, validate_page_image
 
 # Longitud máxima del título, la misma que declara el modelo.
 TITLE_MAX_LENGTH = 120
@@ -51,13 +54,21 @@ class AlbumForm(AccessibleFormMixin, forms.ModelForm):
 
     class Meta:
         model = Album
-        fields = ["title", "source_language", "target_language"]
+        fields = ["title", "source_language", "target_language", "cover_image"]
         labels = {
             "title": "Título del álbum",
+            "cover_image": "Portada del álbum (opcional)",
             "source_language": "Idioma de origen",
             "target_language": "Idioma de destino",
         }
         widgets = {
+            "cover_image": forms.FileInput(
+                attrs={
+                    "class": "sr-only",
+                    "accept": "image/png,image/jpeg,image/webp",
+                    "data-cover-input": True,
+                }
+            ),
             "title": forms.TextInput(
                 attrs={
                     "class": "input",
@@ -85,9 +96,16 @@ class AlbumForm(AccessibleFormMixin, forms.ModelForm):
             },
         }
 
+    remove_cover = forms.BooleanField(
+        required=False, label="Quitar la portada y usar la predeterminada"
+    )
+
     def __init__(self, *args, **kwargs):
         """Prepara el catálogo de idiomas de ambos selectores."""
         super().__init__(*args, **kwargs)
+        self._previous_cover_name = (
+            self.instance.cover_image.name if self.instance.pk else ""
+        )
         for name in ("source_language", "target_language"):
             self.fields[name].queryset = Language.objects.all()
             # Sin opción vacía: un pill "Elige un idioma" sería una opción
@@ -99,6 +117,37 @@ class AlbumForm(AccessibleFormMixin, forms.ModelForm):
     def clean_title(self):
         """Valida el título del álbum (HU-06)."""
         return clean_album_title(self.cleaned_data.get("title"))
+
+    def clean_cover_image(self):
+        """Valida la portada con las mismas reglas que las páginas.
+
+        Si se sube un archivo nuevo, se renombra con la extensión del formato
+        real detectado por Pillow, no con la que declaró el cliente.
+        """
+        cover = self.cleaned_data.get("cover_image")
+        if not isinstance(cover, UploadedFile):
+            return cover
+        try:
+            _width, _height, extension = validate_page_image(cover)
+        except InvalidPageImageError as error:
+            raise forms.ValidationError(str(error), code="invalid_cover") from error
+        cover.name = f"cover{extension}"
+        return cover
+
+    def save(self, commit=True):
+        """Guarda el álbum y retira del disco la portada reemplazada o quitada."""
+        if self.cleaned_data.get("remove_cover") and "cover_image" not in self.files:
+            self.instance.cover_image = ""
+        album = super().save(commit=commit)
+        if commit:
+            self._delete_replaced_cover(album)
+        return album
+
+    def _delete_replaced_cover(self, album):
+        """Borra el archivo anterior si la portada cambió."""
+        previous = self._previous_cover_name
+        if previous and previous != album.cover_image.name:
+            delete_stored_name(album.cover_image.storage, previous)
 
     def clean(self):
         """Comprueba que el idioma de destino difiera del de origen (HU-07).

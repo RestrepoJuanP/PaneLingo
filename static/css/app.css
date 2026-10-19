@@ -1972,6 +1972,68 @@ textarea {
 }
 
 /* Los dos idiomas comparten fila mientras haya sitio. */
+.cover-field__row {
+  display: flex;
+  gap: var(--sp-8);
+  align-items: flex-start;
+}
+
+.cover-field__preview {
+  position: relative;
+  flex: 0 0 120px;
+  aspect-ratio: var(--ratio-page);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  background: var(--surface-subtle);
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.cover-field__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cover-field__img[hidden],
+.cover-field__default[hidden] {
+  display: none;
+}
+
+.cover-field__default {
+  padding: var(--sp-4);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  text-align: center;
+  color: var(--muted);
+}
+
+.cover-field__controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.cover-field__controls:has([data-cover-input]:focus-visible) .btn {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.cover-field__remove {
+  display: inline-flex;
+  gap: var(--sp-3);
+  align-items: center;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--ink-800);
+}
+
 .album-form__languages {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));

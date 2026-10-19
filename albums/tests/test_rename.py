@@ -192,7 +192,7 @@ class AlbumTitleEscapingTests(AlbumTitleTestCase):
     def test_double_quotes_in_the_title_do_not_break_the_aria_label(self):
         """Unas comillas dobles no pueden romper el atributo aria-label.
 
-        El aria-label del botón de renombrar interpola el título dentro de un
+        El aria-label del botón de editar interpola el título dentro de un
         atributo HTML. Ahí unas comillas mal escapadas cierran el atributo
         antes de tiempo y descomponen la maqueta, un fallo distinto del que
         produciría el mismo título en el cuerpo del documento.
@@ -204,10 +204,10 @@ class AlbumTitleEscapingTests(AlbumTitleTestCase):
         response = self.client.get(self.list_url)
         content = response.content.decode()
 
-        self.assertNotIn('aria-label="Renombrar «Salt " Static»"', content)
+        self.assertNotIn('aria-label="Editar «Salt " Static»"', content)
         self.assertIn("Salt &quot; Static", content)
         self.assertIn(
-            'aria-label="Renombrar «Salt &quot; Static»"',
+            'aria-label="Editar «Salt &quot; Static»"',
             content,
         )
 
@@ -260,8 +260,8 @@ class AlbumRenameIsolationTests(AlbumTitleTestCase):
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.startswith(reverse("accounts:login")))
 
-    def test_the_rename_action_is_reachable_by_keyboard(self):
-        """La acción de renombrar es un enlace real, alcanzable por teclado.
+    def test_the_edit_action_is_reachable_by_keyboard(self):
+        """HU-49 — El lápiz es un enlace real a la edición completa.
 
         Un div con un manejador de clic no aparece en el orden de tabulación
         ni se activa con Enter. Aquí es un <a href>, así que funciona sin
@@ -272,5 +272,5 @@ class AlbumRenameIsolationTests(AlbumTitleTestCase):
         response = self.client.get(self.list_url)
         content = response.content.decode()
 
-        self.assertIn(f'href="{self.rename_url(self.album)}"', content)
-        self.assertIn('aria-label="Renombrar «Neon Yokai Bureau»"', content)
+        self.assertIn(f'href="{self.album.get_edit_url()}"', content)
+        self.assertIn('aria-label="Editar «Neon Yokai Bureau»"', content)

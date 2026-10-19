@@ -492,7 +492,56 @@
      Arranque
      ------------------------------------------------------------------------ */
 
+  function bindCoverField(field) {
+    var input = field.querySelector("[data-cover-input]");
+    var preview = field.querySelector("[data-cover-preview]");
+    var current = field.querySelector("[data-cover-current]");
+    var fallback = field.querySelector("[data-cover-default]");
+    var name = field.querySelector("[data-cover-name]");
+    if (!input || !preview) {
+      return;
+    }
+    var originalHint = name ? name.textContent : "";
+    var objectUrl = null;
+
+    input.addEventListener("change", function () {
+      var file = input.files && input.files[0];
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+        objectUrl = null;
+      }
+      if (!file) {
+        preview.hidden = true;
+        if (current) {
+          current.hidden = false;
+        } else if (fallback) {
+          fallback.hidden = false;
+        }
+        if (name) {
+          name.textContent = originalHint;
+        }
+        return;
+      }
+      objectUrl = URL.createObjectURL(file);
+      preview.src = objectUrl;
+      preview.hidden = false;
+      if (current) {
+        current.hidden = true;
+      }
+      if (fallback) {
+        fallback.hidden = true;
+      }
+      if (name) {
+        name.textContent = file.name;
+      }
+    });
+  }
+
   function init() {
+    Array.prototype.forEach.call(
+      document.querySelectorAll("[data-cover-field]"),
+      bindCoverField,
+    );
     Array.prototype.forEach.call(
       document.querySelectorAll("[data-strength-for]"),
       bindStrength,

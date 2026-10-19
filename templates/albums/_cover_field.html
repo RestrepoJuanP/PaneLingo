@@ -1,0 +1,51 @@
+{% comment %}
+Campo de portada del álbum, compartido por la creación (modal y página
+propia) y la edición. Sigue la modalidad de la carga de páginas: zona de
+selección con <label> asociado al input de archivo, que es nativo y por
+tanto operable con teclado. La vista previa la rellena el JavaScript; sin él,
+el archivo se envía igual. Sin portada se usa la predeterminada.
+{% endcomment %}
+<div class="field cover-field" data-cover-field>
+  <span class="field__label" id="cover-field-label">{{ form.cover_image.label }}</span>
+
+  <div class="cover-field__row">
+    <div class="cover-field__preview">
+      {% if form.instance.cover_image %}
+        <img
+          class="cover-field__img"
+          src="{{ form.instance.cover_image.url }}"
+          alt="Portada actual del álbum"
+          data-cover-current
+        />
+      {% endif %}
+      <img class="cover-field__img" alt="Vista previa de la nueva portada" data-cover-preview hidden />
+      <span class="cover-field__default" data-cover-default{% if form.instance.cover_image %} hidden{% endif %}>
+        Portada predeterminada
+      </span>
+    </div>
+
+    <div class="cover-field__controls">
+      <label class="btn btn--secondary btn--compact" for="{{ form.cover_image.id_for_label }}">
+        Elegir imagen
+      </label>
+      {{ form.cover_image }}
+      <p class="field__hint" id="{{ form.cover_image.auto_id }}-hint" data-cover-name>
+        PNG, JPG o WEBP, hasta 10 MB.
+      </p>
+
+      {% if form.instance.cover_image %}
+        <label class="cover-field__remove" for="{{ form.remove_cover.id_for_label }}">
+          {{ form.remove_cover }} {{ form.remove_cover.label }}
+        </label>
+      {% endif %}
+
+      {% if form.cover_image.errors %}
+        <div class="field__error" id="{{ form.cover_image.auto_id }}-error" role="alert">
+          {% for error in form.cover_image.errors %}
+            <p class="field__error-item">{{ error }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
