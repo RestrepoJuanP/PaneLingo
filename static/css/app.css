@@ -1836,7 +1836,9 @@ textarea {
 
 .content {
   padding: var(--pad-page);
-  animation: pl-rise var(--t-slow) ease both;
+  /* "backwards" y no "both": retener el estado final de la animación crea un
+     bloque contenedor y el modal (position: fixed) deja de cubrir la ventana. */
+  animation: pl-rise var(--t-slow) ease backwards;
 }
 
 .page-head {
