@@ -153,6 +153,18 @@ textarea {
   margin-bottom: var(--sp-7);
 }
 
+.search-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-8);
+}
+
+.search-bar__input {
+  flex: 1 1 260px;
+  max-width: 420px;
+}
+
 .section-head__left {
   display: flex;
   align-items: baseline;
