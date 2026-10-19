@@ -1195,12 +1195,34 @@ textarea {
 .modal__dialog {
   width: 100%;
   max-width: var(--w-modal);
-  max-height: 92vh;
-  overflow: auto;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   background: var(--surface);
   border-radius: var(--r-modal);
   box-shadow: var(--shadow-modal);
   animation: pl-rise 0.22s ease both;
+}
+
+/* El formulario es el hijo directo: cabecera y pie fijos, solo el cuerpo
+   desplaza. Sin esto, al enfocar un campo el título quedaba fuera de vista. */
+.modal__dialog > form {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.modal__dialog > form > .modal__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.modal__head,
+.modal__foot {
+  flex: none;
 }
 
 .modal__dialog--sm {
