@@ -41,13 +41,19 @@ def matches_source_script(text, language_code):
     )
 
 
-def needs_review(region, language_code, threshold):
-    """Indica si una región detectada debe revisarse a mano.
+def text_needs_review(text, confidence, language_code, threshold):
+    """Indica si un texto reconocido debe revisarse a mano.
 
-    threshold es la confianza mínima, de 0 a 1 (OCR_REVIEW_THRESHOLD).
+    threshold es la confianza mínima, de 0 a 1 (OCR_REVIEW_THRESHOLD). Se
+    usa al procesar la página y al restaurar el texto del OCR (HU-15).
     """
-    if not region.text.strip():
+    if not text.strip():
         return True
-    if region.confidence is None or region.confidence < threshold:
+    if confidence is None or confidence < threshold:
         return True
-    return not matches_source_script(region.text, language_code)
+    return not matches_source_script(text, language_code)
+
+
+def needs_review(region, language_code, threshold):
+    """Indica si una región detectada debe revisarse a mano."""
+    return text_needs_review(region.text, region.confidence, language_code, threshold)

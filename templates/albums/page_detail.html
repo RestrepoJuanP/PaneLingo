@@ -162,7 +162,7 @@ el teclado sin JavaScript, y el lector de pantalla anuncia número y tipo.
           href="#region-{{ region.reading_order }}"
           style="{{ region.overlay_style }}"
           data-region="{{ region.reading_order }}"
-          aria-label="Región {{ region.reading_order }}: {{ region.get_kind_display|lower }}{% if region.needs_review %}, necesita revisión{% endif %}. {% if region.source_text %}Texto: {{ region.source_text }}{% else %}Sin texto reconocido{% endif %}"
+          aria-label="Región {{ region.reading_order }}: {{ region.get_kind_display|lower }}{% if region.needs_review %}, necesita revisión{% endif %}. {% if region.has_nothing_to_translate %}Sin texto que traducir{% elif region.final_text %}Texto: {{ region.final_text }}{% else %}Sin texto reconocido{% endif %}"
         >
           <span class="region-box__number" aria-hidden="true">{{ region.reading_order }}{% if region.needs_review %} !{% endif %}</span>
         </a>
@@ -238,20 +238,72 @@ el teclado sin JavaScript, y el lector de pantalla anuncia número y tipo.
                       {% if region.needs_review %}
                         {% include "components/badge.html" with label="Revisar" variant="warning" %}
                       {% endif %}
+                      {% if region.is_corrected %}
+                        {% include "components/badge.html" with label="Corregida" variant="success" %}
+                      {% endif %}
                     </span>
                     {% comment %}
                     El texto lleva el idioma de origen en lang para que el navegador
                     elija la tipografía correcta y el lector de pantalla lo pronuncie
-                    en su idioma (HU-13).
+                    en su idioma (HU-13). Se muestra el texto que vale: el corregido
+                    si lo hay, si no el del OCR (HU-15).
                     {% endcomment %}
-                    {% if region.source_text %}
-                      <span class="region-list__text" lang="{{ page.album.source_language.code }}">{{ region.source_text|linebreaksbr }}</span>
+                    {% if region.has_nothing_to_translate %}
+                      <span class="region-list__text region-list__text--empty">Sin texto que traducir</span>
+                    {% elif region.final_text %}
+                      <span class="region-list__text" lang="{{ page.album.source_language.code }}">{{ region.final_text|linebreaksbr }}</span>
                     {% else %}
                       <span class="region-list__text region-list__text--empty">Sin texto reconocido</span>
                     {% endif %}
                     <span class="sr-only">, región {{ region.reading_order }}</span>
                   </span>
                 </a>
+
+                {% comment %}
+                Corrección del texto (HU-15). <details> se abre y se cierra sin
+                JavaScript y con teclado; empieza abierto en las regiones que
+                necesitan revisión. El texto del OCR nunca se pierde: se muestra
+                debajo de una corrección y se puede restaurar.
+                {% endcomment %}
+                <details class="region-edit"{% if region.needs_review %} open{% endif %}>
+                  <summary class="region-edit__summary">Corregir texto</summary>
+                  <form method="post" action="{{ region.get_correct_url }}" class="region-edit__form" data-region-edit>
+                    {% csrf_token %}
+                    <label class="region-edit__label" for="region-text-{{ region.reading_order }}">
+                      Texto de la región {{ region.reading_order }}
+                    </label>
+                    <textarea
+                      class="textarea region-edit__text"
+                      id="region-text-{{ region.reading_order }}"
+                      name="text"
+                      rows="3"
+                      maxlength="2000"
+                      lang="{{ page.album.source_language.code }}"
+                      aria-describedby="region-text-{{ region.reading_order }}-hint"
+                    >{{ region.final_text }}</textarea>
+                    <p class="region-edit__hint" id="region-text-{{ region.reading_order }}-hint">
+                      Déjalo vacío si la región no tiene nada que traducir.
+                    </p>
+                    {% if region.is_corrected %}
+                      <p class="region-edit__original">
+                        Texto del OCR:
+                        {% if region.source_text %}
+                          <span lang="{{ page.album.source_language.code }}">{{ region.source_text }}</span>
+                        {% else %}
+                          <em>sin texto reconocido</em>
+                        {% endif %}
+                      </p>
+                    {% endif %}
+                    <div class="region-edit__actions">
+                      <button type="submit" class="btn btn--primary btn--compact">Guardar corrección</button>
+                      {% if region.is_corrected %}
+                        <button type="submit" class="btn btn--secondary btn--compact" name="restore" value="1">
+                          Restaurar texto del OCR
+                        </button>
+                      {% endif %}
+                    </div>
+                  </form>
+                </details>
               </li>
             {% endfor %}
           </ol>
@@ -286,6 +338,9 @@ el teclado sin JavaScript, y el lector de pantalla anuncia número y tipo.
           Se reemplazarán sus {{ regions|length }} {{ regions|length|pluralize:"región,regiones" }}
           de texto por las que se detecten ahora. Si el procesamiento falla,
           se conservan las actuales.
+          {% if corrected_count %}
+            <strong>Se perderán {{ corrected_count }} {{ corrected_count|pluralize:"corrección,correcciones" }} que hiciste a mano.</strong>
+          {% endif %}
         </p>
         <form method="post" action="{{ page.get_process_url }}">
           {% csrf_token %}

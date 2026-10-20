@@ -5,8 +5,9 @@ import unicodedata
 from django.conf import settings
 from django.contrib import messages
 from django.http import FileResponse, Http404, JsonResponse
-from django.shortcuts import redirect
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.views.decorators.http import require_POST
 from django.views.generic import (
     CreateView,
     DeleteView,
@@ -16,9 +17,10 @@ from django.views.generic import (
     UpdateView,
 )
 
-from accounts.access import PrivateViewMixin
+from accounts.access import PrivateViewMixin, private_view
+from albums.corrections import correct_region, restore_region
 from albums.forms import AlbumForm, AlbumRenameForm
-from albums.models import Album, ComicPage
+from albums.models import Album, ComicPage, TextRegion
 from albums.processing import expire_if_stale, start_processing
 from albums.services import create_pages_from_upload
 
@@ -400,6 +402,7 @@ class PageDetailView(OwnedPageMixin, DetailView):
         review_filter = self.request.GET.get("filtro") == REVIEW_FILTER
         context["regions"] = regions
         context["review_count"] = sum(region.needs_review for region in regions)
+        context["corrected_count"] = sum(region.is_corrected for region in regions)
         context["review_filter"] = review_filter
         context["visible_regions"] = (
             [region for region in regions if region.needs_review]
@@ -542,3 +545,34 @@ class AlbumCoverView(OwnedAlbumMixin, DetailView):
     def render_to_response(self, context, **response_kwargs):
         """Entrega la portada, o 404 si el álbum usa la predeterminada."""
         return stored_file_response(self.object.cover_image)
+
+
+@require_POST
+@private_view
+def region_correct(request, pk):
+    """Guarda la corrección del texto de una región, o la deshace (HU-15).
+
+    Solo acepta POST: un GET responde 405 antes incluso de pedir sesión.
+    La región se busca entre las de las páginas del usuario, así que una
+    región ajena responde 404 (CLAUDE.md, aislamiento por propietario).
+    """
+    region = get_object_or_404(
+        TextRegion.objects.select_related("page__album__source_language"),
+        pk=pk,
+        page__album__owner=request.user,
+    )
+    number = region.reading_order
+    if request.POST.get("restore") == "1":
+        restore_region(region)
+        messages.success(
+            request, f"Se restauró el texto del OCR de la región {number}."
+        )
+    else:
+        correct_region(region, request.POST.get("text", ""))
+        if region.has_nothing_to_translate:
+            messages.success(
+                request, f"La región {number} quedó sin texto que traducir."
+            )
+        else:
+            messages.success(request, f"Se guardó la corrección de la región {number}.")
+    return redirect(f"{region.page.get_absolute_url()}#region-{number}")

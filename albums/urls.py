@@ -16,6 +16,7 @@ from albums.views import (
     PageStatusView,
     PageUploadView,
     UploadChooseView,
+    region_correct,
 )
 
 app_name = "albums"
@@ -46,6 +47,11 @@ urlpatterns = [
         "albumes/<int:pk>/portada/",
         AlbumCoverView.as_view(),
         name="album_cover",
+    ),
+    path(
+        "regiones/<int:pk>/corregir/",
+        region_correct,
+        name="region_correct",
     ),
     path(
         "paginas/<int:pk>/estado/",
