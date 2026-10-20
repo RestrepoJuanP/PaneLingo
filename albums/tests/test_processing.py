@@ -236,8 +236,12 @@ class RegionDisplayTests(ProcessingTestCase):
         response = self.client.get(self.page.get_absolute_url())
 
         self.assertContains(response, 'class="region-box region-box--balloon"', count=2)
-        self.assertContains(response, 'aria-label="Región 1: globo de diálogo"')
-        self.assertContains(response, 'aria-label="Región 2: globo de diálogo"')
+        self.assertContains(
+            response, 'aria-label="Región 1: globo de diálogo. Texto: こんにちは"'
+        )
+        self.assertContains(
+            response, 'aria-label="Región 2: globo de diálogo. Texto: ありがとう"'
+        )
         self.assertContains(response, 'href="#region-1"')
         self.assertContains(response, 'id="region-1"')
 
