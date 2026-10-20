@@ -572,6 +572,60 @@
   }
 
   /* ---------------------------------------------------------------------------
+     Región elegida en el espacio de trabajo (HU-14, CA-14.2).
+
+     Cada región está dos veces: su caja sobre la imagen y su texto en el
+     panel. Elegir cualquiera de las dos resalta ambas y lleva el texto a la
+     vista dentro del panel. Sin JavaScript, las anclas y :target hacen lo
+     mismo de forma más básica.
+     ------------------------------------------------------------------------ */
+
+  function bindRegionSelection(workspace) {
+    function partsOf(number) {
+      return workspace.querySelectorAll(
+        '[data-region="' + number + '"], [data-region-item="' + number + '"]',
+      );
+    }
+
+    function select(number, origin) {
+      Array.prototype.forEach.call(
+        workspace.querySelectorAll(".is-selected"),
+        function (element) {
+          element.classList.remove("is-selected");
+          element.removeAttribute("aria-current");
+        },
+      );
+      Array.prototype.forEach.call(partsOf(number), function (element) {
+        element.classList.add("is-selected");
+        if (element.matches("a")) {
+          element.setAttribute("aria-current", "true");
+        }
+      });
+      var item = workspace.querySelector('[data-region-item="' + number + '"]');
+      if (item && origin !== "list") {
+        item.scrollIntoView({ block: "nearest" });
+      }
+    }
+
+    workspace.addEventListener("click", function (event) {
+      var trigger = event.target.closest("[data-region]");
+      if (!trigger) {
+        return;
+      }
+      // El foco se queda donde el usuario hizo clic: no se salta al ancla.
+      event.preventDefault();
+      var number = trigger.dataset.region;
+      select(number, trigger.closest("[data-region-item]") ? "list" : "image");
+      window.history.replaceState(null, "", "#region-" + number);
+    });
+
+    var match = /^#region-(?:box-)?(\d+)$/.exec(window.location.hash);
+    if (match) {
+      select(match[1], "hash");
+    }
+  }
+
+  /* ---------------------------------------------------------------------------
      Arranque
      ------------------------------------------------------------------------ */
 
@@ -644,6 +698,10 @@
     Array.prototype.forEach.call(
       document.querySelectorAll("[data-page-pager]"),
       bindPagePager,
+    );
+    Array.prototype.forEach.call(
+      document.querySelectorAll("[data-region-workspace]"),
+      bindRegionSelection,
     );
   }
 
