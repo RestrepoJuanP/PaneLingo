@@ -141,7 +141,9 @@ class ProcessPageTests(ProcessingTestCase):
         self.assertEqual(self.page.status, ComicPage.Status.PROCESSED)
         self.assertEqual(self.page.regions.count(), 2)
         self.assertIsNone(self.page.processing_started_at)
-        self.assertContains(self.client.get(response.url), "2 regiones,")
+        self.assertContains(
+            self.client.get(response.url), "2 regiones · orden de lectura"
+        )
 
     def test_each_region_keeps_its_position_and_kind(self):
         """CP-12.1 — Cada región guarda su posición y su tipo."""
@@ -503,9 +505,9 @@ class OcrTextTests(ProcessingTestCase):
 
         response = self.client.get(self.page.get_absolute_url())
 
-        self.assertContains(response, '<span class="region-list__text" lang="ja">')
+        self.assertContains(response, 'lang="ja"')
         self.assertContains(response, "こんにちは")
-        self.assertContains(response, "Confianza 97 %")
+        self.assertContains(response, "97 % alta")
 
     def test_a_reliable_page_is_left_processed(self):
         """CP-13.3 — Sin regiones dudosas, la página queda "Procesada"."""
