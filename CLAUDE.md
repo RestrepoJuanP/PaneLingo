@@ -138,7 +138,9 @@ Los elementos del mockup ligados a funcionalidad fuera de alcance (barras de pro
 - **Grillas:** álbumes `repeat(auto-fill, minmax(252px, 1fr))` con `gap: var(--sp-8)`; páginas `repeat(auto-fill, minmax(146px, 1fr))` con `gap: var(--sp-7)`. Las miniaturas de página usan `aspect-ratio: var(--ratio-page)`.
 
 ## Alcance: qué NO hacer
-No implementes OCR, detección de burbujas, traducción con IA, workspace de traducción dividido, exportación, colaboración en equipo, envío real de correo en producción, pagos, panel administrativo ni eliminación de álbumes. Si una pantalla del mockup pertenece a esas funcionalidades, no la construyas en el Sprint 1.
+**Sprint 2:** la detección de regiones de texto (HU-12) y el OCR (HU-13) entran en alcance, con las decisiones de [`docs/adr/ADR-001-proveedor-ocr-y-tareas-asincronas.md`](docs/adr/ADR-001-proveedor-ocr-y-tareas-asincronas.md): proveedor detrás de un adaptador (`albums/ocr/`), proveedor simulado en todas las pruebas y tareas en segundo plano con Huey. El resto de esta sección sigue vigente para lo que no tenga HU del sprint en curso.
+
+En el Sprint 1: no implementes OCR, detección de burbujas, traducción con IA, workspace de traducción dividido, exportación, colaboración en equipo, envío real de correo en producción, pagos, panel administrativo ni eliminación de álbumes. Si una pantalla del mockup pertenece a esas funcionalidades, no la construyas en el Sprint 1.
 
 ## Reglas de trabajo contigo
 - Trabaja etapa por etapa. No adelantes trabajo de etapas futuras.

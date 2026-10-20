@@ -120,6 +120,27 @@ python manage.py runserver
 
 La aplicación queda disponible en <http://127.0.0.1:8000/>.
 
+**8. Arranca el trabajador de tareas (HU-12)**
+
+Procesar una página (detectar sus regiones de texto) corre en segundo plano con [Huey](https://huey.readthedocs.io/), sobre un archivo SQLite propio (`huey.sqlite3`); no hace falta Redis. En **otra terminal**, con el entorno virtual activado:
+
+```bash
+python manage.py run_huey
+```
+
+Sin el trabajador, las páginas se quedan en "Procesando" y a los cinco minutos se ofrece reintentar. Para una demostración rápida sin segunda terminal, pon `HUEY_IMMEDIATE=True` en `.env`: la detección corre dentro de la propia petición, pero deja de ser asíncrona.
+
+## Detección de texto en desarrollo
+
+El proveedor se elige con `OCR_PROVIDER` en `.env` (decisión en [ADR-001](docs/adr/ADR-001-proveedor-ocr-y-tareas-asincronas.md)):
+
+| Valor | Qué hace |
+|---|---|
+| `fake` (por defecto) | Proveedor simulado: marca dos globos de ejemplo en cualquier página, sin red ni claves. Es el que usan las pruebas y la integración continua |
+| `azure` | Azure AI Vision Read. Crea en el portal de Azure un recurso **Computer Vision** con el plan **Free F0** y copia su punto de conexión y su **KEY 1** en `AZURE_VISION_ENDPOINT` y `AZURE_VISION_KEY` |
+
+La clave vive solo en `.env`; nunca en el código ni en Git.
+
 ## Recuperación de contraseña en desarrollo
 
 PaneLingo no usa un proveedor de correo real: está fuera del alcance del MVP. En desarrollo, `EMAIL_BACKEND` es el backend de consola, así que **el mensaje de recuperación se imprime en la terminal donde corre `runserver`**, no se envía a ninguna parte.
@@ -243,7 +264,7 @@ Estas funcionalidades **no están implementadas** y no deben esperarse en esta e
 
 | Fuera de alcance | Motivo |
 |---|---|
-| OCR y detección de burbujas | Sprint posterior |
+| OCR y detección de burbujas | La detección de regiones llega con HU-12 (Sprint 2); el texto de cada región, con HU-13 |
 | Traducción con IA | Sprint posterior |
 | Workspace de traducción dividido | Sprint posterior |
 | Revisión y exportación | Sprint posterior |
@@ -256,7 +277,7 @@ Estas funcionalidades **no están implementadas** y no deben esperarse en esta e
 | Filtros por estado en la biblioteca | Dependen de que el estado sea editable, que no lo es |
 | Reordenar o insertar páginas | Sin historia de usuario |
 
-Las páginas cargadas quedan en estado **Pendiente de procesamiento** y ahí se quedan: no hay nada que las procese todavía.
+Las páginas cargadas quedan en estado **Pendiente de procesamiento** hasta que se pulsa "Procesar página" en su vista (HU-12).
 
 ## Documentación
 
