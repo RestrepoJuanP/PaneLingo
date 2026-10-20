@@ -1,0 +1,19 @@
+==============================================================================
+PaneLingo — Evidencia del Quality Gate
+==============================================================================
+Etapa           : 02
+Paso            : 3 de 7 — Ruff — verificacion de analisis estatico
+Comando         : ruff check .
+Herramienta     : ruff 0.17.0
+Fecha y hora    : 2026-10-20T14:24:51-05:00
+Rama            : feature/HU-13-ocr-text-extraction
+Commit          : c855da225c4cc717a9b2c8915438d1cf196f780a
+Arbol de trabajo: con cambios sin versionar
+Directorio      : /c/Users/ASUS/Documents/Universidad/6 SEMESTRE/PROYECTO INTEGRADOR 2/Proyecto Panelingo/PaneLingo
+==============================================================================
+
+All checks passed!
+
+==============================================================================
+Codigo de salida: 0  (CORRECTO)
+==============================================================================

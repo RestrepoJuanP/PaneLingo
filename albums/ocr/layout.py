@@ -137,6 +137,18 @@ def sort_in_reading_order(regions, right_to_left):
     return ordered
 
 
+def arrange_regions(detected, page_width, page_height, language_code):
+    """Convierte lo que devolvió un proveedor en regiones en orden de lectura.
+
+    Recorta las cajas a la página, agrupa las líneas en globos y los ordena
+    según el idioma de origen. Lo usan el procesamiento de páginas y la
+    medición de precisión, para que las dos midan exactamente lo mismo.
+    """
+    clamped = [clamp_to_page(line, page_width, page_height) for line in detected]
+    merged = merge_lines_into_regions([line for line in clamped if line])
+    return sort_in_reading_order(merged, is_right_to_left(language_code))
+
+
 def median_luminance(image, region):
     """Devuelve la luminosidad mediana, de 0 a 255, del interior de una región.
 

@@ -134,6 +134,11 @@ el teclado sin JavaScript, y el lector de pantalla anuncia número y tipo.
         <p class="region-panel__meta">
           {{ regions|length }} {{ regions|length|pluralize:"región,regiones" }},
           en orden de lectura{% if page.album.source_language.code == "ja" %} de derecha a izquierda{% endif %}.
+          {% if review_count %}
+            <strong class="region-panel__review">
+              {{ review_count }} {{ review_count|pluralize:"necesita,necesitan" }} revisión.
+            </strong>
+          {% endif %}
         </p>
         <ol class="region-list">
           {% for region in regions %}
@@ -141,7 +146,25 @@ el teclado sin JavaScript, y el lector de pantalla anuncia número y tipo.
               <a class="region-list__link" href="#region-box-{{ region.reading_order }}">
                 <span class="region-list__number region-list__number--{{ region.kind }}" aria-hidden="true">{{ region.reading_order }}</span>
                 <span class="region-list__body">
-                  <span class="region-list__kind">{{ region.get_kind_display }}</span>
+                  <span class="region-list__meta">
+                    <span class="region-list__kind">{{ region.get_kind_display }}</span>
+                    {% if region.confidence_percent is not None %}
+                      <span class="region-list__confidence">Confianza {{ region.confidence_percent }} %</span>
+                    {% endif %}
+                    {% if region.needs_review %}
+                      {% include "components/badge.html" with label="Revisar" variant="warning" %}
+                    {% endif %}
+                  </span>
+                  {% comment %}
+                  El texto lleva el idioma de origen en lang para que el navegador
+                  elija la tipografía correcta y el lector de pantalla lo pronuncie
+                  en su idioma (HU-13). La vista completa de revisión es de HU-14.
+                  {% endcomment %}
+                  {% if region.source_text %}
+                    <span class="region-list__text" lang="{{ page.album.source_language.code }}">{{ region.source_text|linebreaksbr }}</span>
+                  {% else %}
+                    <span class="region-list__text region-list__text--empty">Sin texto reconocido</span>
+                  {% endif %}
                   <span class="sr-only">, región {{ region.reading_order }}</span>
                 </span>
               </a>

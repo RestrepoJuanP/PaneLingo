@@ -389,11 +389,13 @@ class ComicPage(models.Model):
 
 
 class TextRegion(models.Model):
-    """Región de una página que contiene texto, detectada por HU-12.
+    """Región de una página que contiene texto.
+
+    HU-12 la detecta con su posición y su tipo; HU-13 le añade el texto
+    reconocido, la confianza del OCR y si necesita revisión.
 
     La posición se guarda en píxeles de la imagen original, no en
-    porcentajes: así no depende del tamaño con que se muestre la página y
-    sirve igual para recortar la región en el OCR de HU-13.
+    porcentajes: así no depende del tamaño con que se muestre la página.
     """
 
     class Kind(models.TextChoices):
@@ -416,6 +418,22 @@ class TextRegion(models.Model):
     y = models.PositiveIntegerField(_("posición vertical"))
     width = models.PositiveIntegerField(_("ancho"))
     height = models.PositiveIntegerField(_("alto"))
+    source_text = models.TextField(
+        _("texto de origen"),
+        blank=True,
+        help_text=_("Texto que reconoció el OCR, en orden de lectura (HU-13)."),
+    )
+    confidence = models.FloatField(
+        _("confianza"),
+        null=True,
+        blank=True,
+        help_text=_("De 0 a 1. Vacía si el proveedor no la informó."),
+    )
+    needs_review = models.BooleanField(
+        _("necesita revisión"),
+        default=False,
+        help_text=_("Texto vacío, de baja confianza o en otro alfabeto."),
+    )
     created_at = models.DateTimeField(_("detectada"), auto_now_add=True)
 
     class Meta:
@@ -432,6 +450,13 @@ class TextRegion(models.Model):
     def __str__(self):
         """Devuelve la región identificada por su número de orden."""
         return f"Región {self.reading_order}"
+
+    @property
+    def confidence_percent(self):
+        """Devuelve la confianza como porcentaje entero, o None si no hay."""
+        if self.confidence is None:
+            return None
+        return round(self.confidence * 100)
 
     @property
     def overlay_style(self):
