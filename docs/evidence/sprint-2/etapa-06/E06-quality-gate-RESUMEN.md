@@ -2,11 +2,11 @@
 
 | Campo | Valor |
 |---|---|
-| Fecha y hora | `2026-10-20T18:28:40-05:00` |
+| Fecha y hora | `2026-10-20T18:55:52-05:00` |
 | Rama | `feature/HU-26-album-status-and-progress` |
-| Commit | `c90b74b2bf547e93fe102eb5a1c0f4d219f32097` |
+| Commit | `3ada2fe977991ed3c0b0c13dbaf5e4cd9f94ed8e` |
 | Arbol de trabajo | con cambios sin versionar |
-| Resultado global | **FALLA (6/7 en verde)** (rojo) |
+| Resultado global | **PASA (7/7)** (verde) |
 
 ## Pasos
 
@@ -18,7 +18,7 @@
 | 4 | Black — verificacion de formato | `black --check .` | 0 | verde |
 | 5 | Django — comprobaciones del sistema | `python manage.py check` | 0 | verde |
 | 6 | Django — pruebas automaticas | `python manage.py test` | 0 | verde |
-| 7 | pip-audit — auditoria de dependencias | `pip-audit -r requirements.txt` | 1 | rojo |
+| 7 | pip-audit — auditoria de dependencias | `pip-audit -r requirements.txt` | 0 | verde |
 
 ## Archivos de evidencia
 
