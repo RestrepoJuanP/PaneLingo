@@ -1,4 +1,4 @@
-{% load static %}<!doctype html>
+{% load assets %}<!doctype html>
 <html lang="es">
   <head>
     <meta charset="utf-8" />
@@ -12,8 +12,8 @@
       rel="stylesheet"
     />
 
-    <link rel="stylesheet" href="{% static 'css/tokens.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/app.css' %}" />
+    <link rel="stylesheet" href="{% versioned_static 'css/tokens.css' %}" />
+    <link rel="stylesheet" href="{% versioned_static 'css/app.css' %}" />
     {% block extra_css %}{% endblock %}
   </head>
 
@@ -40,7 +40,7 @@
       {% endblock %}
     </div>
 
-    <script src="{% static 'js/app.js' %}" defer></script>
+    <script src="{% versioned_static 'js/app.js' %}" defer></script>
     {% block extra_js %}{% endblock %}
   </body>
 </html>

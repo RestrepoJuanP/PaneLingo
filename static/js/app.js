@@ -489,6 +489,52 @@
   }
 
   /* ---------------------------------------------------------------------------
+     Página en procesamiento (HU-12).
+
+     Mientras la detección corre en el trabajador, se consulta el estado de la
+     página cada poco y, en cuanto deja de estar "Procesando", se recarga la
+     vista para que el servidor pinte las regiones o el error. Es una mejora
+     progresiva: sin JavaScript queda el enlace "Actualizar".
+     ------------------------------------------------------------------------ */
+
+  var PROCESSING_POLL_MS = 1500;
+
+  function bindProcessingPoll(container) {
+    var url = container.dataset.processingPoll;
+
+    function schedule(delay) {
+      window.setTimeout(check, delay);
+    }
+
+    function check() {
+      fetch(url, {
+        headers: { Accept: "application/json" },
+        credentials: "same-origin",
+      })
+        .then(function (response) {
+          if (!response.ok) {
+            throw new Error("HTTP " + response.status);
+          }
+          return response.json();
+        })
+        .then(function (state) {
+          if (state.is_processing) {
+            schedule(PROCESSING_POLL_MS);
+            return;
+          }
+          window.location.reload();
+        })
+        .catch(function () {
+          // Un fallo de red puntual no detiene la espera: se reintenta más
+          // despacio. Si la sesión caducó, la recarga manual lleva al login.
+          schedule(PROCESSING_POLL_MS * 4);
+        });
+    }
+
+    schedule(PROCESSING_POLL_MS);
+  }
+
+  /* ---------------------------------------------------------------------------
      Arranque
      ------------------------------------------------------------------------ */
 
@@ -553,6 +599,10 @@
     Array.prototype.forEach.call(
       document.querySelectorAll("[data-upload-input]"),
       bindUploadQueue,
+    );
+    Array.prototype.forEach.call(
+      document.querySelectorAll("[data-processing-poll]"),
+      bindProcessingPoll,
     );
   }
 

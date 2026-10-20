@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "huey.contrib.djhuey",
     "accounts",
     "albums",
 ]
@@ -95,6 +96,24 @@ DATABASES = {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
     }
+}
+
+
+# --- Tareas en segundo plano ---------------------------------------------
+
+# Huey con almacenamiento SQLite (ADR-001): no exige Redis ni otro servidor.
+# El trabajador se arranca aparte con "python manage.py run_huey".
+# HUEY_IMMEDIATE=True ejecuta cada tarea dentro de la misma petición, sin
+# trabajador; sirve para una demostración rápida, pero entonces el
+# procesamiento deja de ser asíncrono.
+# El trabajador es de hilos porque el de procesos depende de fork, que no
+# existe en Windows.
+HUEY = {
+    "huey_class": "huey.SqliteHuey",
+    "name": "panelingo",
+    "filename": str(BASE_DIR / "huey.sqlite3"),
+    "immediate": get_env_bool("HUEY_IMMEDIATE", default=False),
+    "consumer": {"workers": 1, "worker_type": "thread"},
 }
 
 
@@ -194,3 +213,24 @@ LOW_RESOLUTION_PIXELS = 2_000_000
 # La rejilla muestra 146 px; 400 cubre pantallas de alta densidad sin obligar
 # a descargar el original de varios megapíxeles.
 THUMBNAIL_MAX_SIDE = 400
+
+
+# --- Detección de texto (HU-12, ADR-001) -------------------------------------
+
+# Proveedor de detección: "fake" (simulado, sin red) o "azure" (Azure AI
+# Vision Read). El simulado es el valor por defecto para que las pruebas y la
+# integración continua nunca llamen a un servicio externo.
+OCR_PROVIDER = os.getenv("OCR_PROVIDER", "fake").strip().lower()
+
+# Credenciales de Azure AI Vision. Solo se leen del entorno.
+AZURE_VISION_ENDPOINT = os.getenv("AZURE_VISION_ENDPOINT", "")
+AZURE_VISION_KEY = os.getenv("AZURE_VISION_KEY", "")
+
+# Tiempo máximo de espera de una llamada al proveedor, en segundos.
+OCR_TIMEOUT_SECONDS = 30
+
+# Segundos tras los cuales una página que sigue "Procesando" se da por
+# fallida y se ofrece reintentar. Cubre la caída del trabajador a mitad de
+# una tarea. Cinco minutos multiplican por treinta el objetivo de 10 s por
+# página, así que un procesamiento sano nunca llega a este límite.
+PROCESSING_STALE_AFTER = 300

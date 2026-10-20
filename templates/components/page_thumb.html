@@ -51,7 +51,16 @@ parte visible hasta que se llega a ellas.
   </figure>
   <div class="page-thumb__body">
     <div class="page-thumb__row">
-      <span class="page-thumb__label">Página {{ number }}</span>
+      {% if detail_url %}
+        {% comment %}
+        Enlace extendido: su ::after cubre toda la tarjeta, de modo que la
+        miniatura entera abre la página sin anidar un enlace dentro de otro.
+        El botón de eliminar queda por encima y conserva su propio destino.
+        {% endcomment %}
+        <a class="page-thumb__label page-thumb__link" href="{{ detail_url }}">Página {{ number }}</a>
+      {% else %}
+        <span class="page-thumb__label">Página {{ number }}</span>
+      {% endif %}
       {% if status_label %}
         {% include "components/badge.html" with label=status_label variant=status_variant %}
       {% endif %}

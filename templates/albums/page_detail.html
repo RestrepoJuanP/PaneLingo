@@ -1,0 +1,195 @@
+{% extends "layouts/app_shell.html" %}
+
+{% comment %}
+Vista de una página — HU-12.
+Muestra la página con sus regiones de texto resaltadas y numeradas en orden
+de lectura (CA-12.2), y la acción "Procesar página" (CA-12.1).
+
+Es la vista mínima que pide HU-12. HU-11 la amplía con los metadatos y la
+navegación entre páginas; HU-14, con el texto de cada región en el panel.
+
+Accesibilidad: cada región resaltada es un enlace a su elemento de la lista,
+y cada elemento de la lista enlaza de vuelta a su región. Así se recorren con
+el teclado sin JavaScript, y el lector de pantalla anuncia número y tipo.
+{% endcomment %}
+
+{% block title %}Página {{ page.page_number }} · {{ page.album.title }} · PaneLingo{% endblock %}
+
+{% block breadcrumb %}
+  <a class="breadcrumb__link" href="{% url 'albums:list' %}">Mis álbumes</a>
+  <span class="breadcrumb__sep" aria-hidden="true">/</span>
+  <a class="breadcrumb__link" href="{{ page.album.get_absolute_url }}">{{ page.album.title }}</a>
+  <span class="breadcrumb__sep" aria-hidden="true">/</span>
+  <span class="breadcrumb__current">Página {{ page.page_number }}</span>
+{% endblock %}
+
+{% block content %}
+  <a class="back-link" href="{{ page.album.get_absolute_url }}">
+    <span aria-hidden="true">←</span> Volver al álbum
+  </a>
+
+  <div class="page-head">
+    <div>
+      <div class="album-detail__title-row">
+        <h1 class="page-title">Página {{ page.page_number }}</h1>
+        {% include "components/badge.html" with label=page.get_status_display variant=page.status_variant %}
+      </div>
+      <p class="page-subtitle">{{ page.original_filename }} · {{ page.width }} × {{ page.height }} px</p>
+    </div>
+
+    <div class="page-head__actions">
+      {% if page.is_processing %}
+        <button type="button" class="btn btn--primary" disabled>
+          <span class="btn__spinner" aria-hidden="true"></span>
+          Procesando…
+        </button>
+      {% elif regions %}
+        {% comment %}
+        Reprocesar reemplaza las regiones: pide confirmación (CA-12.5). Sin
+        JavaScript el enlace lleva a la página de confirmación.
+        {% endcomment %}
+        <a
+          class="btn btn--secondary"
+          href="{{ page.get_process_url }}"
+          data-modal-open="reprocesar-pagina"
+        >Volver a procesar</a>
+      {% else %}
+        <form method="post" action="{{ page.get_process_url }}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn--primary" data-submit-busy>
+            <span class="btn__spinner" hidden aria-hidden="true"></span>
+            <span data-submit-label data-busy-label="Procesando…">
+              {% if page.has_failed %}Reintentar{% else %}Procesar página{% endif %}
+            </span>
+          </button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+
+  {% comment %}
+  Mientras la página se procesa, static/js/app.js consulta su estado y recarga
+  la vista en cuanto termina, para mostrar las regiones sin pulsar nada. Sin
+  JavaScript queda el enlace "Actualizar".
+  {% endcomment %}
+  <div
+    class="processing-status"
+    aria-live="polite"
+    {% if page.is_processing %}data-processing-poll="{{ page.get_status_url }}"{% endif %}
+  >
+    {% if page.is_processing %}
+      <p class="processing-note">
+        Estamos detectando el texto de esta página; las regiones aparecerán
+        aquí en cuanto termine. Puedes seguir usando PaneLingo mientras tanto.
+        <noscript><a href="{{ page.get_absolute_url }}">Actualizar</a></noscript>
+      </p>
+    {% endif %}
+  </div>
+
+  {% if page.has_failed %}
+    <div class="form-errors" role="alert">
+      <span class="form-errors__icon" aria-hidden="true">!</span>
+      <div>
+        <p class="form-errors__list">{{ page.processing_error|default:"No se pudo procesar la página." }}</p>
+        <p class="processing-error__hint">
+          {% if regions %}Se conservan las regiones de la última detección. {% endif %}Puedes intentarlo de nuevo.
+        </p>
+        {% if regions %}
+          <form method="post" action="{{ page.get_process_url }}" class="processing-error__retry">
+            {% csrf_token %}
+            <input type="hidden" name="confirm" value="1" />
+            <button type="submit" class="btn btn--secondary btn--compact">Reintentar</button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="page-view">
+    <figure class="region-canvas">
+      <img
+        class="region-canvas__img"
+        src="{{ page.image.url }}"
+        alt="Página {{ page.page_number }} — {{ page.original_filename }}"
+        width="{{ page.width }}"
+        height="{{ page.height }}"
+      />
+      {% for region in regions %}
+        <a
+          class="region-box region-box--{{ region.kind }}"
+          id="region-box-{{ region.reading_order }}"
+          href="#region-{{ region.reading_order }}"
+          style="{{ region.overlay_style }}"
+          aria-label="Región {{ region.reading_order }}: {{ region.get_kind_display|lower }}"
+        >
+          <span class="region-box__number" aria-hidden="true">{{ region.reading_order }}</span>
+        </a>
+      {% endfor %}
+    </figure>
+
+    <aside class="card region-panel" aria-labelledby="region-panel-title">
+      <h2 class="card__title" id="region-panel-title">Regiones de texto</h2>
+
+      {% if regions %}
+        <p class="region-panel__meta">
+          {{ regions|length }} {{ regions|length|pluralize:"región,regiones" }},
+          en orden de lectura{% if page.album.source_language.code == "ja" %} de derecha a izquierda{% endif %}.
+        </p>
+        <ol class="region-list">
+          {% for region in regions %}
+            <li class="region-list__item" id="region-{{ region.reading_order }}">
+              <a class="region-list__link" href="#region-box-{{ region.reading_order }}">
+                <span class="region-list__number region-list__number--{{ region.kind }}" aria-hidden="true">{{ region.reading_order }}</span>
+                <span class="region-list__body">
+                  <span class="region-list__kind">{{ region.get_kind_display }}</span>
+                  <span class="sr-only">, región {{ region.reading_order }}</span>
+                </span>
+              </a>
+            </li>
+          {% endfor %}
+        </ol>
+      {% elif page.was_processed %}
+        <p class="region-panel__empty">No se detectó texto en esta página.</p>
+      {% elif page.has_failed %}
+        <p class="region-panel__empty">No se pudo procesar esta página. Puedes reintentarlo.</p>
+      {% elif page.is_processing %}
+        <p class="region-panel__empty">Las regiones aparecerán aquí cuando termine el procesamiento.</p>
+      {% else %}
+        <p class="region-panel__empty">Esta página aún no se ha procesado.</p>
+      {% endif %}
+    </aside>
+  </div>
+
+  {% if regions %}
+    <div
+      class="modal"
+      id="reprocesar-pagina"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="reprocesar-pagina-title"
+      hidden
+    >
+      <div class="modal__dialog modal__dialog--sm">
+        <h2 class="modal__title" id="reprocesar-pagina-title">¿Volver a procesar esta página?</h2>
+        <p class="modal__body">
+          Se reemplazarán sus {{ regions|length }} {{ regions|length|pluralize:"región,regiones" }}
+          de texto por las que se detecten ahora. Si el procesamiento falla,
+          se conservan las actuales.
+        </p>
+        <form method="post" action="{{ page.get_process_url }}">
+          {% csrf_token %}
+          <input type="hidden" name="confirm" value="1" />
+          <div class="modal__foot">
+            <button type="button" class="btn btn--secondary" data-modal-close>
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn--primary" data-submit-busy>
+              <span class="btn__spinner" hidden aria-hidden="true"></span>
+              <span data-submit-label data-busy-label="Procesando…">Volver a procesar</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  {% endif %}
+{% endblock %}

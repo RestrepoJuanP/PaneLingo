@@ -9,6 +9,8 @@ env/
 
 # Django
 db.sqlite3
+# Cola de tareas de Huey (ADR-001) y sus archivos auxiliares de SQLite.
+huey.sqlite3*
 # Se ignora el CONTENIDO de media/, no el directorio: Git no desciende en un
 # directorio excluido, asi que la negacion del marcador no funcionaria.
 media/*
