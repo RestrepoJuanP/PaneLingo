@@ -2,6 +2,6 @@
 # Rangos abiertos dentro de la major para que pip-audit pueda resolver a la
 # versión parcheada más reciente sin congelar una vulnerable.
 Django>=5.2,<6.0
-Pillow>=12.3,<13.0
+Pillow>=13.0,<14.0
 python-dotenv>=1.0,<2.0
 huey>=3.4,<4.0
