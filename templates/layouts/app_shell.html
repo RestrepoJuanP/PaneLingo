@@ -17,10 +17,14 @@ facturación, fuera de alcance.
 función de equipo fuera de alcance.
 {% endcomment %}
 
-{% url 'albums:list' as albums_url %}
-{% url 'albums:upload_choose' as upload_url %}
-
 {% block body %}
+  {% comment %}
+  Las direcciones se resuelven DENTRO del bloque: Django ignora todo lo que
+  una plantilla hija escribe fuera de sus bloques, y fuera de él quedaban
+  vacías y los enlaces de la navegación apuntaban a "#".
+  {% endcomment %}
+  {% url 'albums:list' as albums_url %}
+  {% url 'albums:upload_choose' as upload_url %}
   <div class="app">
     <aside class="sidebar">
       <div class="sidebar__brand">
@@ -29,24 +33,51 @@ función de equipo fuera de alcance.
       </div>
 
       <nav class="sidebar__nav" aria-label="Principal">
-        {% include "components/nav_item.html" with label="Álbumes" icon="library" url=albums_url current=nav_current|default:"" key="albums" %}
-        {% include "components/nav_item.html" with label="Cargar páginas" icon="upload" url=upload_url current=nav_current|default:"" key="upload" %}
-        {% include "components/nav_item.html" with label="Traducción" icon="workspace" disabled=True %}
-        {% include "components/nav_item.html" with label="Revisión y exportación" icon="review" disabled=True %}
-        {% include "components/nav_item.html" with label="Terminología" icon="terms" disabled=True %}
-        {% include "components/nav_item.html" with label="Configuración" icon="settings" disabled=True %}
+        {% include "components/nav_item.html" with label="Biblioteca" icon="library" url=albums_url current=nav_current|default:"" key="albums" %}
+        {% include "components/nav_item.html" with label="Cargar y escanear" icon="upload" url=upload_url current=nav_current|default:"" key="upload" %}
+        {% if sidebar.workspace_url %}
+          {% include "components/nav_item.html" with label="Espacio de trabajo" icon="workspace" url=sidebar.workspace_url current=nav_current|default:"" key="workspace" %}
+        {% else %}
+          {% include "components/nav_item.html" with label="Espacio de trabajo" icon="workspace" disabled=True reason="Carga una página para abrir el espacio de trabajo" %}
+        {% endif %}
+        {% include "components/nav_item.html" with label="Revisión y exportación" icon="review" disabled=True badge=sidebar.review_total reason="Llega con la revisión y la exportación (HU-19 y HU-27)" %}
+        {% include "components/nav_item.html" with label="Terminología" icon="terms" disabled=True reason="Disponible en un sprint posterior" %}
+        {% include "components/nav_item.html" with label="Configuración" icon="settings" disabled=True reason="Disponible en un sprint posterior" %}
       </nav>
+
+      {% comment %}
+      "Monthly page credits" del mockup, con datos reales: páginas procesadas
+      este mes frente a la cuota gratuita del OCR (OCR_MONTHLY_PAGE_QUOTA).
+      {% endcomment %}
+      <div class="sidebar-quota">
+        <p class="sidebar-quota__title">Páginas procesadas este mes</p>
+        <span class="sidebar-quota__track" aria-hidden="true">
+          <span class="sidebar-quota__bar" style="width: {{ sidebar.quota.percent }}%;"></span>
+        </span>
+        <p class="sidebar-quota__text">
+          {{ sidebar.quota.used }} de {{ sidebar.quota.quota }} · se renueva el {{ sidebar.quota.resets|date:"j \d\e F"|lower }}
+        </p>
+      </div>
 
       <div class="sidebar__spacer"></div>
 
-      <div class="sidebar__user">
-        <span class="avatar" aria-hidden="true">{{ user.initials|default:"?" }}</span>
-        <span class="sidebar__user-text">
-          <span class="sidebar__user-name">{{ user.display_name }}</span>
-          <span class="sidebar__user-mail">{{ user.email }}</span>
-        </span>
-      </div>
-      {% include "components/logout_form.html" with form_class="sidebar__signout" button_class="btn btn--secondary btn--block" %}
+      {% comment %}
+      Bloque de usuario del mockup. Al pulsarlo se abre un menú con "Cerrar
+      sesión" (HU-03): <details> funciona sin JavaScript y con teclado.
+      {% endcomment %}
+      <details class="user-menu">
+        <summary class="sidebar__user">
+          <span class="avatar" aria-hidden="true">{{ user.initials|default:"?" }}</span>
+          <span class="sidebar__user-text">
+            <span class="sidebar__user-name">{{ user.display_name }}</span>
+            <span class="sidebar__user-mail">{{ user.email }}</span>
+          </span>
+          <span class="user-menu__chevron" aria-hidden="true"></span>
+        </summary>
+        <div class="user-menu__panel">
+          {% include "components/logout_form.html" with form_class="user-menu__form" button_class="user-menu__item" with_icon=True %}
+        </div>
+      </details>
     </aside>
 
     <div class="main">
@@ -57,10 +88,16 @@ función de equipo fuera de alcance.
           {% endblock %}
         </nav>
 
+        {% comment %}
+        Sin álbumes no hay nada que buscar (HU-50): el buscador no aparece.
+        {% endcomment %}
+        {% if sidebar.has_albums %}
+          {% include "components/topbar_search.html" %}
+        {% endif %}
         {% block topbar_extra %}{% endblock %}
       </header>
 
-      <main class="content" id="contenido">
+      <main class="content {% block content_class %}{% endblock %}" id="contenido">
         {% block content %}{% endblock %}
       </main>
     </div>

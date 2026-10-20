@@ -7,6 +7,7 @@ identificador, sin imágenes externas ni obra con derechos.
 import hashlib
 
 from django import template
+from django.utils.timesince import timesince
 
 register = template.Library()
 
@@ -65,3 +66,12 @@ def cover_panels(seed):
     # sin repetir dentro de una misma portada.
     step = ((value >> 6) % (COVER_VARIANTS // 2)) * 2 + 1
     return [(start + index * step) % COVER_VARIANTS + 1 for index in range(count)]
+
+
+@register.filter
+def short_since(moment):
+    """Tiempo transcurrido con una sola unidad: "2 horas" y no "2 horas, 37
+    minutos", como las fechas de edición del mockup."""
+    if not moment:
+        return ""
+    return timesince(moment, depth=1)

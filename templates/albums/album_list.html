@@ -1,16 +1,12 @@
 {% extends "layouts/app_shell.html" %}
+{% load design %}
 
 {% comment %}
-Biblioteca de álbumes — HU-05.
-Referencia visual: design/screenshots/dashboard-library.png.
-
-Adaptaciones al alcance del Sprint 1, ya acordadas en la Etapa 2:
-- Sin banda "Pick up where you left off": depende del workspace.
-- Sin tarjetas de estadística: de las cuatro del mockup solo una tendría
-dato real, y una sola en una grilla de cuatro se lee como un fallo.
-- Sin barra de progreso en las tarjetas: no hay traducción todavía.
-- Sin filtros por estado: en este sprint ninguna historia cambia el estado,
-así que cuatro de los cinco devolverían siempre lista vacía.
+Biblioteca de álbumes — HU-05, HU-26, HU-50.
+Referencia visual: design/PaneLingo.dc.html (dashboard) y
+design/screenshots/dashboard-library.png. Saludo, cuatro estadísticas, banda
+para seguir trabajando, filtros por estado y tarjetas con progreso; todas
+las cifras salen de albums/insights.py.
 {% endcomment %}
 
 {% block title %}Mis álbumes · PaneLingo{% endblock %}
@@ -19,15 +15,22 @@ así que cuatro de los cinco devolverían siempre lista vacía.
   <span class="breadcrumb__current">Mis álbumes</span>
 {% endblock %}
 
+
 {% block content %}
   {% url 'albums:create' as create_url %}
 
   <div class="page-head">
     <div>
-      <h1 class="page-title">Mis álbumes</h1>
+      <h1 class="page-title">{{ greeting }}, {{ user.display_name|default:user.email }}</h1>
       <p class="page-subtitle">
-        Cada álbum agrupa las páginas de un cómic, un tomo de manga o una
-        temporada de webtoon.
+        {% if total_album_count %}
+          {{ active_albums }} {{ active_albums|pluralize:"álbum activo,álbumes activos" }}
+          · {{ review_regions }} {{ review_regions|pluralize:"región,regiones" }} por revisar.
+          Sigue donde lo dejaste o empieza uno nuevo.
+        {% else %}
+          Cada álbum agrupa las páginas de un cómic, un tomo de manga o una
+          temporada de webtoon.
+        {% endif %}
       </p>
     </div>
     <div class="page-head__actions">
@@ -35,73 +38,44 @@ así que cuatro de los cinco devolverían siempre lista vacía.
       Enlace de verdad: sin JavaScript navega a la página propia de
       creación. El JavaScript lo intercepta para abrir el modal.
       {% endcomment %}
+      <a class="btn btn--secondary" href="{% url 'albums:upload_choose' %}">Cargar páginas</a>
       <a
         class="btn btn--primary"
         href="{% url 'albums:create' %}"
         data-modal-open="crear-album"
-      >Nuevo álbum</a>
+      ><span aria-hidden="true">+</span> Nuevo álbum</a>
     </div>
   </div>
 
   {% if total_album_count %}
-    {% comment %}
-    Búsqueda por título (HU-50). Formulario GET, así que funciona sin
-    JavaScript y el resultado es un enlace que se puede compartir o recargar.
-    Con JavaScript, static/js/app.js filtra mientras se escribe: pide solo el
-    bloque de resultados y lo reemplaza sin tocar el campo, para no perder el
-    foco ni lo escrito. El botón "Buscar" queda para cuando no hay JavaScript.
-    {% endcomment %}
-    <form
-      class="search-bar"
-      method="get"
-      action="{% url 'albums:list' %}"
-      role="search"
-      data-live-search
-    >
-      <div class="search-field">
-        <label class="sr-only" for="album-search">Buscar álbumes por título</label>
-        <svg class="search-field__icon" viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false" width="16" height="16">
-          <circle cx="7" cy="7" r="4.75" stroke="currentColor" stroke-width="1.5"/>
-          <path d="m10.5 10.5 3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-        <input
-          class="input search-field__input"
-          type="search"
-          id="album-search"
-          name="q"
-          value="{{ search_text }}"
-          maxlength="120"
-          placeholder="Buscar por título"
-          autocomplete="off"
-          spellcheck="false"
-          aria-controls="album-results"
-          aria-describedby="album-search-hint"
-          data-live-search-input
-        />
-        <span class="search-field__spinner" aria-hidden="true" hidden data-live-search-spinner></span>
-        {% comment %}
-        Enlace de verdad: sin JavaScript vuelve a la biblioteca completa. Con
-        JavaScript vacía el campo y actualiza los resultados sin recargar.
-        {% endcomment %}
-        <a
-          class="search-field__clear"
-          href="{% url 'albums:list' %}"
-          aria-label="Limpiar búsqueda"
-          title="Limpiar búsqueda"
-          data-live-search-clear
-          {% if not search_text %}hidden{% endif %}
-        >
-          <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false" width="12" height="12">
-            <path d="m4 4 8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-          </svg>
-        </a>
-        <kbd class="search-field__hint" aria-hidden="true" data-live-search-hint hidden>/</kbd>
-      </div>
-      <p class="sr-only" id="album-search-hint">Los resultados se actualizan mientras escribes.</p>
-      <button type="submit" class="btn btn--primary" data-live-search-submit>Buscar</button>
-    </form>
-    <p class="sr-only" aria-live="polite" data-live-search-status></p>
+    <div class="stat-grid library-stats">
+      {% for stat in stats %}
+        {% include "components/stat_card.html" with label=stat.label value=stat.value hint=stat.hint tone=stat.tone %}
+      {% endfor %}
+    </div>
   {% endif %}
+
+  {% if resume %}
+    {% comment %}
+    Banda "Continuar donde lo dejaste": la última página tocada que aún
+    tiene trabajo (por revisar, con error o sin procesar).
+    {% endcomment %}
+    <section class="resume" aria-labelledby="resume-title">
+      <img class="resume__thumb" src="{{ resume.get_thumbnail_url }}" alt="" loading="lazy" decoding="async" />
+      <div class="resume__body">
+        <p class="resume__eyebrow">Continuar donde lo dejaste</p>
+        <h2 class="resume__title" id="resume-title">{{ resume.album.title }} · Página {{ resume.page_number }}</h2>
+        <p class="resume__meta">
+          {{ resume.album.language_pair }} · {{ resume.get_status_display }}
+          {% if resume_review %}· {{ resume_review }} {{ resume_review|pluralize:"región,regiones" }} por revisar{% endif %}
+          · editada hace {{ resume.updated_at|short_since }}
+        </p>
+      </div>
+      <a class="resume__cta" href="{{ resume.get_absolute_url }}">Seguir traduciendo</a>
+    </section>
+  {% endif %}
+
+  <p class="sr-only" aria-live="polite" data-live-search-status></p>
 
   {% comment %}
   Bloque de resultados: contador, rejilla o estado vacío. Es lo único que la

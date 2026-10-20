@@ -223,6 +223,8 @@
   /* --- Lettering de cómic --------------------------------------------------- */
   --comic-bubble-bg: #ffffff;
   --comic-narration-bg: #fdf6e8;
+  /* Lienzo oscuro del espacio de trabajo, donde se muestra la página. */
+  --workspace-canvas: #231f2b;
   --comic-ink: #191821;
   --shadow-sfx: 2px 2px 0 #191821, -1px -1px 0 #191821;
 

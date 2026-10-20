@@ -773,6 +773,7 @@
     var spinner = form.querySelector("[data-live-search-spinner]");
     var hint = form.querySelector("[data-live-search-hint]");
     var status = document.querySelector("[data-live-search-status]");
+    var filter = form.querySelector("[data-live-search-filter]");
     var cache = new Map();
     var timer = null;
     var spinnerTimer = null;
@@ -788,6 +789,9 @@
 
     function addressFor(query) {
       var url = new URL(form.getAttribute("action"), window.location.href);
+      if (filter) {
+        url.searchParams.set("estado", filter.value);
+      }
       if (query) {
         url.searchParams.set("q", query);
       }
@@ -1008,7 +1012,135 @@
     });
   }
 
+  // Menús hechos con <details> (tarjetas de álbum y menú de usuario): el
+  // navegador ya los abre y cierra con teclado; aquí solo se cierran al
+  // pulsar fuera o con Escape. Va delegado en el documento porque la
+  // búsqueda automática reemplaza las tarjetas.
+  var DISCLOSURE_MENUS = "details.card-menu[open], details.user-menu[open]";
+
+  function bindDisclosureMenus() {
+    document.addEventListener("click", function (event) {
+      Array.prototype.forEach.call(
+        document.querySelectorAll(DISCLOSURE_MENUS),
+        function (menu) {
+          if (!menu.contains(event.target)) {
+            menu.open = false;
+          }
+        },
+      );
+    });
+    document.addEventListener("keydown", function (event) {
+      if (event.key !== "Escape") {
+        return;
+      }
+      Array.prototype.forEach.call(
+        document.querySelectorAll(DISCLOSURE_MENUS),
+        function (menu) {
+          menu.open = false;
+          var toggle = menu.querySelector("summary");
+          if (toggle && menu.contains(document.activeElement)) {
+            toggle.focus();
+          }
+        },
+      );
+    });
+  }
+
+  // Zoom de la página y visibilidad de las regiones en el espacio de
+  // trabajo, como en el mockup. Las regiones van en porcentajes sobre la
+  // figura, así que escalar su ancho las mantiene en su sitio. La elección
+  // se recuerda en este navegador; si el almacenamiento no está disponible,
+  // simplemente no se recuerda.
+  var ZOOM_MIN = 0.6;
+  var ZOOM_MAX = 2;
+  var ZOOM_STEP = 0.15;
+  var ZOOM_BASE_WIDTH = 460;
+
+  function readPreference(key) {
+    try {
+      return window.localStorage.getItem(key);
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function writePreference(key, value) {
+    try {
+      window.localStorage.setItem(key, value);
+    } catch (error) {
+      // Sin almacenamiento: la preferencia dura solo esta visita.
+    }
+  }
+
+  function bindCanvasZoom(controls) {
+    var figure = document.querySelector("[data-zoom-target]");
+    if (!figure) {
+      return;
+    }
+    var value = controls.querySelector("[data-zoom-value]");
+    var zoomOut = controls.querySelector("[data-zoom-out]");
+    var zoomIn = controls.querySelector("[data-zoom-in]");
+    var stored = parseFloat(readPreference("panelingo.zoom"));
+    var zoom = stored >= ZOOM_MIN && stored <= ZOOM_MAX ? stored : 1;
+
+    function apply(next) {
+      zoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.round(next * 100) / 100));
+      figure.style.width = ZOOM_BASE_WIDTH * zoom + "px";
+      value.textContent = Math.round(zoom * 100) + " %";
+      zoomOut.disabled = zoom <= ZOOM_MIN;
+      zoomIn.disabled = zoom >= ZOOM_MAX;
+      writePreference("panelingo.zoom", String(zoom));
+    }
+
+    function fit() {
+      // Cabe entera: el menor de los dos límites, ancho del lienzo y alto
+      // visible bajo la barra de herramientas.
+      var canvas = figure.parentElement;
+      var styles = window.getComputedStyle(canvas);
+      var width =
+        canvas.clientWidth -
+        parseFloat(styles.paddingLeft) -
+        parseFloat(styles.paddingRight);
+      var top = figure.getBoundingClientRect().top + window.scrollY;
+      var height = window.innerHeight - Math.min(top, window.innerHeight / 3) - 24;
+      var ratio = figure.offsetHeight / figure.offsetWidth || 1.41;
+      apply(Math.min(width, height / ratio) / ZOOM_BASE_WIDTH);
+    }
+
+    zoomOut.addEventListener("click", function () {
+      apply(zoom - ZOOM_STEP);
+    });
+    zoomIn.addEventListener("click", function () {
+      apply(zoom + ZOOM_STEP);
+    });
+    controls.querySelector("[data-zoom-fit]").addEventListener("click", fit);
+    controls.hidden = false;
+    apply(zoom);
+  }
+
+  function bindRegionsToggle(button) {
+    var figure = document.querySelector("[data-zoom-target]");
+    var state = button.querySelector("[data-regions-state]");
+    if (!figure) {
+      return;
+    }
+
+    function apply(isVisible) {
+      figure.classList.toggle("is-regions-hidden", !isVisible);
+      button.setAttribute("aria-pressed", String(isVisible));
+      state.textContent = isVisible ? "visibles" : "ocultas";
+      writePreference("panelingo.regions", isVisible ? "1" : "0");
+    }
+
+    button.addEventListener("click", function () {
+      apply(button.getAttribute("aria-pressed") !== "true");
+    });
+    button.hidden = false;
+    apply(readPreference("panelingo.regions") !== "0");
+  }
+
   function init() {
+    bindDisclosureMenus();
     Array.prototype.forEach.call(
       document.querySelectorAll("[data-cover-field]"),
       bindCoverField,
@@ -1044,6 +1176,14 @@
     Array.prototype.forEach.call(
       document.querySelectorAll("[data-live-search]"),
       bindLiveSearch,
+    );
+    Array.prototype.forEach.call(
+      document.querySelectorAll("[data-zoom-controls]"),
+      bindCanvasZoom,
+    );
+    Array.prototype.forEach.call(
+      document.querySelectorAll("[data-regions-toggle]"),
+      bindRegionsToggle,
     );
   }
 

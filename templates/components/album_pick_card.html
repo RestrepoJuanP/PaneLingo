@@ -1,0 +1,40 @@
+{% comment %}
+Tarjeta de álbum sencilla, para elegir un álbum (cargar páginas) y para la
+página del sistema de diseño. La biblioteca usa components/album_card.html,
+con el progreso y el menú de acciones del mockup.
+{% endcomment %}
+<article class="album-card">
+  <a href="{{ album_url|default:'#' }}" tabindex="-1" aria-hidden="true">
+    {% include "components/album_cover.html" with seed=seed cover_image=cover_image lang_pair=lang_pair status_label=status_label status_variant=status_variant extra_class="album-card__cover" %}
+  </a>
+
+  <div class="album-card__body">
+    <div class="album-card__head">
+      <a class="album-card__title" href="{{ album_url|default:'#' }}">{{ title }}</a>
+      {% if edit_url %}
+        {% comment %}
+        El lápiz lleva a la edición completa del álbum (título, idiomas y
+        portada). El aria-label incluye el título para que un lector de
+        pantalla distinga un "Editar" de otro al recorrer la rejilla.
+        {% endcomment %}
+        <a
+          class="btn-icon"
+          href="{{ edit_url }}"
+          aria-label="Editar «{{ title }}»"
+          title="Editar"
+        >
+          <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false" width="15" height="15">
+            <path d="M11.2 1.8a1.6 1.6 0 0 1 2.3 2.3l-7.6 7.6L2.5 13l1.3-3.4 7.4-7.8Z"
+                  stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      {% endif %}
+    </div>
+
+    <p class="album-card__meta">{{ page_count }} {{ page_count|pluralize:"página,páginas" }}</p>
+
+    {% if edited_label %}
+      <p class="album-card__edited">Editado hace {{ edited_label }}</p>
+    {% endif %}
+  </div>
+</article>

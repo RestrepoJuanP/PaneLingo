@@ -20,6 +20,19 @@ from django.views.generic import (
 from accounts.access import PrivateViewMixin, private_view
 from albums.corrections import correct_region, restore_region
 from albums.forms import AlbumForm, AlbumRenameForm
+from albums.insights import (
+    LIBRARY_FILTERS,
+    PAGE_FILTERS,
+    AlbumProgress,
+    library_for,
+    library_stats,
+    page_card,
+    pages_with_progress,
+    percent,
+    resume_page,
+    time_greeting,
+    with_progress,
+)
 from albums.models import Album, ComicPage, TextRegion
 from albums.processing import expire_if_stale, start_processing
 from albums.services import create_pages_from_upload
@@ -35,11 +48,12 @@ def normalize_search_text(text):
 
 
 class AlbumListView(PrivateViewMixin, ListView):
-    """Biblioteca de álbumes del usuario autenticado (HU-05).
+    """Biblioteca de álbumes del usuario autenticado (HU-05, HU-26, HU-50).
 
-    Los filtros por estado del mockup no se implementan todavía: en el Sprint
-    1 todos los álbumes están en borrador, porque ninguna historia cambia el
-    estado, y cuatro de los cinco filtros devolverían siempre lista vacía.
+    Como en el mockup: saludo, estadísticas, banda para seguir trabajando,
+    filtros por estado y tarjetas con su progreso. El estado de cada álbum se
+    deriva de sus páginas (HU-26), y el filtro (?estado=) se combina con la
+    búsqueda por título (?q=, HU-50).
     """
 
     model = Album
@@ -47,16 +61,12 @@ class AlbumListView(PrivateViewMixin, ListView):
     context_object_name = "albums"
 
     def get_queryset(self):
-        """Devuelve solo los álbumes de quien hace la petición.
+        """Devuelve solo los álbumes de quien hace la petición, con su progreso.
 
         El filtrado por propietario ocurre aquí, en el servidor. Es la única
         barrera que impide ver la biblioteca de otra cuenta.
         """
-        albums = (
-            Album.objects.filter(owner=self.request.user)
-            .select_related("source_language", "target_language")
-            .order_by("-updated_at")
-        )
+        albums = library_for(self.request.user)
         search_text = self.get_search_text()
         if not search_text:
             return albums
@@ -72,6 +82,16 @@ class AlbumListView(PrivateViewMixin, ListView):
         """Devuelve el texto buscado (parámetro q), recortado y acotado."""
         return self.request.GET.get("q", "").strip()[:SEARCH_MAX_LENGTH]
 
+    def get_status_filter(self):
+        """Devuelve el filtro de estado elegido (parámetro estado)."""
+        chosen = self.request.GET.get("estado", "")
+        valid = {slug for slug, _label, _status in LIBRARY_FILTERS}
+        return chosen if chosen in valid else "todos"
+
+    def is_live_request(self):
+        """Indica si la petición viene de la búsqueda automática."""
+        return self.request.headers.get("X-Live-Search") == "1"
+
     def get_template_names(self):
         """Devuelve solo el bloque de resultados a la búsqueda automática.
 
@@ -80,20 +100,67 @@ class AlbumListView(PrivateViewMixin, ListView):
         acorta la descarga y el procesado de cada pulsación. El filtrado y el
         aislamiento por propietario son exactamente los mismos.
         """
-        if self.request.headers.get("X-Live-Search") == "1":
+        if self.is_live_request():
             return ["albums/_album_results.html"]
         return super().get_template_names()
 
     def get_context_data(self, **kwargs):
-        """Añade el formulario de creación para el modal de la biblioteca."""
+        """Añade progreso, filtros y, en la página completa, el resumen."""
         context = super().get_context_data(**kwargs)
-        context["form"] = kwargs.get("form") or AlbumForm()
-        context["nav_current"] = "albums"
+        albums = list(context["albums"])
+        for album in albums:
+            album.progress = AlbumProgress.of(album)
+
+        chosen = self.get_status_filter()
+        status_by_slug = {slug: status for slug, _label, status in LIBRARY_FILTERS}
+        wanted = status_by_slug[chosen]
+        context["albums"] = [
+            album
+            for album in albums
+            if wanted is None or album.progress.status.key == wanted
+        ]
+        context["status_filters"] = [
+            {
+                "slug": slug,
+                "label": label,
+                "count": sum(
+                    1
+                    for album in albums
+                    if status is None or album.progress.status.key == status
+                ),
+                "active": slug == chosen,
+            }
+            for slug, label, status in LIBRARY_FILTERS
+        ]
+        context["status_filter"] = chosen
         context["search_text"] = self.get_search_text()
+        context["live_search"] = True
         context["total_album_count"] = Album.objects.filter(
             owner=self.request.user
         ).count()
+        if not self.is_live_request():
+            context.update(self.get_summary(albums))
+        context["form"] = kwargs.get("form") or AlbumForm()
+        context["nav_current"] = "albums"
         return context
+
+    def get_summary(self, albums):
+        """Saludo, estadísticas y página por la que seguir (cabecera)."""
+        user = self.request.user
+        progress = [album.progress for album in albums]
+        resume = resume_page(user)
+        return {
+            "greeting": time_greeting(),
+            "stats": library_stats(user, progress),
+            "resume": resume,
+            "resume_review": (
+                resume.regions.filter(needs_review=True).count() if resume else 0
+            ),
+            "review_regions": sum(item.region_review for item in progress),
+            "active_albums": sum(
+                1 for item in progress if item.status.key != "completed"
+            ),
+        }
 
 
 class AlbumCreateView(PrivateViewMixin, CreateView):
@@ -267,15 +334,89 @@ class UploadChooseView(PrivateViewMixin, TemplateView):
 
 
 class AlbumDetailView(OwnedAlbumMixin, DetailView):
-    """Detalle de un álbum (HU-08).
+    """Detalle de un álbum (HU-08, HU-22, HU-26).
 
-    Del mockup quedan fuera el panel de progreso de traducción, los estados de
-    página, los filtros de página y los botones de workspace y exportación:
-    todos dependen de funcionalidad que no entra en el Sprint 1. El área de
-    páginas muestra su estado vacío hasta que HU-09 permita cargarlas.
+    Como en el mockup: estado derivado, acciones con "Abrir espacio de
+    trabajo" (HU-11) como principal, tarjeta de progreso, filtros de página
+    (?estado=) y miniaturas con su estado y su barra.
     """
 
     template_name = "albums/album_detail.html"
+
+    # Estados de una página en la que todavía queda trabajo por hacer.
+    PENDING_WORK = (
+        ComicPage.Status.PENDING,
+        ComicPage.Status.FAILED,
+        ComicPage.Status.NEEDS_REVIEW,
+    )
+
+    def get_page_filter(self):
+        """Devuelve el filtro de páginas elegido (parámetro estado)."""
+        chosen = self.request.GET.get("estado", "")
+        valid = {slug for slug, _label, _statuses in PAGE_FILTERS}
+        return chosen if chosen in valid else "todas"
+
+    def get_context_data(self, **kwargs):
+        """Añade progreso, filtros, miniaturas y la página de trabajo.
+
+        La página con la que abrir el espacio de trabajo es la primera con
+        trabajo pendiente y, si no queda ninguna, la primera del álbum,
+        igual que "Open workspace" en el mockup.
+        """
+        context = super().get_context_data(**kwargs)
+        album = self.object
+        pages = list(pages_with_progress(album))
+        context["workspace_page"] = next(
+            (page for page in pages if page.status in self.PENDING_WORK),
+            pages[0] if pages else None,
+        )
+        context["progress"] = AlbumProgress.of(
+            with_progress(Album.objects.filter(pk=album.pk)).get()
+        )
+        context["page_progress"] = self.page_progress(pages)
+
+        chosen = self.get_page_filter()
+        statuses_by_slug = {slug: statuses for slug, _l, statuses in PAGE_FILTERS}
+        wanted = statuses_by_slug[chosen]
+        context["page_filters"] = [
+            {
+                "slug": slug,
+                "label": label,
+                "count": sum(
+                    1 for page in pages if statuses is None or page.status in statuses
+                ),
+                "active": slug == chosen,
+            }
+            for slug, label, statuses in PAGE_FILTERS
+        ]
+        context["page_filter"] = chosen
+        context["page_cards"] = [
+            page_card(page) for page in pages if wanted is None or page.status in wanted
+        ]
+        context["page_total"] = len(pages)
+        return context
+
+    @staticmethod
+    def page_progress(pages):
+        """Reparto de páginas para la tarjeta de progreso del mockup."""
+        total = len(pages)
+        ready = sum(
+            1
+            for page in pages
+            if page.status in (ComicPage.Status.PROCESSED, ComicPage.Status.APPROVED)
+        )
+        review = sum(
+            1 for page in pages if page.status == ComicPage.Status.NEEDS_REVIEW
+        )
+        pending = total - ready - review
+        return {
+            "ready": ready,
+            "review": review,
+            "pending": pending,
+            "ready_percent": percent(ready, total),
+            "review_percent": percent(review, total),
+            "pending_percent": percent(pending, total),
+        }
 
 
 class AlbumUpdateView(OwnedAlbumMixin, UpdateView):
@@ -415,6 +556,11 @@ class PageDetailView(OwnedPageMixin, DetailView):
         context["regions"] = regions
         context["review_count"] = sum(region.needs_review for region in regions)
         context["corrected_count"] = sum(region.is_corrected for region in regions)
+        ready_count = len(regions) - context["review_count"]
+        context["ready_count"] = ready_count
+        context["ready_percent"] = (
+            round(ready_count / len(regions) * 100) if regions else 0
+        )
         context["review_filter"] = review_filter
         context["visible_regions"] = (
             [region for region in regions if region.needs_review]

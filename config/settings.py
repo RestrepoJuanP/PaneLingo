@@ -79,6 +79,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "albums.context_processors.sidebar",
             ],
         },
     },
@@ -241,3 +242,8 @@ OCR_ACCURACY_THRESHOLDS = {
     "zh-hans": None,
     "en": None,
 }
+
+# Páginas que el OCR puede procesar al mes en el plan gratuito F0 de Azure AI
+# Vision (unas 5 000 transacciones). Lo muestra la tarjeta de cuota de la
+# barra lateral; no limita nada por sí mismo.
+OCR_MONTHLY_PAGE_QUOTA = 5000

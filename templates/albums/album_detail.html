@@ -1,16 +1,12 @@
 {% extends "layouts/app_shell.html" %}
 
+{% load design %}
 {% comment %}
-Detalle de álbum — HU-08.
-Referencia visual: design/screenshots/album-detail.png.
-
-Del mockup quedan fuera, por depender de funcionalidad ajena al Sprint 1:
-- El panel "Translation progress" y su leyenda de bloques.
-- Los estados de página (Approved / Needs review / Untranslated) y sus
-filtros.
-- Los botones "Open workspace" y "Review & export".
-El área de páginas muestra su estado vacío hasta que HU-09 permita
-cargarlas.
+Detalle de álbum — HU-08, HU-22, HU-26.
+Referencia visual: design/PaneLingo.dc.html (album) y
+design/screenshots/album-detail.png. Estado derivado, acciones, tarjeta de
+progreso, filtros de página y miniaturas con estado y barra. "Revisión y
+exportación" y "Eliminar" se ven deshabilitados: no tienen HU todavía.
 {% endcomment %}
 
 {% block title %}{{ album.title }} · PaneLingo{% endblock %}
@@ -27,7 +23,7 @@ cargarlas.
   </a>
 
   <div class="album-detail">
-    {% include "components/album_cover.html" with seed=album.pk cover_image=album.cover_url lang_pair=album.language_pair extra_class="album-detail__cover" %}
+    {% include "components/album_cover.html" with seed=album.pk cover_image=album.cover_url extra_class="album-detail__cover" %}
 
     <div class="album-detail__main">
       <div class="album-detail__title-row">
@@ -35,50 +31,101 @@ cargarlas.
         <a class="btn btn--secondary btn--compact" href="{{ album.get_rename_url }}">
           Renombrar
         </a>
-        {% include "components/badge.html" with label=album.get_status_display variant="neutral" %}
+        {% include "components/badge.html" with label=progress.status.label variant=progress.status.variant %}
       </div>
 
       <p class="album-detail__meta">
         {{ album.language_pair }} ·
-        {{ album.page_count }} {{ album.page_count|pluralize:"página,páginas" }} ·
-        editado hace {{ album.updated_at|timesince }}
+        {{ page_total }} {{ page_total|pluralize:"página,páginas" }} ·
+        {{ progress.region_total }} {{ progress.region_total|pluralize:"región,regiones" }} ·
+        editado hace {{ album.updated_at|short_since }}
       </p>
 
       <div class="album-detail__actions">
-        <a class="btn btn--primary" href="{{ album.get_upload_url }}">Añadir páginas</a>
+        {% if workspace_page %}
+          <a class="btn btn--primary" href="{{ workspace_page.get_absolute_url }}">Abrir espacio de trabajo</a>
+          <a class="btn btn--secondary" href="{{ album.get_upload_url }}">Añadir páginas</a>
+        {% else %}
+          <a class="btn btn--primary" href="{{ album.get_upload_url }}">Añadir páginas</a>
+        {% endif %}
         <a class="btn btn--secondary" href="{{ album.get_edit_url }}">Editar álbum</a>
+        <span
+          class="btn btn--secondary"
+          aria-disabled="true"
+          title="Llega con la revisión final (HU-27)"
+        >Revisión y exportación</span>
         {% comment %}
-        Eliminar álbum no tiene HU, CA ni CP en el Sprint 1. Se maqueta con
-        el estilo destructivo del mockup pero deshabilitado, con la razón a
-        la vista, para no prometer una acción que no existe.
+        Eliminar álbum no tiene HU, CA ni CP. Se maqueta con el estilo
+        destructivo del mockup pero deshabilitado, con la razón a la vista,
+        para no prometer una acción que no existe.
         {% endcomment %}
         <span
           class="btn btn--danger"
           aria-disabled="true"
           title="Disponible en un sprint posterior"
         >Eliminar</span>
-        <span class="album-detail__note">
-          Eliminar álbumes llega en un sprint posterior.
-        </span>
       </div>
+      <p class="album-detail__note">
+        Eliminar álbumes llega en un sprint posterior, igual que la revisión y exportación.
+      </p>
     </div>
+
+    {% if page_total %}
+      <section class="album-progress" aria-labelledby="album-progress-title">
+        <h2 class="album-progress__title" id="album-progress-title">Progreso de las páginas</h2>
+        <div
+          class="split-progress__track split-progress__track--thick"
+          role="img"
+          aria-label="{{ page_progress.ready }} listas, {{ page_progress.review }} por revisar y {{ page_progress.pending }} sin procesar"
+        >
+          <span class="split-progress__ready" style="width: {{ page_progress.ready_percent }}%"></span>
+          <span class="split-progress__review" style="width: {{ page_progress.review_percent }}%"></span>
+          <span class="split-progress__pending" style="width: {{ page_progress.pending_percent }}%"></span>
+        </div>
+        <dl class="album-progress__legend">
+          <div><dt><span class="legend-dot legend-dot--brand"></span>Listas</dt><dd>{{ page_progress.ready }}</dd></div>
+          <div><dt><span class="legend-dot legend-dot--warning"></span>Por revisar</dt><dd>{{ page_progress.review }}</dd></div>
+          <div><dt><span class="legend-dot legend-dot--muted"></span>Sin procesar</dt><dd>{{ page_progress.pending }}</dd></div>
+          <div><dt><span class="legend-dot legend-dot--ink"></span>Regiones corregidas</dt><dd>{{ progress.region_corrected }}</dd></div>
+        </dl>
+      </section>
+    {% endif %}
   </div>
 
   <div class="section-head">
     <div class="section-head__left">
       <h2 class="section-title">Páginas</h2>
       <span class="section-count">
-        {{ album.page_count }} {{ album.page_count|pluralize:"página,páginas" }}
+        {% if page_filter != "todas" %}
+          {{ page_cards|length }} de {{ page_total }} mostradas
+        {% else %}
+          {{ page_total }} {{ page_total|pluralize:"página,páginas" }}
+        {% endif %}
       </span>
     </div>
+    {% if page_total %}
+      <nav class="pill-group" aria-label="Filtrar páginas por estado">
+        {% for filter in page_filters %}
+          <a
+            class="pill{% if filter.active %} pill--selected{% endif %}"
+            href="{{ album.get_absolute_url }}?estado={{ filter.slug }}"
+            {% if filter.active %}aria-current="page"{% endif %}
+          >{{ filter.label }} <span class="pill__count">{{ filter.count }}</span></a>
+        {% endfor %}
+      </nav>
+    {% endif %}
   </div>
 
-  {% if album.pages.exists %}
+  {% if page_cards %}
     <div class="page-grid">
-      {% for page in album.pages.all %}
-        {% include "components/page_thumb.html" with number=page.page_number image_url=page.display_image_url alt=page.original_filename status_label=page.short_status_display status_variant=page.status_variant warning=page.has_low_resolution delete_url=page.get_delete_url detail_url=page.get_absolute_url %}
+      {% for card in page_cards %}
+        {% with page=card.page %}
+          {% include "components/page_thumb.html" with number=page.page_number image_url=page.display_image_url alt=page.original_filename status_label=page.short_status_display status_variant=page.status_variant warning=page.has_low_resolution delete_url=page.get_delete_url detail_url=page.get_absolute_url percent=card.percent bar=card.bar %}
+        {% endwith %}
       {% endfor %}
     </div>
+  {% elif page_total %}
+    {% include "components/empty_state.html" with title="Ninguna página en este estado" body="Elige otro filtro para ver el resto de las páginas del álbum." action_label="Ver todas las páginas" action_url=album.get_absolute_url %}
   {% else %}
     {% include "components/empty_state.html" with title="Este álbum aún no tiene páginas" body="Carga las páginas completas de la obra para empezar a trabajar sobre ellas. Podrás añadir más en cualquier momento." action_label="Cargar páginas" action_url=album.get_upload_url %}
   {% endif %}
