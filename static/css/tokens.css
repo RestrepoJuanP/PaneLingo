@@ -234,6 +234,10 @@
   --t-fast: 0.16s;
   --t-base: 0.18s;
   --t-slow: 0.28s;
+  /* Curva de salida marcada para entradas y desplazamientos de la interfaz:
+     arranca rápido, justo cuando el usuario está mirando. La lee también
+     static/js/app.js para las animaciones de la búsqueda. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 
   /* --- Punto de ruptura ------------------------------------------------------
      Por debajo de 900px la barra lateral pasa a navegación inferior y las

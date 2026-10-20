@@ -1,0 +1,34 @@
+{% comment %}
+Bloque de resultados de la biblioteca: contador, rejilla o estado vacío.
+Se incluye en album_list.html y es también lo único que devuelve la vista a
+la búsqueda automática (cabecera X-Live-Search), para que cada pulsación
+descargue y procese unas pocas tarjetas en lugar de la página entera.
+{% endcomment %}
+{% url 'albums:create' as create_url %}
+{% url 'albums:list' as list_url %}
+{% if total_album_count %}
+  <div class="section-head">
+    <div class="section-head__left">
+      <h2 class="section-title">Álbumes</h2>
+      <span class="section-count" data-live-search-count>
+        {% if search_text %}
+          {{ albums|length }} de {{ total_album_count }}
+        {% else %}
+          {{ albums|length }} {{ albums|length|pluralize:"álbum,álbumes" }}
+        {% endif %}
+      </span>
+    </div>
+  </div>
+{% endif %}
+
+{% if albums %}
+  <div class="album-grid">
+    {% for album in albums %}
+      {% include "components/album_card.html" with seed=album.pk title=album.title page_count=album.page_count edited_label=album.updated_at|timesince lang_pair=album.language_pair status_label=album.get_status_display status_variant="neutral" album_url=album.get_absolute_url edit_url=album.get_edit_url cover_image=album.cover_url %}
+    {% endfor %}
+  </div>
+{% elif search_text %}
+  {% include "components/empty_state.html" with title="Ningún álbum coincide con tu búsqueda" body="Prueba con otra parte del título o limpia la búsqueda para ver todos tus álbumes." action_label="Limpiar búsqueda" action_url=list_url %}
+{% else %}
+  {% include "components/empty_state.html" with title="Todavía no tienes álbumes" body="Un álbum agrupa las páginas de un cómic, un tomo de manga o una temporada de webtoon. Crea el primero para empezar a organizar tu trabajo." action_label="Crear mi primer álbum" action_url=create_url action_modal="crear-album" %}
+{% endif %}
