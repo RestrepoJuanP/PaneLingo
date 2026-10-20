@@ -4,7 +4,7 @@ import unicodedata
 
 from django.conf import settings
 from django.contrib import messages
-from django.http import JsonResponse
+from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import (
@@ -377,22 +377,43 @@ class OwnedPageMixin(PrivateViewMixin):
 
 
 class PageDetailView(OwnedPageMixin, DetailView):
-    """Vista de una página con sus regiones de texto resaltadas (HU-12).
+    """Espacio de trabajo de una página (HU-11, HU-12, HU-13 y HU-14).
 
-    Es la vista mínima que necesita CA-12.2. HU-11 la amplía con los
-    metadatos de la página y la navegación entre páginas, y HU-14 con el
-    texto de cada región.
+    Muestra la página a tamaño completo con sus datos y la navegación a la
+    anterior y a la siguiente (HU-11), sus regiones resaltadas (HU-12) y el
+    texto reconocido de cada una (HU-13). Por decisión del 2026-10-20, la
+    página seleccionada es directamente el espacio de trabajo: no hay un
+    visor aparte.
     """
 
     template_name = "albums/page_detail.html"
 
     def get_context_data(self, **kwargs):
-        """Añade las regiones en orden de lectura y cuántas hay que revisar."""
+        """Añade las regiones, las páginas vecinas y la posición en el álbum."""
         context = super().get_context_data(**kwargs)
-        regions = list(self.object.regions.all())
+        page = self.object
+        regions = list(page.regions.all())
         context["regions"] = regions
         context["review_count"] = sum(region.needs_review for region in regions)
+        context.update(page_neighbours(page))
         return context
+
+
+def page_neighbours(page):
+    """Devuelve la página anterior, la siguiente y la posición en el álbum.
+
+    Se ordena por número de página y no por posición en una lista: tras
+    eliminar páginas hay huecos en la numeración (HU-10) y "anterior" debe
+    saltarlos.
+    """
+    siblings = page.album.pages.order_by("page_number")
+    number = page.page_number
+    return {
+        "previous_page": siblings.filter(page_number__lt=number).last(),
+        "next_page": siblings.filter(page_number__gt=number).first(),
+        "page_position": siblings.filter(page_number__lte=number).count(),
+        "album_page_count": siblings.count(),
+    }
 
 
 class PageStatusView(OwnedPageMixin, DetailView):
@@ -468,3 +489,45 @@ class PageProcessView(OwnedPageMixin, DetailView):
         level, text = processing_feedback(page)
         messages.add_message(request, level, text)
         return redirect(page.get_absolute_url())
+
+
+def stored_file_response(field):
+    """Entrega un archivo guardado, o 404 si no existe.
+
+    Si el archivo falta en disco se responde 404 y no 500: para quien lo pide
+    es lo mismo que una imagen que no existe.
+    """
+    if not field:
+        raise Http404("La imagen no existe.")
+    try:
+        handle = field.open("rb")
+    except (FileNotFoundError, OSError) as error:
+        raise Http404("La imagen no existe.") from error
+    return FileResponse(handle)
+
+
+class PageImageView(OwnedPageMixin, DetailView):
+    """Imagen original o miniatura de una página propia (HU-11, CA-11.4).
+
+    Sustituye al servicio directo de MEDIA_URL, que entregaba la imagen a
+    cualquiera que conociera su dirección (deuda DT-02). Hereda el filtro por
+    propietario, así que una página ajena responde 404, y PrivateViewMixin,
+    que exige sesión e impide que el navegador guarde la imagen en caché.
+    """
+
+    variant = "image"
+
+    def render_to_response(self, context, **response_kwargs):
+        """Entrega el archivo en lugar de una plantilla."""
+        page = self.object
+        if self.variant == "thumbnail" and page.thumbnail:
+            return stored_file_response(page.thumbnail)
+        return stored_file_response(page.image)
+
+
+class AlbumCoverView(OwnedAlbumMixin, DetailView):
+    """Portada subida de un álbum propio (HU-49), con el mismo control (DT-02)."""
+
+    def render_to_response(self, context, **response_kwargs):
+        """Entrega la portada, o 404 si el álbum usa la predeterminada."""
+        return stored_file_response(self.object.cover_image)

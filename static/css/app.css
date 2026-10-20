@@ -2551,9 +2551,77 @@ textarea {
   color: var(--ink-900);
 }
 
-.region-panel {
+/* Columna lateral del espacio de trabajo: datos de la página y regiones. */
+.page-side {
   position: sticky;
   top: var(--sp-10);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+}
+
+.page-info__list {
+  display: grid;
+  gap: var(--sp-3);
+  margin: var(--sp-5) 0 0;
+}
+
+.page-info__list div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--sp-5);
+}
+
+.page-info__list dt {
+  font-size: var(--fs-sm);
+  color: var(--muted);
+}
+
+.page-info__list dd {
+  margin: 0;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--ink-900);
+  text-align: right;
+}
+
+.page-info__file {
+  overflow-wrap: anywhere;
+}
+
+/* Navegación entre páginas (HU-11). */
+.page-pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-8);
+}
+
+.page-pager .btn[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.page-pager__position {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--ink-800);
+}
+
+.page-pager__hint {
+  margin-left: auto;
+  font-size: var(--fs-label-sm);
+  color: var(--muted);
+}
+
+.page-pager__hint kbd {
+  padding: 0 var(--sp-1);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  background: var(--surface-subtle);
+  font-family: var(--font-ui);
 }
 
 .region-panel__meta,
@@ -2688,7 +2756,11 @@ textarea {
     grid-template-columns: 1fr;
   }
 
-  .region-panel {
+  .page-side {
     position: static;
+  }
+
+  .page-pager__hint {
+    display: none;
   }
 }

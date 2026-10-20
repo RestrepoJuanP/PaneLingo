@@ -3,6 +3,7 @@
 from django.urls import path
 
 from albums.views import (
+    AlbumCoverView,
     AlbumCreateView,
     AlbumDetailView,
     AlbumListView,
@@ -10,6 +11,7 @@ from albums.views import (
     AlbumUpdateView,
     PageDeleteView,
     PageDetailView,
+    PageImageView,
     PageProcessView,
     PageStatusView,
     PageUploadView,
@@ -29,6 +31,21 @@ urlpatterns = [
         "paginas/<int:pk>/procesar/",
         PageProcessView.as_view(),
         name="page_process",
+    ),
+    path(
+        "paginas/<int:pk>/imagen/",
+        PageImageView.as_view(variant="image"),
+        name="page_image",
+    ),
+    path(
+        "paginas/<int:pk>/miniatura/",
+        PageImageView.as_view(variant="thumbnail"),
+        name="page_thumbnail",
+    ),
+    path(
+        "albumes/<int:pk>/portada/",
+        AlbumCoverView.as_view(),
+        name="album_cover",
     ),
     path(
         "paginas/<int:pk>/estado/",

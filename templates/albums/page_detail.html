@@ -34,7 +34,7 @@ el teclado sin JavaScript, y el lector de pantalla anuncia número y tipo.
         <h1 class="page-title">Página {{ page.page_number }}</h1>
         {% include "components/badge.html" with label=page.get_status_display variant=page.status_variant %}
       </div>
-      <p class="page-subtitle">{{ page.original_filename }} · {{ page.width }} × {{ page.height }} px</p>
+      <p class="page-subtitle">{{ page.album.title }} · {{ page.album.language_pair }}</p>
     </div>
 
     <div class="page-head__actions">
@@ -66,6 +66,41 @@ el teclado sin JavaScript, y el lector de pantalla anuncia número y tipo.
       {% endif %}
     </div>
   </div>
+
+  {% comment %}
+  Navegación entre páginas (HU-11, CA-11.2). Enlaces de verdad: sin
+  JavaScript funcionan igual. static/js/app.js añade las flechas del teclado.
+  {% endcomment %}
+  <nav class="page-pager" aria-label="Páginas del álbum" data-page-pager>
+    {% if previous_page %}
+      <a
+        class="btn btn--secondary btn--compact"
+        href="{{ previous_page.get_absolute_url }}"
+        rel="prev"
+        aria-label="Página anterior: página {{ previous_page.page_number }}"
+        data-page-prev
+      ><span aria-hidden="true">←</span> Anterior</a>
+    {% else %}
+      <span class="btn btn--secondary btn--compact" aria-disabled="true">
+        <span aria-hidden="true">←</span> Anterior
+      </span>
+    {% endif %}
+    <span class="page-pager__position">Página {{ page_position }} de {{ album_page_count }}</span>
+    {% if next_page %}
+      <a
+        class="btn btn--secondary btn--compact"
+        href="{{ next_page.get_absolute_url }}"
+        rel="next"
+        aria-label="Página siguiente: página {{ next_page.page_number }}"
+        data-page-next
+      >Siguiente <span aria-hidden="true">→</span></a>
+    {% else %}
+      <span class="btn btn--secondary btn--compact" aria-disabled="true">
+        Siguiente <span aria-hidden="true">→</span>
+      </span>
+    {% endif %}
+    <span class="page-pager__hint">También con las flechas <kbd>←</kbd> <kbd>→</kbd></span>
+  </nav>
 
   {% comment %}
   Mientras la página se procesa, static/js/app.js consulta su estado y recarga
@@ -109,7 +144,7 @@ el teclado sin JavaScript, y el lector de pantalla anuncia número y tipo.
     <figure class="region-canvas">
       <img
         class="region-canvas__img"
-        src="{{ page.image.url }}"
+        src="{{ page.get_image_url }}"
         alt="Página {{ page.page_number }} — {{ page.original_filename }}"
         width="{{ page.width }}"
         height="{{ page.height }}"
@@ -126,6 +161,22 @@ el teclado sin JavaScript, y el lector de pantalla anuncia número y tipo.
         </a>
       {% endfor %}
     </figure>
+
+    <div class="page-side">
+    <section class="card page-info" aria-labelledby="page-info-title">
+      <h2 class="card__title" id="page-info-title">Datos de la página</h2>
+      <dl class="page-info__list">
+        <div><dt>Número</dt><dd>{{ page.page_number }}</dd></div>
+        <div><dt>Archivo original</dt><dd class="page-info__file">{{ page.original_filename }}</dd></div>
+        <div><dt>Dimensiones</dt><dd>{{ page.width }} × {{ page.height }} px</dd></div>
+        <div><dt>Tamaño</dt><dd>{{ page.file_size|filesizeformat }}</dd></div>
+        <div>
+          <dt>Estado</dt>
+          <dd>{% include "components/badge.html" with label=page.get_status_display variant=page.status_variant %}</dd>
+        </div>
+        <div><dt>Cargada</dt><dd>{{ page.created_at|date:"j \d\e F \d\e Y, H:i"|lower }}</dd></div>
+      </dl>
+    </section>
 
     <aside class="card region-panel" aria-labelledby="region-panel-title">
       <h2 class="card__title" id="region-panel-title">Regiones de texto</h2>
@@ -181,6 +232,7 @@ el teclado sin JavaScript, y el lector de pantalla anuncia número y tipo.
         <p class="region-panel__empty">Esta página aún no se ha procesado.</p>
       {% endif %}
     </aside>
+    </div>
   </div>
 
   {% if regions %}
