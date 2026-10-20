@@ -3,7 +3,7 @@
 # PaneLingo — Captura de evidencias del Quality Gate.
 #
 # Ejecuta los siete pasos del Quality Gate definidos en CLAUDE.md y guarda la
-# salida de cada uno en docs/evidence/sprint-1/etapa-<NN>/, junto con un
+# salida de cada uno en docs/evidence/sprint-<S>/etapa-<NN>/, junto con un
 # resumen en Markdown listo para pegar en la wiki del proyecto.
 #
 # Uso:
@@ -40,8 +40,9 @@ Ejemplos:
   ./scripts/quality_gate.sh 08
   ./scripts/quality_gate.sh 08b
 
-Genera docs/evidence/sprint-1/etapa-<NN>/ con la salida de los siete pasos
-del Quality Gate y un resumen en Markdown.
+Genera docs/evidence/sprint-<S>/etapa-<NN>/ con la salida de los siete pasos
+del Quality Gate y un resumen en Markdown. El sprint se toma de la variable
+SPRINT (1 por defecto): SPRINT=2 ./scripts/quality_gate.sh 01
 USAGE
 }
 
@@ -101,7 +102,9 @@ export PATH
 export PYTHONIOENCODING=utf-8
 export PYTHONUTF8=1
 
-OUTPUT_DIR="docs/evidence/sprint-1/etapa-${STAGE}"
+# Sprint de la evidencia. Por defecto 1, para no cambiar el uso del Sprint 1.
+SPRINT="${SPRINT:-1}"
+OUTPUT_DIR="docs/evidence/sprint-${SPRINT}/etapa-${STAGE}"
 mkdir -p "$OUTPUT_DIR" || {
     echo "ERROR: no se pudo crear $OUTPUT_DIR." >&2
     exit 2
