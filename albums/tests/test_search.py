@@ -69,3 +69,94 @@ class AlbumSearchTests(AlbumEditTestCase):
 
         self.assertNotContains(response, 'role="search"')
         self.assertContains(response, "Todavía no tienes álbumes")
+
+
+class LiveSearchTests(AlbumEditTestCase):
+    """HU-50 — La biblioteca está preparada para buscar mientras se escribe.
+
+    El filtrado lo hace siempre el servidor; el JavaScript solo reemplaza el
+    bloque de resultados. Estas pruebas fijan el contrato entre los dos: los
+    marcadores que el script busca y que el bloque exista en toda respuesta.
+    """
+
+    RESULTS_BLOCK = '<div id="album-results" data-live-search-results>'
+
+    def setUp(self):
+        """Añade álbumes con títulos variados al propietario."""
+        super().setUp()
+        self.make_album(self.owner, "Camión Fantasma")
+        self.make_album(self.owner, "Salt & Static")
+        self.sign_in()
+
+    def search(self, text):
+        """Pide la biblioteca con el texto de búsqueda indicado."""
+        return self.client.get(reverse("albums:list"), {"q": text})
+
+    def test_the_form_is_marked_for_live_search(self):
+        """HU-50 — El campo y el formulario llevan los marcadores del script."""
+        response = self.search("")
+
+        self.assertContains(response, "data-live-search\n")
+        self.assertContains(response, "data-live-search-input")
+        self.assertContains(response, 'aria-controls="album-results"')
+
+    def test_every_response_has_the_results_block(self):
+        """HU-50 — Con y sin coincidencias, la respuesta trae el bloque."""
+        for text in ("", "yokai", "zzz"):
+            with self.subTest(text=text):
+                self.assertContains(self.search(text), self.RESULTS_BLOCK, count=1)
+
+    def test_the_results_block_holds_the_cards_and_the_count(self):
+        """HU-50 — El contador y las tarjetas viven dentro del bloque."""
+        content = self.search("yokai").content.decode()
+        block = content.split(self.RESULTS_BLOCK, 1)[1]
+
+        self.assertIn("1 de 3", block)
+        self.assertIn("Neon Yokai Bureau", block)
+        self.assertNotIn('role="search"', block)
+
+    def test_clear_is_hidden_until_there_is_a_search(self):
+        """HU-50 — El botón de limpiar solo se ve cuando hay texto buscado."""
+        hidden_clear = "data-live-search-clear\n          hidden"
+
+        self.assertContains(self.search(""), hidden_clear)
+        self.assertNotContains(self.search("yokai"), hidden_clear)
+        self.assertContains(self.search("yokai"), 'aria-label="Limpiar búsqueda"')
+
+    def test_live_requests_receive_only_the_results_block(self):
+        """HU-50 — La búsqueda automática recibe solo el bloque, ya filtrado."""
+        response = self.client.get(
+            reverse("albums:list"), {"q": "yokai"}, headers={"X-Live-Search": "1"}
+        )
+
+        self.assertTemplateUsed(response, "albums/_album_results.html")
+        self.assertNotContains(response, "<html")
+        self.assertNotContains(response, 'role="search"')
+        self.assertContains(response, "Neon Yokai Bureau")
+        self.assertNotContains(response, "Camión Fantasma")
+
+    def test_live_requests_keep_owner_isolation(self):
+        """HU-50 — Flujo alternativo: el bloque nunca trae álbumes ajenos."""
+        response = self.client.get(
+            reverse("albums:list"), {"q": "ajeno"}, headers={"X-Live-Search": "1"}
+        )
+
+        self.assertContains(response, "Ningún álbum coincide")
+
+    def test_cards_carry_their_id_for_the_animation(self):
+        """HU-50 — Cada tarjeta lleva su identificador para animar el cambio."""
+        album = Album.objects.get(title="Neon Yokai Bureau")
+
+        self.assertContains(self.search("yokai"), f'data-album-id="{album.pk}"')
+
+    def test_no_results_offers_to_clear_the_search(self):
+        """HU-50 — Sin coincidencias se ofrece limpiar la búsqueda (CA-50.4)."""
+        response = self.search("zzz")
+
+        self.assertContains(response, "Limpiar búsqueda</a>")
+
+    def test_without_javascript_the_search_button_remains(self):
+        """HU-50 — Flujo alternativo: sin JavaScript sigue el botón "Buscar"."""
+        response = self.search("")
+
+        self.assertContains(response, "data-live-search-submit>Buscar</button>")
