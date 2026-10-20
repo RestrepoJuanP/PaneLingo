@@ -4,6 +4,7 @@ import unicodedata
 
 from django.conf import settings
 from django.contrib import messages
+from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import (
@@ -18,6 +19,7 @@ from django.views.generic import (
 from accounts.access import PrivateViewMixin
 from albums.forms import AlbumForm, AlbumRenameForm
 from albums.models import Album, ComicPage
+from albums.processing import expire_if_stale, start_processing
 from albums.services import create_pages_from_upload
 
 # Longitud máxima del texto de búsqueda; el título admite 120 caracteres.
@@ -343,3 +345,124 @@ class PageDeleteView(PrivateViewMixin, DeleteView):
                 f"El álbum se quedó sin páginas.",
             )
         return response
+
+
+class OwnedPageMixin(PrivateViewMixin):
+    """Restringe una vista a las páginas de álbumes de quien hace la petición.
+
+    Una página de otra cuenta no se encuentra y la vista responde 404, no 403,
+    para no confirmar que existe (CA-12.6).
+    """
+
+    model = ComicPage
+    context_object_name = "page"
+
+    def get_queryset(self):
+        """Devuelve solo las páginas de los álbumes del usuario autenticado."""
+        return ComicPage.objects.filter(album__owner=self.request.user).select_related(
+            "album__source_language", "album__target_language"
+        )
+
+    def get_object(self, queryset=None):
+        """Devuelve la página, pasando a "Error" la que quedó colgada."""
+        page = super().get_object(queryset)
+        expire_if_stale(page)
+        return page
+
+    def get_context_data(self, **kwargs):
+        """Marca el destino activo de la navegación lateral."""
+        context = super().get_context_data(**kwargs)
+        context["nav_current"] = "albums"
+        return context
+
+
+class PageDetailView(OwnedPageMixin, DetailView):
+    """Vista de una página con sus regiones de texto resaltadas (HU-12).
+
+    Es la vista mínima que necesita CA-12.2. HU-11 la amplía con los
+    metadatos de la página y la navegación entre páginas, y HU-14 con el
+    texto de cada región.
+    """
+
+    template_name = "albums/page_detail.html"
+
+    def get_context_data(self, **kwargs):
+        """Añade las regiones en orden de lectura."""
+        context = super().get_context_data(**kwargs)
+        context["regions"] = list(self.object.regions.all())
+        return context
+
+
+class PageStatusView(OwnedPageMixin, DetailView):
+    """Estado de procesamiento de una página, en JSON (HU-12).
+
+    Lo consulta la vista de la página mientras está "Procesando", para
+    recargarse sola en cuanto termina la detección. Hereda el filtro por
+    propietario: una página ajena responde 404, igual que su vista.
+    """
+
+    def render_to_response(self, context, **response_kwargs):
+        """Devuelve el estado como JSON en lugar de una plantilla."""
+        page = self.object
+        return JsonResponse(
+            {
+                "status": page.status,
+                "is_processing": page.is_processing,
+                "region_count": page.regions.count(),
+            }
+        )
+
+
+def processing_feedback(page):
+    """Devuelve el nivel y el texto del mensaje tras pedir el procesamiento.
+
+    Con el trabajador en marcha la página sigue "Procesando" al volver de la
+    petición. En modo inmediato ya llega procesada o con error, y el mensaje
+    tiene que decir lo que de verdad pasó.
+    """
+    if page.status == ComicPage.Status.PROCESSING:
+        return messages.SUCCESS, (
+            f"Procesando la página {page.page_number}. "
+            "Puedes seguir usando PaneLingo mientras tanto."
+        )
+    if page.has_failed:
+        return messages.ERROR, page.processing_error
+    count = page.regions.count()
+    if not count:
+        return messages.SUCCESS, (
+            f"Página {page.page_number} procesada. "
+            "No se detectó texto en esta página."
+        )
+    noun = "región" if count == 1 else "regiones"
+    return messages.SUCCESS, (
+        f"Página {page.page_number} procesada: {count} {noun} de texto."
+    )
+
+
+class PageProcessView(OwnedPageMixin, DetailView):
+    """Procesar una página para detectar sus regiones de texto (HU-12).
+
+    Solo el POST procesa. Un GET muestra la confirmación de volver a
+    procesar, que es además la degradación del modal sin JavaScript.
+
+    Si la página ya tiene regiones, el POST exige confirm=1: reprocesar las
+    reemplaza (CA-12.5), y la confirmación no puede depender solo de que la
+    interfaz muestre el modal.
+    """
+
+    template_name = "albums/page_confirm_process.html"
+
+    def post(self, request, *args, **kwargs):
+        """Encola la detección y vuelve a la vista de la página."""
+        page = self.get_object()
+        if page.regions.exists() and request.POST.get("confirm") != "1":
+            return redirect(page.get_process_url())
+
+        if not start_processing(page):
+            messages.info(request, "Esta página ya se está procesando.")
+            return redirect(page.get_absolute_url())
+
+        page.refresh_from_db()
+        level, text = processing_feedback(page)
+        messages.add_message(request, level, text)
+        return redirect(page.get_absolute_url())

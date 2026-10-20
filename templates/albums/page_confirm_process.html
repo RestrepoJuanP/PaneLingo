@@ -1,0 +1,71 @@
+{% extends "layouts/app_shell.html" %}
+
+{% comment %}
+Confirmar que se vuelve a procesar una página — HU-12, CA-12.5.
+Es la degradación del modal para cuando el JavaScript no está disponible.
+Un GET llega aquí y NO procesa nada; solo el POST lo hace.
+{% endcomment %}
+
+{% block title %}Procesar página {{ page.page_number }} · PaneLingo{% endblock %}
+
+{% block breadcrumb %}
+  <a class="breadcrumb__link" href="{% url 'albums:list' %}">Mis álbumes</a>
+  <span class="breadcrumb__sep" aria-hidden="true">/</span>
+  <a class="breadcrumb__link" href="{{ page.album.get_absolute_url }}">{{ page.album.title }}</a>
+  <span class="breadcrumb__sep" aria-hidden="true">/</span>
+  <a class="breadcrumb__link" href="{{ page.get_absolute_url }}">Página {{ page.page_number }}</a>
+  <span class="breadcrumb__sep" aria-hidden="true">/</span>
+  <span class="breadcrumb__current">Procesar</span>
+{% endblock %}
+
+{% block content %}
+  <div class="page-head">
+    <div>
+      <h1 class="page-title">
+        {% if page.regions.exists %}¿Volver a procesar esta página?{% else %}¿Procesar esta página?{% endif %}
+      </h1>
+      <p class="page-subtitle">
+        {% if page.regions.exists %}
+          Se reemplazarán sus regiones de texto por las que se detecten ahora.
+        {% else %}
+          Se detectarán automáticamente sus regiones de texto.
+        {% endif %}
+      </p>
+    </div>
+  </div>
+
+  <div class="card album-form">
+    <div class="page-delete__preview">
+      <img
+        class="page-delete__thumb"
+        src="{{ page.display_image.url }}"
+        alt="Página {{ page.page_number }}"
+      />
+      <p class="page-delete__label">
+        Página {{ page.page_number }} · {{ page.original_filename }}
+      </p>
+    </div>
+
+    {% if page.regions.exists %}
+      <p class="modal__body">
+        Si el procesamiento falla, se conservan las regiones actuales.
+      </p>
+    {% endif %}
+
+    <form method="post" action="{{ page.get_process_url }}">
+      {% csrf_token %}
+      <input type="hidden" name="confirm" value="1" />
+      <div class="album-form__actions">
+        <a class="btn btn--secondary" href="{{ page.get_absolute_url }}">
+          Cancelar
+        </a>
+        <button type="submit" class="btn btn--primary" data-submit-busy>
+          <span class="btn__spinner" hidden aria-hidden="true"></span>
+          <span data-submit-label data-busy-label="Procesando…">
+            {% if page.regions.exists %}Volver a procesar{% else %}Procesar página{% endif %}
+          </span>
+        </button>
+      </div>
+    </form>
+  </div>
+{% endblock %}

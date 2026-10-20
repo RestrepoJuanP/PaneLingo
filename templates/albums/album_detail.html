@@ -76,7 +76,7 @@ cargarlas.
   {% if album.pages.exists %}
     <div class="page-grid">
       {% for page in album.pages.all %}
-        {% include "components/page_thumb.html" with number=page.page_number image_url=page.display_image.url alt=page.original_filename status_label=page.short_status_display status_variant="neutral" warning=page.has_low_resolution delete_url=page.get_delete_url %}
+        {% include "components/page_thumb.html" with number=page.page_number image_url=page.display_image.url alt=page.original_filename status_label=page.short_status_display status_variant=page.status_variant warning=page.has_low_resolution delete_url=page.get_delete_url detail_url=page.get_absolute_url %}
       {% endfor %}
     </div>
   {% else %}
