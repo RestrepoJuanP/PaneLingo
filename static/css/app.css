@@ -2759,6 +2759,58 @@ textarea {
   padding-right: var(--sp-1);
 }
 
+/* Corrección del texto de una región (HU-15). */
+.region-list__item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.region-edit {
+  margin-left: calc(24px + var(--sp-5) + var(--sp-5));
+}
+
+.region-edit__summary {
+  width: fit-content;
+  font-size: var(--fs-label-sm);
+  font-weight: 700;
+  color: var(--brand);
+  cursor: pointer;
+}
+
+.region-edit__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  margin-top: var(--sp-3);
+}
+
+.region-edit__label {
+  font-size: var(--fs-label-sm);
+  font-weight: 600;
+  color: var(--ink-800);
+}
+
+.region-edit__text:lang(ja) {
+  font-family: var(--font-ja);
+}
+
+.region-edit__text:lang(ko) {
+  font-family: var(--font-ko);
+}
+
+.region-edit__hint,
+.region-edit__original {
+  font-size: var(--fs-label-sm);
+  color: var(--muted);
+}
+
+.region-edit__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+}
+
 .region-panel__review {
   display: block;
   margin-top: var(--sp-2);

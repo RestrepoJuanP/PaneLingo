@@ -457,6 +457,17 @@ class TextRegion(models.Model):
         default=False,
         help_text=_("Texto vacío, de baja confianza o en otro alfabeto."),
     )
+    corrected_text = models.TextField(
+        _("texto corregido"),
+        blank=True,
+        help_text=_("Corrección del usuario (HU-15). Vacía y corregida: sin texto."),
+    )
+    is_corrected = models.BooleanField(
+        _("revisada por el usuario"),
+        default=False,
+        help_text=_("Distingue una corrección vacía de una región sin corregir."),
+    )
+    corrected_at = models.DateTimeField(_("corregida"), null=True, blank=True)
     created_at = models.DateTimeField(_("detectada"), auto_now_add=True)
 
     class Meta:
@@ -473,6 +484,23 @@ class TextRegion(models.Model):
     def __str__(self):
         """Devuelve la región identificada por su número de orden."""
         return f"Región {self.reading_order}"
+
+    @property
+    def final_text(self):
+        """Texto que vale para traducir: el corregido si lo hay, si no el del OCR.
+
+        Es el que debe usar la traducción de HU-16 (CA-15.2).
+        """
+        return self.corrected_text if self.is_corrected else self.source_text
+
+    @property
+    def has_nothing_to_translate(self):
+        """Indica si el usuario vació la región a propósito (CA-15.5)."""
+        return self.is_corrected and not self.corrected_text
+
+    def get_correct_url(self):
+        """Devuelve la dirección para corregir o restaurar esta región."""
+        return reverse("albums:region_correct", kwargs={"pk": self.pk})
 
     @property
     def confidence_percent(self):

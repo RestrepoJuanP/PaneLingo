@@ -626,6 +626,41 @@
   }
 
   /* ---------------------------------------------------------------------------
+     Correcciones sin guardar (HU-15, CA-15.4).
+
+     Si hay un texto corregido que no se ha guardado y el usuario intenta
+     salir de la página (enlace, flechas de navegación, recarga o cierre de
+     la pestaña), el navegador pide confirmación. Al guardar una región no se
+     avisa por esa región, pero sí si quedan otras editadas sin guardar.
+     ------------------------------------------------------------------------ */
+
+  function bindUnsavedCorrections(workspace) {
+    var fields = workspace.querySelectorAll("[data-region-edit] textarea");
+    if (!fields.length) {
+      return;
+    }
+    var submittingForm = null;
+
+    workspace.addEventListener("submit", function (event) {
+      if (event.target.matches("[data-region-edit]")) {
+        submittingForm = event.target;
+      }
+    });
+
+    window.addEventListener("beforeunload", function (event) {
+      var unsaved = Array.prototype.some.call(fields, function (field) {
+        return field.value !== field.defaultValue && field.form !== submittingForm;
+      });
+      if (!unsaved) {
+        return;
+      }
+      event.preventDefault();
+      // Requisito de algunos navegadores para mostrar el aviso.
+      event.returnValue = "";
+    });
+  }
+
+  /* ---------------------------------------------------------------------------
      Arranque
      ------------------------------------------------------------------------ */
 
@@ -702,6 +737,10 @@
     Array.prototype.forEach.call(
       document.querySelectorAll("[data-region-workspace]"),
       bindRegionSelection,
+    );
+    Array.prototype.forEach.call(
+      document.querySelectorAll("[data-region-workspace]"),
+      bindUnsavedCorrections,
     );
   }
 
