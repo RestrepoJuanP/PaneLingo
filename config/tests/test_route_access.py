@@ -50,6 +50,7 @@ PRIVATE_ROUTES = [
 # aparte porque un GET debe responder 405, no una redirección.
 ACTION_ROUTES = [
     "accounts:logout",
+    "albums:region_correct",
 ]
 
 # Argumentos con los que resolver las rutas que llevan parámetros en la URL.
@@ -61,6 +62,7 @@ ROUTE_ARGS = {
     "albums:rename": {"pk": 1},
     "albums:album_cover": {"pk": 1},
     "albums:page_delete": {"pk": 1},
+    "albums:region_correct": {"pk": 1},
     "albums:page_image": {"pk": 1},
     "albums:page_thumbnail": {"pk": 1},
     "albums:page_detail": {"pk": 1},
