@@ -13,23 +13,17 @@ construida en el sistema de diseño pero no se muestra aquí.
   <div class="album-card__body">
     <div class="album-card__head">
       <a class="album-card__title" href="{{ album_url|default:'#' }}">{{ title }}</a>
-      {% if rename_url %}
+      {% if edit_url %}
         {% comment %}
-        Renombrar es la única acción de álbum del Sprint 1: eliminar está
-        deshabilitado, y duplicar y archivar quedan fuera de alcance. Un
-        menú "···" de un solo elemento costaría un clic extra y toda la
-        maquinaria de foco atrapado para nada, así que la acción va
-        directa. El aria-label incluye el título para que un lector de
-        pantalla distinga un "Renombrar" de otro al recorrer la rejilla.
+        El lápiz lleva a la edición completa del álbum (título, idiomas y
+        portada). El aria-label incluye el título para que un lector de
+        pantalla distinga un "Editar" de otro al recorrer la rejilla.
         {% endcomment %}
         <a
           class="btn-icon"
-          href="{{ rename_url }}"
-          data-modal-open="renombrar-album"
-          data-modal-action="{{ rename_url }}"
-          data-modal-value="{{ title }}"
-          aria-label="Renombrar «{{ title }}»"
-          title="Renombrar"
+          href="{{ edit_url }}"
+          aria-label="Editar «{{ title }}»"
+          title="Editar"
         >
           <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false" width="15" height="15">
             <path d="M11.2 1.8a1.6 1.6 0 0 1 2.3 2.3l-7.6 7.6L2.5 13l1.3-3.4 7.4-7.8Z"

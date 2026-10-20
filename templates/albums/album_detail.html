@@ -27,7 +27,7 @@ cargarlas.
   </a>
 
   <div class="album-detail">
-    {% include "components/album_cover.html" with seed=album.pk lang_pair=album.language_pair extra_class="album-detail__cover" %}
+    {% include "components/album_cover.html" with seed=album.pk cover_image=album.cover_url lang_pair=album.language_pair extra_class="album-detail__cover" %}
 
     <div class="album-detail__main">
       <div class="album-detail__title-row">

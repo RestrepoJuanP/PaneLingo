@@ -1,11 +1,11 @@
-"""Señales de la app albums: limpieza de archivos al borrar páginas (HU-10)."""
+"""Señales de la app albums: limpieza de archivos al borrar páginas y álbumes."""
 
 import logging
 
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 
-from albums.models import ComicPage
+from albums.models import Album, ComicPage
 
 logger = logging.getLogger(__name__)
 
@@ -24,13 +24,18 @@ def delete_stored_file(field):
     """
     if not field or not field.name:
         return
+    delete_stored_name(field.storage, field.name)
+
+
+def delete_stored_name(storage, name):
+    """Borra del almacenamiento el archivo con ese nombre, tolerando fallos."""
     try:
-        field.storage.delete(field.name)
+        storage.delete(name)
     except OSError:
         logger.warning(
             "No se pudo borrar del disco el archivo %s. El registro sí se "
             "eliminó; el archivo queda huérfano y habrá que limpiarlo.",
-            field.name,
+            name,
             exc_info=True,
         )
 
@@ -53,3 +58,9 @@ def delete_page_files(sender, instance, **kwargs):
     """
     delete_stored_file(instance.image)
     delete_stored_file(instance.thumbnail)
+
+
+@receiver(post_delete, sender=Album)
+def delete_album_cover(sender, instance, **kwargs):
+    """Borra la portada de un álbum eliminado, o cuya cuenta se eliminó."""
+    delete_stored_file(instance.cover_image)

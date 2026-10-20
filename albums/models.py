@@ -1,6 +1,7 @@
 """Modelos de dominio de la app albums: catálogo de idiomas y álbumes."""
 
 import uuid
+from pathlib import Path
 
 from django.conf import settings
 from django.db import models
@@ -34,6 +35,18 @@ class Language(models.Model):
     def __str__(self):
         """Devuelve el nombre del idioma."""
         return self.name
+
+
+def album_cover_path(instance, filename):
+    """Devuelve la ruta en disco de la portada de un álbum.
+
+    Igual que con las páginas, el nombre lo genera el servidor; solo se
+    conserva la extensión, que el formulario ya normalizó según el formato
+    real de la imagen. Cuelga del usuario y no del álbum porque, al crear,
+    el álbum aún no tiene identificador.
+    """
+    extension = Path(filename).suffix.lower() or ".jpg"
+    return f"albums/user_{instance.owner_id}/covers/{uuid.uuid4().hex}{extension}"
 
 
 class Album(models.Model):
@@ -83,6 +96,12 @@ class Album(models.Model):
         choices=Status.choices,
         default=Status.DRAFT,
     )
+    cover_image = models.ImageField(
+        _("portada"),
+        upload_to=album_cover_path,
+        blank=True,
+        help_text=_("Opcional. Sin portada se muestra la predeterminada."),
+    )
     created_at = models.DateTimeField(_("creado"), auto_now_add=True)
     updated_at = models.DateTimeField(_("actualizado"), auto_now=True)
 
@@ -117,6 +136,11 @@ class Album(models.Model):
     def get_rename_url(self):
         """Devuelve la dirección para renombrar este álbum."""
         return reverse("albums:rename", kwargs={"pk": self.pk})
+
+    @property
+    def cover_url(self):
+        """Dirección de la portada subida, o cadena vacía si usa la predeterminada."""
+        return self.cover_image.url if self.cover_image else ""
 
     @property
     def language_pair(self):

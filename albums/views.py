@@ -1,5 +1,7 @@
 """Vistas de la app albums."""
 
+import unicodedata
+
 from django.conf import settings
 from django.contrib import messages
 from django.shortcuts import redirect
@@ -17,6 +19,15 @@ from accounts.access import PrivateViewMixin
 from albums.forms import AlbumForm, AlbumRenameForm
 from albums.models import Album, ComicPage
 from albums.services import create_pages_from_upload
+
+# Longitud máxima del texto de búsqueda; el título admite 120 caracteres.
+SEARCH_MAX_LENGTH = 120
+
+
+def normalize_search_text(text):
+    """Pasa a minúsculas y quita las tildes, para comparar sin distinguirlas."""
+    decomposed = unicodedata.normalize("NFD", text.casefold())
+    return "".join(char for char in decomposed if not unicodedata.combining(char))
 
 
 class AlbumListView(PrivateViewMixin, ListView):
@@ -37,17 +48,35 @@ class AlbumListView(PrivateViewMixin, ListView):
         El filtrado por propietario ocurre aquí, en el servidor. Es la única
         barrera que impide ver la biblioteca de otra cuenta.
         """
-        return (
+        albums = (
             Album.objects.filter(owner=self.request.user)
             .select_related("source_language", "target_language")
             .order_by("-updated_at")
         )
+        search_text = self.get_search_text()
+        if not search_text:
+            return albums
+        # Se compara en Python, no en SQL: icontains de SQLite no ignora las
+        # tildes. El conjunto es el de un solo usuario, así que es pequeño.
+        needle = normalize_search_text(search_text)
+        matching_ids = [
+            album.pk for album in albums if needle in normalize_search_text(album.title)
+        ]
+        return albums.filter(pk__in=matching_ids)
+
+    def get_search_text(self):
+        """Devuelve el texto buscado (parámetro q), recortado y acotado."""
+        return self.request.GET.get("q", "").strip()[:SEARCH_MAX_LENGTH]
 
     def get_context_data(self, **kwargs):
         """Añade el formulario de creación para el modal de la biblioteca."""
         context = super().get_context_data(**kwargs)
         context["form"] = kwargs.get("form") or AlbumForm()
         context["nav_current"] = "albums"
+        context["search_text"] = self.get_search_text()
+        context["total_album_count"] = Album.objects.filter(
+            owner=self.request.user
+        ).count()
         return context
 
 

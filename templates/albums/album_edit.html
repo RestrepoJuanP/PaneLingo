@@ -3,7 +3,7 @@
 {% comment %}
 Editar álbum — HU-08.
 Reutiliza AlbumForm, así que los campos editables son los que definieron
-HU-06 y HU-07: título e idiomas.
+HU-06 y HU-07: título e idiomas, más la portada (HU-49).
 
 "Cancelar" es un enlace de vuelta al detalle, NO un botón de envío. Al no
 producirse ningún POST, no se escribe nada en la base de datos, ni siquiera
@@ -25,7 +25,7 @@ updated_at, que es lo que exige CA-08.2.
     <div>
       <h1 class="page-title">Editar álbum</h1>
       <p class="page-subtitle">
-        Cambia el título o el par de idiomas. Los cambios se aplican al mismo
+        Cambia el título, el par de idiomas o la portada. Los cambios se aplican al mismo
         álbum, sin crear uno nuevo.
       </p>
     </div>
@@ -41,7 +41,7 @@ updated_at, que es lo que exige CA-08.2.
       </div>
     {% endif %}
 
-    <form method="post" action="{{ album.get_edit_url }}" novalidate>
+    <form method="post" action="{{ album.get_edit_url }}" enctype="multipart/form-data" novalidate>
       {% csrf_token %}
       {% include "albums/_album_form_fields.html" %}
 
