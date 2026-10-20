@@ -5,6 +5,7 @@ entorno mediante python-dotenv. Nunca se escriben secretos en este archivo.
 """
 
 import os
+import sys
 from pathlib import Path
 
 from django.core.exceptions import ImproperlyConfigured
@@ -112,6 +113,14 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": f"{_PASSWORD_VALIDATION}.CommonPasswordValidator"},
     {"NAME": f"{_PASSWORD_VALIDATION}.NumericPasswordValidator"},
 ]
+
+# Solo al ejecutar las pruebas: un hasher rápido. El de producción (PBKDF2,
+# cientos de miles de iteraciones) es lento a propósito, y casi cada prueba
+# crea usuarios e inicia sesión, así que dominaba la duración de la suite. Un
+# hash débil no importa aquí: las contraseñas de prueba nunca salen de la base
+# temporal. Fuera de "manage.py test" se usa siempre el de Django por defecto.
+if len(sys.argv) > 1 and sys.argv[1] == "test":
+    PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
 
 # Caducidad del enlace de recuperación de contraseña, en segundos.
 # Django trae 259 200 (tres días). Se reduce a una hora a propósito: el enlace
