@@ -1,0 +1,19 @@
+==============================================================================
+PaneLingo — Evidencia del Quality Gate
+==============================================================================
+Etapa           : 01
+Paso            : 7 de 7 — pip-audit — auditoria de dependencias
+Comando         : pip-audit -r requirements.txt
+Herramienta     : pip-audit 2.10.1
+Fecha y hora    : 2026-10-20T13:13:23-05:00
+Rama            : feature/HU-12-detect-text-regions
+Commit          : 7ca881b3d01e3028cafce17621078345b29f8ded
+Arbol de trabajo: con cambios sin versionar
+Directorio      : /c/Users/ASUS/Documents/Universidad/6 SEMESTRE/PROYECTO INTEGRADOR 2/Proyecto Panelingo/PaneLingo
+==============================================================================
+
+No known vulnerabilities found
+
+==============================================================================
+Codigo de salida: 0  (CORRECTO)
+==============================================================================

@@ -1,11 +1,13 @@
-"""Modelos de dominio de la app albums: catálogo de idiomas y álbumes."""
+"""Modelos de dominio de la app albums: idiomas, álbumes, páginas y regiones."""
 
 import uuid
+from datetime import timedelta
 from pathlib import Path
 
 from django.conf import settings
 from django.db import models
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from albums.validators import is_low_resolution
@@ -207,9 +209,10 @@ def page_thumbnail_path(instance, filename):
 class ComicPage(models.Model):
     """Página de un álbum: la imagen completa de una plancha del cómic.
 
-    En el Sprint 1 las páginas se cargan y se listan, nada más. El estado
-    queda en PENDING; los demás valores existen para el OCR y la revisión de
-    sprints posteriores, y ninguna historia de este sprint los alcanza.
+    Al cargarse queda en PENDING. HU-12 la lleva a PROCESSING mientras se
+    detectan sus regiones de texto, a PROCESSED cuando termina y a FAILED si
+    la detección falla. NEEDS_REVIEW y APPROVED los alcanzan el OCR y la
+    revisión de historias posteriores.
     """
 
     class Status(models.TextChoices):
@@ -220,6 +223,10 @@ class ComicPage(models.Model):
         PROCESSED = "processed", _("Procesada")
         NEEDS_REVIEW = "needs_review", _("Necesita revisión")
         APPROVED = "approved", _("Aprobada")
+        # Decisión del equipo del 2026-10-20 sobre la pregunta abierta de
+        # HU-12: un fallo de la detección se distingue de una página que
+        # nunca se procesó, en lugar de devolverla a PENDING.
+        FAILED = "failed", _("Error")
 
     album = models.ForeignKey(
         Album,
@@ -245,6 +252,18 @@ class ComicPage(models.Model):
     width = models.PositiveIntegerField(_("ancho en píxeles"))
     height = models.PositiveIntegerField(_("alto en píxeles"))
     file_size = models.PositiveIntegerField(_("tamaño en bytes"))
+    processing_started_at = models.DateTimeField(
+        _("inicio del procesamiento"),
+        null=True,
+        blank=True,
+        help_text=_("Permite detectar un procesamiento que quedó colgado."),
+    )
+    processing_error = models.CharField(
+        _("error del último procesamiento"),
+        max_length=255,
+        blank=True,
+        help_text=_("Motivo del último fallo, para mostrarlo junto a Reintentar."),
+    )
     created_at = models.DateTimeField(_("creada"), auto_now_add=True)
     updated_at = models.DateTimeField(_("actualizada"), auto_now=True)
 
@@ -282,16 +301,76 @@ class ComicPage(models.Model):
         "processed": _("Procesada"),
         "needs_review": _("Revisar"),
         "approved": _("Aprobada"),
+        "failed": _("Error"),
     }
+
+    # Variante del chip de estado para cada estado de la página.
+    STATUS_VARIANTS = {
+        "pending": "neutral",
+        "processing": "progress",
+        "processed": "success",
+        "needs_review": "warning",
+        "approved": "success",
+        "failed": "danger",
+    }
+
+    @property
+    def status_variant(self):
+        """Devuelve la variante de color del chip de estado."""
+        return self.STATUS_VARIANTS.get(self.status, "neutral")
 
     @property
     def short_status_display(self):
         """Devuelve la etiqueta breve del estado, para la rejilla."""
         return self.SHORT_STATUS_LABELS.get(self.status, self.get_status_display())
 
+    def get_absolute_url(self):
+        """Devuelve la dirección de la vista de esta página."""
+        return reverse("albums:page_detail", kwargs={"pk": self.pk})
+
     def get_delete_url(self):
         """Devuelve la dirección para eliminar esta página."""
         return reverse("albums:page_delete", kwargs={"pk": self.pk})
+
+    def get_process_url(self):
+        """Devuelve la dirección para procesar esta página."""
+        return reverse("albums:page_process", kwargs={"pk": self.pk})
+
+    def get_status_url(self):
+        """Devuelve la dirección del estado de procesamiento, en JSON."""
+        return reverse("albums:page_status", kwargs={"pk": self.pk})
+
+    @property
+    def is_processing(self):
+        """Indica si la página se está procesando y aún no se dio por perdida."""
+        return self.status == self.Status.PROCESSING and not self.is_processing_stale
+
+    @property
+    def is_processing_stale(self):
+        """Indica si el procesamiento lleva demasiado tiempo sin terminar.
+
+        Si el trabajador de tareas se cae a mitad de una página, nadie la saca
+        de PROCESSING. Pasado PROCESSING_STALE_AFTER se trata como un fallo y
+        se ofrece reintentar, en lugar de dejarla bloqueada para siempre.
+        """
+        if self.status != self.Status.PROCESSING or not self.processing_started_at:
+            return False
+        limit = timedelta(seconds=settings.PROCESSING_STALE_AFTER)
+        return timezone.now() - self.processing_started_at > limit
+
+    @property
+    def was_processed(self):
+        """Indica si la última detección de regiones terminó bien."""
+        return self.status in (
+            self.Status.PROCESSED,
+            self.Status.NEEDS_REVIEW,
+            self.Status.APPROVED,
+        )
+
+    @property
+    def has_failed(self):
+        """Indica si la última detección falló."""
+        return self.status == self.Status.FAILED
 
     @property
     def has_low_resolution(self):
@@ -307,3 +386,67 @@ class ComicPage(models.Model):
     def display_image(self):
         """Devuelve la miniatura si existe, y si no la imagen original."""
         return self.thumbnail if self.thumbnail else self.image
+
+
+class TextRegion(models.Model):
+    """Región de una página que contiene texto, detectada por HU-12.
+
+    La posición se guarda en píxeles de la imagen original, no en
+    porcentajes: así no depende del tamaño con que se muestre la página y
+    sirve igual para recortar la región en el OCR de HU-13.
+    """
+
+    class Kind(models.TextChoices):
+        """Tipos de región que distingue la interfaz."""
+
+        BALLOON = "balloon", _("Globo de diálogo")
+        NARRATION = "narration", _("Cuadro narrativo")
+
+    page = models.ForeignKey(
+        ComicPage,
+        on_delete=models.CASCADE,
+        related_name="regions",
+        verbose_name=_("página"),
+    )
+    reading_order = models.PositiveIntegerField(_("orden de lectura"))
+    kind = models.CharField(
+        _("tipo"), max_length=20, choices=Kind.choices, default=Kind.BALLOON
+    )
+    x = models.PositiveIntegerField(_("posición horizontal"))
+    y = models.PositiveIntegerField(_("posición vertical"))
+    width = models.PositiveIntegerField(_("ancho"))
+    height = models.PositiveIntegerField(_("alto"))
+    created_at = models.DateTimeField(_("detectada"), auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("región de texto")
+        verbose_name_plural = _("regiones de texto")
+        ordering = ["reading_order"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["page", "reading_order"],
+                name="unique_reading_order_per_page",
+            )
+        ]
+
+    def __str__(self):
+        """Devuelve la región identificada por su número de orden."""
+        return f"Región {self.reading_order}"
+
+    @property
+    def overlay_style(self):
+        """Devuelve la posición de la región en porcentajes, como estilo CSS.
+
+        Se formatea aquí y no en la plantilla porque el idioma de la interfaz
+        escribe los decimales con coma, y CSS solo entiende el punto.
+        """
+        page_width = self.page.width or 1
+        page_height = self.page.height or 1
+        left = self.x / page_width * 100
+        top = self.y / page_height * 100
+        width = self.width / page_width * 100
+        height = self.height / page_height * 100
+        return (
+            f"left: {left:.3f}%; top: {top:.3f}%; "
+            f"width: {width:.3f}%; height: {height:.3f}%;"
+        )

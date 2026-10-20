@@ -1,10 +1,13 @@
 """Pruebas de las vistas de la app accounts (HU-01)."""
 
+from django.conf import global_settings
 from django.contrib.messages import get_messages
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
 from accounts.models import User
+
+PRODUCTION_HASHERS = global_settings.PASSWORD_HASHERS
 
 VALID_PAYLOAD = {
     "display_name": "Mira Okonkwo",
@@ -53,6 +56,9 @@ class RegistrationViewSuccessTests(TestCase):
         self.assertEqual(user.display_name, "Mira Okonkwo")
         self.assertRedirects(response, reverse("albums:list"))
 
+    # Las pruebas usan un hasher rápido (config/settings.py); esta fuerza el de
+    # producción para comprobar que es el que guarda la contraseña.
+    @override_settings(PASSWORD_HASHERS=PRODUCTION_HASHERS)
     def test_password_is_stored_hashed(self):
         """CP-01.1 — La contraseña se almacena hasheada, no en texto plano."""
         self.client.post(reverse("accounts:register"), data=VALID_PAYLOAD)
