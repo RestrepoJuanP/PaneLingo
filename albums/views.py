@@ -387,9 +387,11 @@ class PageDetailView(OwnedPageMixin, DetailView):
     template_name = "albums/page_detail.html"
 
     def get_context_data(self, **kwargs):
-        """Añade las regiones en orden de lectura."""
+        """Añade las regiones en orden de lectura y cuántas hay que revisar."""
         context = super().get_context_data(**kwargs)
-        context["regions"] = list(self.object.regions.all())
+        regions = list(self.object.regions.all())
+        context["regions"] = regions
+        context["review_count"] = sum(region.needs_review for region in regions)
         return context
 
 

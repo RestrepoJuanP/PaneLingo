@@ -1,4 +1,4 @@
-"""Servicio de procesamiento de páginas: detección de regiones de texto (HU-12).
+"""Servicio de procesamiento de páginas: regiones de texto y OCR (HU-12, HU-13).
 
 El flujo tiene dos mitades. start_processing corre dentro de la petición web:
 marca la página y encola la tarea. run_detection corre en el trabajador de
@@ -8,19 +8,15 @@ Huey: llama al proveedor y guarda el resultado. Ver ADR-001.
 import io
 import logging
 
+from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 from PIL import Image
 
 from albums.models import ComicPage, TextRegion
 from albums.ocr import OcrProviderError, get_provider
-from albums.ocr.layout import (
-    clamp_to_page,
-    is_balloon,
-    is_right_to_left,
-    merge_lines_into_regions,
-    sort_in_reading_order,
-)
+from albums.ocr.layout import arrange_regions, is_balloon
+from albums.ocr.review import needs_review
 
 logger = logging.getLogger(__name__)
 
@@ -60,13 +56,14 @@ def read_image_bytes(page):
 def build_regions(page, image_bytes, detected):
     """Convierte lo que devolvió el proveedor en regiones listas para guardar.
 
-    Recorta las cajas a la página, agrupa las líneas en globos, las ordena
-    según el idioma de origen del álbum y clasifica cada una.
+    Recorta las cajas a la página, agrupa las líneas en globos y las ordena
+    según el idioma de origen del álbum (HU-12). Cada región guarda además su
+    texto y su confianza, y se marca para revisión si no se puede confiar en
+    lo leído (HU-13).
     """
-    clamped = [clamp_to_page(line, page.width, page.height) for line in detected]
-    merged = merge_lines_into_regions([line for line in clamped if line])
-    right_to_left = is_right_to_left(page.album.source_language.code)
-    ordered = sort_in_reading_order(merged, right_to_left)
+    language_code = page.album.source_language.code
+    ordered = arrange_regions(detected, page.width, page.height, language_code)
+    threshold = settings.OCR_REVIEW_THRESHOLD
 
     with Image.open(io.BytesIO(image_bytes)) as image:
         return [
@@ -82,21 +79,31 @@ def build_regions(page, image_bytes, detected):
                 y=region.y,
                 width=region.width,
                 height=region.height,
+                source_text=region.text,
+                confidence=region.confidence,
+                needs_review=needs_review(region, language_code, threshold),
             )
             for position, region in enumerate(ordered, start=1)
         ]
 
 
 def save_regions(page, regions):
-    """Reemplaza las regiones de la página y la marca como procesada.
+    """Reemplaza las regiones de la página y actualiza su estado.
 
-    El borrado y la inserción van en la misma transacción: si algo falla al
-    guardar, la página conserva sus regiones anteriores (CA-12.4).
+    La página queda "Necesita revisión" si alguna región lo necesita
+    (CA-13.3) y "Procesada" en caso contrario. El borrado y la inserción van
+    en la misma transacción: si algo falla al guardar, la página conserva sus
+    regiones anteriores (CA-12.4).
     """
+    has_doubtful_regions = any(region.needs_review for region in regions)
     with transaction.atomic():
         page.regions.all().delete()
         TextRegion.objects.bulk_create(regions)
-        page.status = ComicPage.Status.PROCESSED
+        page.status = (
+            ComicPage.Status.NEEDS_REVIEW
+            if has_doubtful_regions
+            else ComicPage.Status.PROCESSED
+        )
         page.processing_started_at = None
         page.processing_error = ""
         page.save(update_fields=["status", "processing_started_at", "processing_error"])

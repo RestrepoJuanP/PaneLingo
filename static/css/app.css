@@ -2574,7 +2574,7 @@ textarea {
 
 .region-list__link {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--sp-5);
   padding: var(--sp-4) var(--sp-5);
   border: 1px solid var(--border);
@@ -2606,6 +2606,55 @@ textarea {
   font-weight: 700;
   line-height: 24px;
   text-align: center;
+}
+
+.region-list__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  min-width: 0;
+}
+
+.region-list__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.region-list__confidence {
+  font-size: var(--fs-label-sm);
+  font-weight: 600;
+  color: var(--muted);
+}
+
+/* Texto reconocido por el OCR (HU-13). Conserva los saltos de línea de cada
+   globo y parte las palabras largas para no desbordar el panel. */
+.region-list__text {
+  color: var(--ink-900);
+  font-size: var(--fs-body);
+  font-weight: 500;
+  line-height: var(--lh-body);
+  overflow-wrap: anywhere;
+}
+
+.region-list__text:lang(ja) {
+  font-family: var(--font-ja), var(--font-ui);
+}
+
+.region-list__text:lang(ko) {
+  font-family: var(--font-ko), var(--font-ui);
+}
+
+.region-list__text--empty {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.region-panel__review {
+  display: block;
+  margin-top: var(--sp-2);
+  color: var(--warning-fg);
 }
 
 .region-list__number--narration {
