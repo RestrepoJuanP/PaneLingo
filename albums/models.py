@@ -141,8 +141,14 @@ class Album(models.Model):
 
     @property
     def cover_url(self):
-        """Dirección de la portada subida, o cadena vacía si usa la predeterminada."""
-        return self.cover_image.url if self.cover_image else ""
+        """Dirección de la portada subida, o cadena vacía si usa la predeterminada.
+
+        Apunta a la vista protegida, no a MEDIA_URL: la portada es una imagen
+        del usuario y solo la puede descargar su propietario (DT-02).
+        """
+        if not self.cover_image:
+            return ""
+        return reverse("albums:album_cover", kwargs={"pk": self.pk})
 
     @property
     def language_pair(self):
@@ -339,6 +345,23 @@ class ComicPage(models.Model):
     def get_status_url(self):
         """Devuelve la dirección del estado de procesamiento, en JSON."""
         return reverse("albums:page_status", kwargs={"pk": self.pk})
+
+    # Las imágenes se piden por estas direcciones protegidas y nunca por
+    # MEDIA_URL: así una página ajena responde 404 aunque se conozca su
+    # dirección (HU-11, CA-11.4, deuda DT-02).
+
+    def get_image_url(self):
+        """Devuelve la dirección protegida de la imagen original."""
+        return reverse("albums:page_image", kwargs={"pk": self.pk})
+
+    def get_thumbnail_url(self):
+        """Devuelve la dirección protegida de la miniatura."""
+        return reverse("albums:page_thumbnail", kwargs={"pk": self.pk})
+
+    @property
+    def display_image_url(self):
+        """Dirección de la miniatura, que cae en el original si no la hay."""
+        return self.get_thumbnail_url()
 
     @property
     def is_processing(self):

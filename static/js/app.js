@@ -535,6 +535,43 @@
   }
 
   /* ---------------------------------------------------------------------------
+     Navegación entre páginas con el teclado (HU-11).
+
+     Las flechas izquierda y derecha siguen los enlaces "Anterior" y
+     "Siguiente". No actúan mientras se escribe en un campo ni con un modal
+     abierto, para no robarle las flechas a quien está editando.
+     ------------------------------------------------------------------------ */
+
+  function bindPagePager(pager) {
+    var previous = pager.querySelector("[data-page-prev]");
+    var next = pager.querySelector("[data-page-next]");
+
+    document.addEventListener("keydown", function (event) {
+      if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) {
+        return;
+      }
+      var target = event.target;
+      var isTyping =
+        target.isContentEditable ||
+        /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName);
+      if (isTyping || document.querySelector(".modal:not([hidden])")) {
+        return;
+      }
+      var link = null;
+      if (event.key === "ArrowLeft") {
+        link = previous;
+      } else if (event.key === "ArrowRight") {
+        link = next;
+      }
+      if (!link) {
+        return;
+      }
+      event.preventDefault();
+      window.location.href = link.href;
+    });
+  }
+
+  /* ---------------------------------------------------------------------------
      Arranque
      ------------------------------------------------------------------------ */
 
@@ -603,6 +640,10 @@
     Array.prototype.forEach.call(
       document.querySelectorAll("[data-processing-poll]"),
       bindProcessingPoll,
+    );
+    Array.prototype.forEach.call(
+      document.querySelectorAll("[data-page-pager]"),
+      bindPagePager,
     );
   }
 
