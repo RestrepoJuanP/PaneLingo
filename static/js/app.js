@@ -661,6 +661,305 @@
   }
 
   /* ---------------------------------------------------------------------------
+     Búsqueda de álbumes mientras se escribe (HU-50).
+
+     Es una MEJORA PROGRESIVA del formulario GET. Pide al servidor solo el
+     bloque de resultados (cabecera X-Live-Search) y lo reemplaza sin tocar el
+     campo, así que no se pierden ni el foco ni lo escrito. El filtro lo sigue
+     haciendo el servidor: aquí no se compara ningún título. Sin JavaScript
+     queda el botón "Buscar".
+
+     Movimiento: las tarjetas que siguen tras filtrar se desplazan a su sitio
+     nuevo en lugar de saltar (técnica FLIP), y las que aparecen entran con un
+     fundido corto y escalonado. Todo con transform y opacity, por debajo de
+     250 ms, y nada con movimiento reducido.
+     ------------------------------------------------------------------------ */
+
+  // Espera tras la última tecla antes de pedir resultados.
+  var LIVE_SEARCH_DELAY_MS = 120;
+  // El indicador de carga solo aparece si la respuesta tarda: así una
+  // respuesta rápida no provoca un parpadeo.
+  var LIVE_SEARCH_SPINNER_DELAY_MS = 150;
+  var LIVE_SEARCH_CACHE_SIZE = 30;
+  var CARD_MOVE_MS = 220;
+  var CARD_ENTER_MS = 180;
+  var CARD_STAGGER_MS = 25;
+  var CARD_STAGGER_MAX = 8;
+  var FALLBACK_EASE_OUT = "cubic-bezier(0.23, 1, 0.32, 1)";
+
+  function prefersReducedMotion() {
+    return (
+      window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    );
+  }
+
+  function easeOut() {
+    var token = window
+      .getComputedStyle(document.documentElement)
+      .getPropertyValue("--ease-out")
+      .trim();
+    return token || FALLBACK_EASE_OUT;
+  }
+
+  function cardPositions(container) {
+    var positions = {};
+    Array.prototype.forEach.call(
+      container.querySelectorAll("[data-album-id]"),
+      function (card) {
+        positions[card.dataset.albumId] = card.getBoundingClientRect();
+      },
+    );
+    return positions;
+  }
+
+  function animateCards(container, before) {
+    if (prefersReducedMotion() || !Element.prototype.animate) {
+      return;
+    }
+    var easing = easeOut();
+    var entering = 0;
+    Array.prototype.forEach.call(
+      container.querySelectorAll("[data-album-id]"),
+      function (card) {
+        var previous = before[card.dataset.albumId];
+        if (previous) {
+          var current = card.getBoundingClientRect();
+          var deltaX = previous.left - current.left;
+          var deltaY = previous.top - current.top;
+          if (deltaX || deltaY) {
+            card.animate(
+              [
+                { transform: "translate(" + deltaX + "px, " + deltaY + "px)" },
+                { transform: "none" },
+              ],
+              { duration: CARD_MOVE_MS, easing: easing },
+            );
+          }
+          return;
+        }
+        card.animate(
+          [
+            { opacity: 0, transform: "translateY(6px)" },
+            { opacity: 1, transform: "none" },
+          ],
+          {
+            duration: CARD_ENTER_MS,
+            easing: easing,
+            delay: Math.min(entering, CARD_STAGGER_MAX) * CARD_STAGGER_MS,
+            fill: "backwards",
+          },
+        );
+        entering += 1;
+      },
+    );
+    var empty = container.querySelector(".empty-state");
+    if (empty) {
+      empty.animate([{ opacity: 0 }, { opacity: 1 }], {
+        duration: CARD_ENTER_MS,
+        easing: easing,
+      });
+    }
+  }
+
+  function bindLiveSearch(form) {
+    var input = form.querySelector("[data-live-search-input]");
+    var results = document.querySelector("[data-live-search-results]");
+    if (!input || !results || !window.fetch) {
+      return;
+    }
+    var submit = form.querySelector("[data-live-search-submit]");
+    var clear = form.querySelector("[data-live-search-clear]");
+    var spinner = form.querySelector("[data-live-search-spinner]");
+    var hint = form.querySelector("[data-live-search-hint]");
+    var status = document.querySelector("[data-live-search-status]");
+    var cache = new Map();
+    var timer = null;
+    var spinnerTimer = null;
+    var controller = null;
+    var lastQuery = input.value.trim();
+
+    if (submit) {
+      submit.hidden = true;
+    }
+    if (hint) {
+      hint.hidden = false;
+    }
+
+    function addressFor(query) {
+      var url = new URL(form.getAttribute("action"), window.location.href);
+      if (query) {
+        url.searchParams.set("q", query);
+      }
+      return url.toString();
+    }
+
+    function setBusy(isBusy) {
+      window.clearTimeout(spinnerTimer);
+      if (isBusy) {
+        results.setAttribute("aria-busy", "true");
+        spinnerTimer = window.setTimeout(function () {
+          if (spinner) {
+            spinner.hidden = false;
+          }
+        }, LIVE_SEARCH_SPINNER_DELAY_MS);
+        return;
+      }
+      results.removeAttribute("aria-busy");
+      if (spinner) {
+        spinner.hidden = true;
+      }
+    }
+
+    function remember(query, html) {
+      cache.delete(query);
+      cache.set(query, html);
+      if (cache.size > LIVE_SEARCH_CACHE_SIZE) {
+        cache.delete(cache.keys().next().value);
+      }
+    }
+
+    function render(query, html) {
+      var before = cardPositions(results);
+      results.innerHTML = html;
+      animateCards(results, before);
+      if (clear) {
+        clear.hidden = !query;
+      }
+      if (status) {
+        // Región viva fuera del bloque reemplazado: un aria-live recién
+        // insertado no se anuncia, así que el contador se copia aquí.
+        var count = results.querySelector("[data-live-search-count]");
+        status.textContent = count
+          ? count.textContent.trim().replace(/\s+/g, " ")
+          : "";
+      }
+      window.history.replaceState(null, "", addressFor(query));
+    }
+
+    function fetchResults(query) {
+      if (controller) {
+        controller.abort();
+      }
+      controller = window.AbortController ? new AbortController() : null;
+      setBusy(true);
+      fetch(addressFor(query), {
+        credentials: "same-origin",
+        headers: { "X-Live-Search": "1" },
+        signal: controller ? controller.signal : undefined,
+      })
+        .then(function (response) {
+          if (response.redirected || !response.ok) {
+            // La sesión caducó o algo falló: se navega para que el usuario
+            // vea la página real en lugar de un bloque a medias.
+            window.location.href = response.url || addressFor(query);
+            return null;
+          }
+          return response.text();
+        })
+        .then(function (html) {
+          if (html === null || query !== lastQuery) {
+            return;
+          }
+          remember(query, html);
+          setBusy(false);
+          render(query, html);
+        })
+        .catch(function (error) {
+          if (error && error.name === "AbortError") {
+            return;
+          }
+          // Sin red: se deja el resultado anterior y la siguiente tecla
+          // vuelve a intentarlo.
+          setBusy(false);
+          lastQuery = null;
+        });
+    }
+
+    function search() {
+      var query = input.value.trim();
+      if (query === lastQuery) {
+        return;
+      }
+      lastQuery = query;
+      if (cache.has(query)) {
+        // Volver a un texto ya buscado (por ejemplo, al borrar) es inmediato.
+        if (controller) {
+          controller.abort();
+        }
+        setBusy(false);
+        render(query, cache.get(query));
+        return;
+      }
+      fetchResults(query);
+    }
+
+    function schedule() {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(search, LIVE_SEARCH_DELAY_MS);
+    }
+
+    function clearSearch() {
+      input.value = "";
+      window.clearTimeout(timer);
+      search();
+      input.focus();
+    }
+
+    // La vista inicial ya está pintada: se guarda para que volver a ella al
+    // borrar no necesite pedir nada.
+    remember(lastQuery, results.innerHTML);
+
+    input.addEventListener("input", function (event) {
+      // Mientras se compone con un teclado japonés, chino o coreano, el texto
+      // aún no es definitivo: se busca al terminar la composición.
+      if (event.isComposing) {
+        return;
+      }
+      schedule();
+    });
+    input.addEventListener("compositionend", schedule);
+
+    input.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && input.value) {
+        event.preventDefault();
+        clearSearch();
+      }
+    });
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+      window.clearTimeout(timer);
+      search();
+    });
+
+    if (clear) {
+      clear.addEventListener("click", function (event) {
+        event.preventDefault();
+        clearSearch();
+      });
+    }
+
+    // Atajo "/" para ir al buscador, como en GitHub o YouTube. No actúa si
+    // ya se está escribiendo en otro campo ni con un modal abierto.
+    document.addEventListener("keydown", function (event) {
+      if (event.key !== "/" || event.ctrlKey || event.metaKey || event.altKey) {
+        return;
+      }
+      var target = event.target;
+      var isTyping =
+        target.isContentEditable ||
+        /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName);
+      if (isTyping || document.querySelector(".modal:not([hidden])")) {
+        return;
+      }
+      event.preventDefault();
+      input.focus();
+      input.select();
+    });
+  }
+
+  /* ---------------------------------------------------------------------------
      Arranque
      ------------------------------------------------------------------------ */
 
@@ -741,6 +1040,10 @@
     Array.prototype.forEach.call(
       document.querySelectorAll("[data-region-workspace]"),
       bindUnsavedCorrections,
+    );
+    Array.prototype.forEach.call(
+      document.querySelectorAll("[data-live-search]"),
+      bindLiveSearch,
     );
   }
 

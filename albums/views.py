@@ -72,6 +72,18 @@ class AlbumListView(PrivateViewMixin, ListView):
         """Devuelve el texto buscado (parámetro q), recortado y acotado."""
         return self.request.GET.get("q", "").strip()[:SEARCH_MAX_LENGTH]
 
+    def get_template_names(self):
+        """Devuelve solo el bloque de resultados a la búsqueda automática.
+
+        El script de la biblioteca marca sus peticiones con la cabecera
+        X-Live-Search. Responderle con el bloque, y no con la página entera,
+        acorta la descarga y el procesado de cada pulsación. El filtrado y el
+        aislamiento por propietario son exactamente los mismos.
+        """
+        if self.request.headers.get("X-Live-Search") == "1":
+            return ["albums/_album_results.html"]
+        return super().get_template_names()
+
     def get_context_data(self, **kwargs):
         """Añade el formulario de creación para el modal de la biblioteca."""
         context = super().get_context_data(**kwargs)

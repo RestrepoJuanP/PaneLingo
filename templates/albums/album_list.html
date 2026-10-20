@@ -47,51 +47,69 @@ así que cuatro de los cinco devolverían siempre lista vacía.
     {% comment %}
     Búsqueda por título (HU-50). Formulario GET, así que funciona sin
     JavaScript y el resultado es un enlace que se puede compartir o recargar.
+    Con JavaScript, static/js/app.js filtra mientras se escribe: pide solo el
+    bloque de resultados y lo reemplaza sin tocar el campo, para no perder el
+    foco ni lo escrito. El botón "Buscar" queda para cuando no hay JavaScript.
     {% endcomment %}
-    <form class="search-bar" method="get" action="{% url 'albums:list' %}" role="search">
-      <label class="sr-only" for="album-search">Buscar álbumes por título</label>
-      <input
-        class="input search-bar__input"
-        type="search"
-        id="album-search"
-        name="q"
-        value="{{ search_text }}"
-        maxlength="120"
-        placeholder="Buscar por título"
-        autocomplete="off"
-      />
-      <button type="submit" class="btn btn--primary">Buscar</button>
-      {% if search_text %}
-        <a class="btn btn--secondary" href="{% url 'albums:list' %}">Limpiar</a>
-      {% endif %}
-    </form>
-
-    <div class="section-head">
-      <div class="section-head__left">
-        <h2 class="section-title">Álbumes</h2>
-        <span class="section-count" aria-live="polite">
-          {% if search_text %}
-            {{ albums|length }} de {{ total_album_count }}
-          {% else %}
-            {{ albums|length }} {{ albums|length|pluralize:"álbum,álbumes" }}
-          {% endif %}
-        </span>
+    <form
+      class="search-bar"
+      method="get"
+      action="{% url 'albums:list' %}"
+      role="search"
+      data-live-search
+    >
+      <div class="search-field">
+        <label class="sr-only" for="album-search">Buscar álbumes por título</label>
+        <svg class="search-field__icon" viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false" width="16" height="16">
+          <circle cx="7" cy="7" r="4.75" stroke="currentColor" stroke-width="1.5"/>
+          <path d="m10.5 10.5 3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <input
+          class="input search-field__input"
+          type="search"
+          id="album-search"
+          name="q"
+          value="{{ search_text }}"
+          maxlength="120"
+          placeholder="Buscar por título"
+          autocomplete="off"
+          spellcheck="false"
+          aria-controls="album-results"
+          aria-describedby="album-search-hint"
+          data-live-search-input
+        />
+        <span class="search-field__spinner" aria-hidden="true" hidden data-live-search-spinner></span>
+        {% comment %}
+        Enlace de verdad: sin JavaScript vuelve a la biblioteca completa. Con
+        JavaScript vacía el campo y actualiza los resultados sin recargar.
+        {% endcomment %}
+        <a
+          class="search-field__clear"
+          href="{% url 'albums:list' %}"
+          aria-label="Limpiar búsqueda"
+          title="Limpiar búsqueda"
+          data-live-search-clear
+          {% if not search_text %}hidden{% endif %}
+        >
+          <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false" width="12" height="12">
+            <path d="m4 4 8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+        </a>
+        <kbd class="search-field__hint" aria-hidden="true" data-live-search-hint hidden>/</kbd>
       </div>
-    </div>
-
+      <p class="sr-only" id="album-search-hint">Los resultados se actualizan mientras escribes.</p>
+      <button type="submit" class="btn btn--primary" data-live-search-submit>Buscar</button>
+    </form>
+    <p class="sr-only" aria-live="polite" data-live-search-status></p>
   {% endif %}
 
-  {% if albums %}
-    <div class="album-grid">
-      {% for album in albums %}
-        {% include "components/album_card.html" with seed=album.pk title=album.title page_count=album.page_count edited_label=album.updated_at|timesince lang_pair=album.language_pair status_label=album.get_status_display status_variant="neutral" album_url=album.get_absolute_url edit_url=album.get_edit_url cover_image=album.cover_url %}
-      {% endfor %}
-    </div>
-  {% elif search_text %}
-    {% include "components/empty_state.html" with title="Ningún álbum coincide con tu búsqueda" body="Prueba con otra parte del título o limpia la búsqueda para ver todos tus álbumes." %}
-  {% else %}
-    {% include "components/empty_state.html" with title="Todavía no tienes álbumes" body="Un álbum agrupa las páginas de un cómic, un tomo de manga o una temporada de webtoon. Crea el primero para empezar a organizar tu trabajo." action_label="Crear mi primer álbum" action_url=create_url action_modal="crear-album" %}
-  {% endif %}
+  {% comment %}
+  Bloque de resultados: contador, rejilla o estado vacío. Es lo único que la
+  búsqueda automática reemplaza.
+  {% endcomment %}
+  <div id="album-results" data-live-search-results>
+    {% include "albums/_album_results.html" %}
+  </div>
 
   {% comment %}
   Modal de creación. Sin JavaScript nunca se abre, y el botón de arriba

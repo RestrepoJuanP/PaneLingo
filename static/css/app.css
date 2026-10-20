@@ -160,9 +160,114 @@ textarea {
   margin-bottom: var(--sp-8);
 }
 
-.search-bar__input {
+/* Campo de búsqueda con icono, indicador de carga, botón de limpiar y atajo
+   de teclado dentro del propio campo (HU-50). */
+.search-field {
+  position: relative;
   flex: 1 1 260px;
-  max-width: 420px;
+  max-width: 440px;
+}
+
+/* Doble clase: .input, declarada más abajo, fija su propio padding y ganaría
+   por orden con la misma especificidad. */
+.search-field .search-field__input {
+  padding-left: 38px;
+  padding-right: 64px;
+}
+
+/* El campo trae su propio botón de limpiar; se retira el nativo del
+   navegador para que no aparezcan dos. */
+.search-field__input::-webkit-search-cancel-button {
+  appearance: none;
+}
+
+.search-field__icon {
+  position: absolute;
+  top: 50%;
+  left: 13px;
+  color: var(--muted);
+  transform: translateY(-50%);
+  pointer-events: none;
+  transition: color var(--t-fast) ease;
+}
+
+.search-field:focus-within .search-field__icon {
+  color: var(--brand);
+}
+
+.search-field__clear,
+.search-field__spinner,
+.search-field__hint {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.search-field__clear {
+  right: 10px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--r-full);
+  background: var(--surface-muted);
+  color: var(--ink-600);
+  transition:
+    background var(--t-fast) ease,
+    color var(--t-fast) ease;
+}
+
+.search-field__clear:hover {
+  background: var(--border-strong);
+  color: var(--ink-900);
+}
+
+.search-field__spinner {
+  right: 42px;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--border-strong);
+  border-top-color: var(--brand);
+  border-radius: var(--r-full);
+  animation: pl-spin 0.7s linear infinite;
+}
+
+.search-field__hint {
+  right: 12px;
+  min-width: 22px;
+  padding: 1px var(--sp-2);
+  border: 1px solid var(--border-strong);
+  border-bottom-width: 2px;
+  border-radius: var(--r-sm);
+  background: var(--surface-subtle);
+  color: var(--muted);
+  font-family: var(--font-ui);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+}
+
+/* El atajo solo se anuncia con el campo vacío y sin foco. */
+.search-field:focus-within .search-field__hint,
+.search-field__input:not(:placeholder-shown) ~ .search-field__hint {
+  display: none;
+}
+
+/* El atributo hidden debe ganar a los display de arriba y al de .btn: con
+   búsqueda automática se ocultan "Buscar" y, sin texto, el botón limpiar. */
+.search-bar [hidden] {
+  display: none;
+}
+
+/* Mientras llega el resultado, los anteriores se atenúan apenas: dice que
+   la lista está cambiando sin parpadeos ni esqueletos. */
+[data-live-search-results] {
+  transition: opacity var(--t-fast) ease;
+}
+
+[data-live-search-results][aria-busy="true"] {
+  opacity: 0.6;
 }
 
 .section-head__left {
@@ -974,9 +1079,13 @@ textarea {
     transform var(--t-base) ease;
 }
 
-.album-card:hover {
-  box-shadow: var(--shadow-card-hover);
-  transform: translateY(-2px);
+/* Solo con puntero real: en pantallas táctiles el :hover se queda pegado
+   tras tocar la tarjeta. */
+@media (hover: hover) and (pointer: fine) {
+  .album-card:hover {
+    box-shadow: var(--shadow-card-hover);
+    transform: translateY(-2px);
+  }
 }
 
 .album-card__cover {

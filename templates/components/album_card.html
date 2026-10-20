@@ -5,7 +5,11 @@ Adaptación al Sprint 1: el metadato del mockup ("24 pages · 7 approved ·
 existen bloques, aprobaciones ni traducciones. La barra de progreso está
 construida en el sistema de diseño pero no se muestra aquí.
 {% endcomment %}
-<article class="album-card">
+{% comment %}
+data-album-id permite a la búsqueda automática reconocer qué tarjetas siguen
+tras filtrar, para desplazarlas a su sitio nuevo en lugar de que salten.
+{% endcomment %}
+<article class="album-card" data-album-id="{{ seed }}">
   <a href="{{ album_url|default:'#' }}" tabindex="-1" aria-hidden="true">
     {% include "components/album_cover.html" with seed=seed cover_image=cover_image lang_pair=lang_pair status_label=status_label status_variant=status_variant extra_class="album-card__cover" %}
   </a>
