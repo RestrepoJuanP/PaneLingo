@@ -2530,6 +2530,26 @@ textarea {
   text-decoration: none;
 }
 
+/* Región que necesita revisión (HU-14, CA-14.3): se distingue por la forma
+   (borde discontinuo) y por el signo "!" junto al número, no solo por el
+   color. */
+.region-box--review {
+  border-style: dashed;
+  border-color: var(--warning-fg);
+}
+
+.region-box--review .region-box__number {
+  background: var(--warning-fg);
+  color: #fff;
+}
+
+/* Región elegida: su caja y su texto se resaltan a la vez (CA-14.2). */
+.region-box.is-selected,
+.region-box:target {
+  box-shadow: 0 0 0 3px var(--focus-ring);
+  background: color-mix(in srgb, var(--brand) 22%, transparent);
+}
+
 .region-box__number {
   position: absolute;
   top: -11px;
@@ -2658,6 +2678,11 @@ textarea {
   text-decoration: none;
 }
 
+.region-list__item--review .region-list__link {
+  border-left: 3px solid var(--warning);
+}
+
+.region-list__item.is-selected .region-list__link,
 .region-list__item:target .region-list__link {
   border-color: var(--brand);
   background: var(--brand-tint-2);
@@ -2717,6 +2742,21 @@ textarea {
 .region-list__text--empty {
   color: var(--muted);
   font-style: italic;
+}
+
+.region-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin-top: var(--sp-5);
+}
+
+/* El panel de texto se desplaza por su cuenta para que la imagen siga a la
+   vista mientras se recorren muchas regiones. */
+.region-list {
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: var(--sp-1);
 }
 
 .region-panel__review {

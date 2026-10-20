@@ -376,6 +376,10 @@ class OwnedPageMixin(PrivateViewMixin):
         return context
 
 
+# Valor de ?filtro= que deja solo las regiones pendientes de revisar (HU-14).
+REVIEW_FILTER = "revisar"
+
+
 class PageDetailView(OwnedPageMixin, DetailView):
     """Espacio de trabajo de una página (HU-11, HU-12, HU-13 y HU-14).
 
@@ -393,8 +397,15 @@ class PageDetailView(OwnedPageMixin, DetailView):
         context = super().get_context_data(**kwargs)
         page = self.object
         regions = list(page.regions.all())
+        review_filter = self.request.GET.get("filtro") == REVIEW_FILTER
         context["regions"] = regions
         context["review_count"] = sum(region.needs_review for region in regions)
+        context["review_filter"] = review_filter
+        context["visible_regions"] = (
+            [region for region in regions if region.needs_review]
+            if review_filter
+            else regions
+        )
         context.update(page_neighbours(page))
         return context
 

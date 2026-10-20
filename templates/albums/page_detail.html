@@ -140,7 +140,13 @@ el teclado sin JavaScript, y el lector de pantalla anuncia número y tipo.
     </div>
   {% endif %}
 
-  <div class="page-view">
+  {% comment %}
+  Vista dividida (HU-14): la imagen con sus regiones a un lado y el texto de
+  cada una al otro, en orden de lectura. Cada región de la imagen enlaza con
+  su texto y cada texto con su región: sin JavaScript funciona con anclas, y
+  static/js/app.js resalta a la vez las dos mitades de la región elegida.
+  {% endcomment %}
+  <div class="page-view" data-region-workspace>
     <figure class="region-canvas">
       <img
         class="region-canvas__img"
@@ -149,15 +155,16 @@ el teclado sin JavaScript, y el lector de pantalla anuncia número y tipo.
         width="{{ page.width }}"
         height="{{ page.height }}"
       />
-      {% for region in regions %}
+      {% for region in visible_regions %}
         <a
-          class="region-box region-box--{{ region.kind }}"
+          class="region-box region-box--{{ region.kind }}{% if region.needs_review %} region-box--review{% endif %}"
           id="region-box-{{ region.reading_order }}"
           href="#region-{{ region.reading_order }}"
           style="{{ region.overlay_style }}"
-          aria-label="Región {{ region.reading_order }}: {{ region.get_kind_display|lower }}"
+          data-region="{{ region.reading_order }}"
+          aria-label="Región {{ region.reading_order }}: {{ region.get_kind_display|lower }}{% if region.needs_review %}, necesita revisión{% endif %}. {% if region.source_text %}Texto: {{ region.source_text }}{% else %}Sin texto reconocido{% endif %}"
         >
-          <span class="region-box__number" aria-hidden="true">{{ region.reading_order }}</span>
+          <span class="region-box__number" aria-hidden="true">{{ region.reading_order }}{% if region.needs_review %} !{% endif %}</span>
         </a>
       {% endfor %}
     </figure>
@@ -179,7 +186,7 @@ el teclado sin JavaScript, y el lector de pantalla anuncia número y tipo.
     </section>
 
     <aside class="card region-panel" aria-labelledby="region-panel-title">
-      <h2 class="card__title" id="region-panel-title">Regiones de texto</h2>
+      <h2 class="card__title" id="region-panel-title">Texto detectado</h2>
 
       {% if regions %}
         <p class="region-panel__meta">
@@ -191,37 +198,66 @@ el teclado sin JavaScript, y el lector de pantalla anuncia número y tipo.
             </strong>
           {% endif %}
         </p>
-        <ol class="region-list">
-          {% for region in regions %}
-            <li class="region-list__item" id="region-{{ region.reading_order }}">
-              <a class="region-list__link" href="#region-box-{{ region.reading_order }}">
-                <span class="region-list__number region-list__number--{{ region.kind }}" aria-hidden="true">{{ region.reading_order }}</span>
-                <span class="region-list__body">
-                  <span class="region-list__meta">
-                    <span class="region-list__kind">{{ region.get_kind_display }}</span>
-                    {% if region.confidence_percent is not None %}
-                      <span class="region-list__confidence">Confianza {{ region.confidence_percent }} %</span>
+
+        {% if review_count %}
+          {% comment %}
+          Filtro de regiones (CA-14.3). Son enlaces con ?filtro=, así que
+          funcionan sin JavaScript y el resultado se puede recargar. Usan el
+          patrón de pill selector del sistema de diseño.
+          {% endcomment %}
+          <nav class="region-filter" aria-label="Filtrar regiones">
+            <a
+              class="pill{% if not review_filter %} pill--selected{% endif %}"
+              href="{{ page.get_absolute_url }}"
+              {% if not review_filter %}aria-current="true"{% endif %}
+            >Todas ({{ regions|length }})</a>
+            <a
+              class="pill{% if review_filter %} pill--selected{% endif %}"
+              href="{{ page.get_absolute_url }}?filtro=revisar"
+              {% if review_filter %}aria-current="true"{% endif %}
+            >Por revisar ({{ review_count }})</a>
+          </nav>
+        {% endif %}
+
+        {% if visible_regions %}
+          <ol class="region-list">
+            {% for region in visible_regions %}
+              <li
+                class="region-list__item{% if region.needs_review %} region-list__item--review{% endif %}"
+                id="region-{{ region.reading_order }}"
+                data-region-item="{{ region.reading_order }}"
+              >
+                <a class="region-list__link" href="#region-box-{{ region.reading_order }}" data-region="{{ region.reading_order }}">
+                  <span class="region-list__number region-list__number--{{ region.kind }}" aria-hidden="true">{{ region.reading_order }}</span>
+                  <span class="region-list__body">
+                    <span class="region-list__meta">
+                      <span class="region-list__kind">{{ region.get_kind_display }}</span>
+                      {% if region.confidence_percent is not None %}
+                        <span class="region-list__confidence">Confianza {{ region.confidence_percent }} %</span>
+                      {% endif %}
+                      {% if region.needs_review %}
+                        {% include "components/badge.html" with label="Revisar" variant="warning" %}
+                      {% endif %}
+                    </span>
+                    {% comment %}
+                    El texto lleva el idioma de origen en lang para que el navegador
+                    elija la tipografía correcta y el lector de pantalla lo pronuncie
+                    en su idioma (HU-13).
+                    {% endcomment %}
+                    {% if region.source_text %}
+                      <span class="region-list__text" lang="{{ page.album.source_language.code }}">{{ region.source_text|linebreaksbr }}</span>
+                    {% else %}
+                      <span class="region-list__text region-list__text--empty">Sin texto reconocido</span>
                     {% endif %}
-                    {% if region.needs_review %}
-                      {% include "components/badge.html" with label="Revisar" variant="warning" %}
-                    {% endif %}
+                    <span class="sr-only">, región {{ region.reading_order }}</span>
                   </span>
-                  {% comment %}
-                  El texto lleva el idioma de origen en lang para que el navegador
-                  elija la tipografía correcta y el lector de pantalla lo pronuncie
-                  en su idioma (HU-13). La vista completa de revisión es de HU-14.
-                  {% endcomment %}
-                  {% if region.source_text %}
-                    <span class="region-list__text" lang="{{ page.album.source_language.code }}">{{ region.source_text|linebreaksbr }}</span>
-                  {% else %}
-                    <span class="region-list__text region-list__text--empty">Sin texto reconocido</span>
-                  {% endif %}
-                  <span class="sr-only">, región {{ region.reading_order }}</span>
-                </span>
-              </a>
-            </li>
-          {% endfor %}
-        </ol>
+                </a>
+              </li>
+            {% endfor %}
+          </ol>
+        {% else %}
+          <p class="region-panel__empty">No hay regiones pendientes de revisar.</p>
+        {% endif %}
       {% elif page.was_processed %}
         <p class="region-panel__empty">No se detectó texto en esta página.</p>
       {% elif page.has_failed %}
