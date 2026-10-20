@@ -1,0 +1,45 @@
+==============================================================================
+PaneLingo — Evidencia del Quality Gate
+==============================================================================
+Etapa           : 04
+Paso            : 6 de 7 — Django — pruebas automaticas
+Comando         : python manage.py test
+Herramienta     : Python 3.14.5 / Django 5.2.18
+Fecha y hora    : 2026-10-20T15:12:01-05:00
+Rama            : feature/HU-14-detected-text-view
+Commit          : a32b8ae71ead42d7c44f0e29b8f50c52ac0f46f0
+Arbol de trabajo: con cambios sin versionar
+Directorio      : /c/Users/ASUS/Documents/Universidad/6 SEMESTRE/PROYECTO INTEGRADOR 2/Proyecto Panelingo/PaneLingo
+==============================================================================
+
+Creating test database for alias 'default'...
+..........................................................................................................................................................................................................................................................................................................Method Not Allowed (GET): /cuentas/salir/
+.Not Found: /albumes/1/
+Not Found: /albumes/1/editar/
+Not Found: /albumes/1/renombrar/
+Not Found: /albumes/1/portada/
+Not Found: /paginas/1/eliminar/
+Not Found: /paginas/1/
+Not Found: /paginas/1/imagen/
+Not Found: /paginas/1/procesar/
+Not Found: /paginas/1/estado/
+Not Found: /paginas/1/miniatura/
+Not Found: /albumes/1/cargar/
+..............................Azure Read respondió 401.
+Azure Read respondió 403.
+Azure Read respondió 429.
+Azure Read respondió 500.
+Azure Read respondió 503.
+..No se pudo contactar con Azure Read: <urlopen error sin red>
+.....................
+----------------------------------------------------------------------
+Ran 352 tests in 305.024s
+
+OK
+Destroying test database for alias 'default'...
+Found 352 test(s).
+System check identified no issues (0 silenced).
+
+==============================================================================
+Codigo de salida: 0  (CORRECTO)
+==============================================================================
