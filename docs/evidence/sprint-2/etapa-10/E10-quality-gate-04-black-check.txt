@@ -1,0 +1,20 @@
+==============================================================================
+PaneLingo — Evidencia del Quality Gate
+==============================================================================
+Etapa           : 10
+Paso            : 4 de 7 — Black — verificacion de formato
+Comando         : black --check .
+Herramienta     : black, 25.12.0 (compiled: yes)
+Fecha y hora    : 2026-10-21T12:42:41-05:00
+Rama            : feature/HU-21-album-library
+Commit          : 00bd938aafa4c7f68eceb53372c63739f1c03715
+Arbol de trabajo: con cambios sin versionar
+Directorio      : /c/Users/ASUS/Documents/Universidad/6 SEMESTRE/PROYECTO INTEGRADOR 2/Proyecto Panelingo/PaneLingo-HU-21
+==============================================================================
+
+All done! ✨ 🍰 ✨
+81 files would be left unchanged.
+
+==============================================================================
+Codigo de salida: 0  (CORRECTO)
+==============================================================================
