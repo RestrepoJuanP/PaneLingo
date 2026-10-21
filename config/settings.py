@@ -252,6 +252,22 @@ OCR_ACCURACY_THRESHOLDS = {
     "en": None,
 }
 
+# --- Traducción asistida por IA (HU-16, ADR-002) -------------------------------
+
+# Proveedor de traducción: "fake" (simulado, sin red) o "gemini" (Google
+# Gemini, nivel gratuito de AI Studio). Igual que el OCR, el simulado es el
+# valor por defecto para que las pruebas nunca llamen a un servicio externo.
+TRANSLATION_PROVIDER = os.getenv("TRANSLATION_PROVIDER", "fake").strip().lower()
+
+# Clave de la API de Gemini y modelo. Solo se leen del entorno. El modelo por
+# defecto es un Flash-Lite del nivel gratuito; se puede cambiar sin tocar código.
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite").strip()
+
+# Tiempo máximo de espera de una traducción, en segundos. Una página entera
+# tarda unos pocos segundos; el margen cubre picos de demanda.
+TRANSLATION_TIMEOUT_SECONDS = 60
+
 # Páginas que el OCR puede procesar al mes en el plan gratuito F0 de Azure AI
 # Vision (unas 5 000 transacciones). Lo muestra la tarjeta de cuota de la
 # barra lateral; no limita nada por sí mismo.

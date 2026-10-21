@@ -3949,3 +3949,69 @@ button.ws-group__step:disabled {
     flex-wrap: wrap;
   }
 }
+
+/* Traducción de cada bloque (HU-16), como el bloque "translation" del
+   mockup: separador con la etiqueta del idioma y el estado, y el texto
+   traducido con más peso que el de origen. */
+.block-card__translation {
+  padding: 0 12px 12px;
+}
+
+.block-card__divider {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin-bottom: 7px;
+}
+
+.block-card__divider::after {
+  content: "";
+  flex: 1;
+  order: 1;
+  height: 1px;
+  background: var(--track);
+}
+
+.block-card__divider .block-card__label {
+  margin-bottom: 0;
+}
+
+.block-card__divider .badge {
+  order: 2;
+}
+
+.block-card__translated {
+  margin: 0;
+  padding: 9px 11px;
+  border: 1.5px solid var(--surface-muted-3);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--ink-900);
+  font-size: var(--fs-body);
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.block-card__placeholder {
+  margin: 0;
+  padding: 9px 11px;
+  border: 1.5px dashed var(--danger-border);
+  border-radius: var(--r-md);
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.block-card__translation .block-card__actions {
+  margin-top: var(--sp-4);
+}
+
+.ws-cta[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.ws-cta[aria-disabled="true"]:hover {
+  background: var(--accent);
+}

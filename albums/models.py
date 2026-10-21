@@ -234,6 +234,17 @@ class ComicPage(models.Model):
         # nunca se procesó, en lugar de devolverla a PENDING.
         FAILED = "failed", _("Error")
 
+    class TranslationState(models.TextChoices):
+        """Estado de la tarea de traducción de la página (HU-16, ADR-002).
+
+        Va aparte de Status para no mezclar el OCR con la traducción: una
+        página puede estar "Procesada" y, a la vez, traduciéndose.
+        """
+
+        IDLE = "idle", _("En reposo")
+        TRANSLATING = "translating", _("Traduciendo")
+        FAILED = "failed", _("Error de traducción")
+
     album = models.ForeignKey(
         Album,
         on_delete=models.CASCADE,
@@ -266,6 +277,25 @@ class ComicPage(models.Model):
     )
     processing_error = models.CharField(
         _("error del último procesamiento"),
+        max_length=255,
+        blank=True,
+        help_text=_("Motivo del último fallo, para mostrarlo junto a Reintentar."),
+    )
+    translation_state = models.CharField(
+        _("estado de la traducción"),
+        max_length=20,
+        choices=TranslationState.choices,
+        default=TranslationState.IDLE,
+        help_text=_("Tarea de traducción de la página (HU-16), aparte del OCR."),
+    )
+    translation_started_at = models.DateTimeField(
+        _("inicio de la traducción"),
+        null=True,
+        blank=True,
+        help_text=_("Permite detectar una traducción que quedó colgada."),
+    )
+    translation_error = models.CharField(
+        _("error de la última traducción"),
         max_length=255,
         blank=True,
         help_text=_("Motivo del último fallo, para mostrarlo junto a Reintentar."),
@@ -395,6 +425,38 @@ class ComicPage(models.Model):
         """Indica si la última detección falló."""
         return self.status == self.Status.FAILED
 
+    def get_translate_url(self):
+        """Devuelve la dirección para traducir la página con IA (HU-16)."""
+        return reverse("albums:page_translate", kwargs={"pk": self.pk})
+
+    @property
+    def is_translating(self):
+        """Indica si la página se está traduciendo y aún no se dio por perdida."""
+        return (
+            self.translation_state == self.TranslationState.TRANSLATING
+            and not self.is_translation_stale
+        )
+
+    @property
+    def is_translation_stale(self):
+        """Indica si la traducción lleva demasiado tiempo sin terminar.
+
+        Mismo criterio que el OCR (ADR-001): si el trabajador se cae, la
+        página no puede quedarse "Traduciendo" para siempre.
+        """
+        if (
+            self.translation_state != self.TranslationState.TRANSLATING
+            or not self.translation_started_at
+        ):
+            return False
+        limit = timedelta(seconds=settings.PROCESSING_STALE_AFTER)
+        return timezone.now() - self.translation_started_at > limit
+
+    @property
+    def translation_failed(self):
+        """Indica si la última traducción falló."""
+        return self.translation_state == self.TranslationState.FAILED
+
     @property
     def has_low_resolution(self):
         """Indica si la página lleva advertencia de baja resolución.
@@ -426,6 +488,22 @@ class TextRegion(models.Model):
 
         BALLOON = "balloon", _("Globo de diálogo")
         NARRATION = "narration", _("Cuadro narrativo")
+
+    class TranslationStatus(models.TextChoices):
+        """Estados de la traducción de una región (HU-16 a HU-19, ADR-002)."""
+
+        UNTRANSLATED = "untranslated", _("Sin traducir")
+        GENERATED = "generated", _("Generada")
+        EDITED = "edited", _("Editada")
+        APPROVED = "approved", _("Aprobada")
+
+    # Variante del chip de estado de la traducción, como en el mockup.
+    TRANSLATION_VARIANTS = {
+        "untranslated": "neutral",
+        "generated": "progress",
+        "edited": "warning",
+        "approved": "success",
+    }
 
     page = models.ForeignKey(
         ComicPage,
@@ -468,6 +546,24 @@ class TextRegion(models.Model):
         help_text=_("Distingue una corrección vacía de una región sin corregir."),
     )
     corrected_at = models.DateTimeField(_("corregida"), null=True, blank=True)
+    machine_translation = models.TextField(
+        _("propuesta de la IA"),
+        blank=True,
+        help_text=_("Última traducción que propuso la IA. Se conserva al editar."),
+    )
+    translation = models.TextField(
+        _("traducción"),
+        blank=True,
+        help_text=_("Texto de trabajo: el que se revisa, edita y aprueba."),
+    )
+    translation_status = models.CharField(
+        _("estado de la traducción"),
+        max_length=20,
+        choices=TranslationStatus.choices,
+        default=TranslationStatus.UNTRANSLATED,
+    )
+    translated_at = models.DateTimeField(_("traducida"), null=True, blank=True)
+    approved_at = models.DateTimeField(_("aprobada"), null=True, blank=True)
     created_at = models.DateTimeField(_("detectada"), auto_now_add=True)
 
     class Meta:
@@ -501,6 +597,29 @@ class TextRegion(models.Model):
     def get_correct_url(self):
         """Devuelve la dirección para corregir o restaurar esta región."""
         return reverse("albums:region_correct", kwargs={"pk": self.pk})
+
+    def get_retranslate_url(self):
+        """Devuelve la dirección para volver a traducir solo esta región."""
+        return reverse("albums:region_retranslate", kwargs={"pk": self.pk})
+
+    @property
+    def needs_translation(self):
+        """Indica si la región tiene texto que traducir (ADR-002, T5).
+
+        Las regiones que el usuario vació a propósito (CA-15.5) y las que el
+        OCR dejó sin texto no se traducen ni cuentan como pendientes.
+        """
+        return bool(self.final_text.strip())
+
+    @property
+    def is_translation_approved(self):
+        """Indica si la traducción está aprobada (HU-19)."""
+        return self.translation_status == self.TranslationStatus.APPROVED
+
+    @property
+    def translation_variant(self):
+        """Devuelve la variante de color del chip de la traducción."""
+        return self.TRANSLATION_VARIANTS.get(self.translation_status, "neutral")
 
     @property
     def confidence_percent(self):

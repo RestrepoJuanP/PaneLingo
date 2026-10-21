@@ -16,7 +16,9 @@ from albums.views import (
     PageStatusView,
     PageUploadView,
     UploadChooseView,
+    page_translate,
     region_correct,
+    region_retranslate,
 )
 
 app_name = "albums"
@@ -52,6 +54,16 @@ urlpatterns = [
         "regiones/<int:pk>/corregir/",
         region_correct,
         name="region_correct",
+    ),
+    path(
+        "paginas/<int:pk>/traducir/",
+        page_translate,
+        name="page_translate",
+    ),
+    path(
+        "regiones/<int:pk>/traducir/",
+        region_retranslate,
+        name="region_retranslate",
     ),
     path(
         "paginas/<int:pk>/estado/",

@@ -36,6 +36,11 @@ from albums.insights import (
 from albums.models import Album, ComicPage, TextRegion
 from albums.processing import expire_if_stale, start_processing
 from albums.services import create_pages_from_upload
+from albums.translating import (
+    can_translate,
+    expire_translation_if_stale,
+    start_translation,
+)
 
 # Longitud máxima del texto de búsqueda; el título admite 120 caracteres.
 SEARCH_MAX_LENGTH = 120
@@ -519,9 +524,14 @@ class OwnedPageMixin(PrivateViewMixin):
         )
 
     def get_object(self, queryset=None):
-        """Devuelve la página, pasando a "Error" la que quedó colgada."""
+        """Devuelve la página, pasando a "Error" la que quedó colgada.
+
+        Vale para el OCR y para la traducción: ninguna de las dos tareas
+        puede dejar la página bloqueada si el trabajador se cae.
+        """
         page = super().get_object(queryset)
         expire_if_stale(page)
+        expire_translation_if_stale(page)
         return page
 
     def get_context_data(self, **kwargs):
@@ -568,7 +578,24 @@ class PageDetailView(OwnedPageMixin, DetailView):
             else regions
         )
         context.update(page_neighbours(page))
+        context.update(translation_summary(page, regions))
         return context
+
+
+def translation_summary(page, regions):
+    """Datos de la traducción para el espacio de trabajo (HU-16)."""
+    pending = [region for region in regions if region.needs_translation]
+    translated = [
+        region
+        for region in pending
+        if region.translation_status != TextRegion.TranslationStatus.UNTRANSLATED
+    ]
+    return {
+        "can_translate": can_translate(page),
+        "translatable_count": len(pending),
+        "translated_count": len(translated),
+        "has_translations": bool(translated),
+    }
 
 
 def page_neighbours(page):
@@ -603,6 +630,7 @@ class PageStatusView(OwnedPageMixin, DetailView):
             {
                 "status": page.status,
                 "is_processing": page.is_processing,
+                "is_translating": page.is_translating,
                 "region_count": page.regions.count(),
             }
         )
@@ -703,6 +731,86 @@ class AlbumCoverView(OwnedAlbumMixin, DetailView):
     def render_to_response(self, context, **response_kwargs):
         """Entrega la portada, o 404 si el álbum usa la predeterminada."""
         return stored_file_response(self.object.cover_image)
+
+
+def translation_feedback(page):
+    """Nivel y texto del mensaje tras pedir la traducción (HU-16).
+
+    Con el trabajador en marcha la página sigue "Traduciendo"; en modo
+    inmediato ya llega traducida o con error.
+    """
+    if page.is_translating:
+        return messages.SUCCESS, (
+            f"Traduciendo la página {page.page_number}. "
+            "Puedes seguir usando PaneLingo mientras tanto."
+        )
+    if page.translation_failed:
+        return messages.ERROR, page.translation_error
+    return messages.SUCCESS, f"Página {page.page_number} traducida."
+
+
+def owned_page_or_404(request, pk):
+    """Página del usuario, o 404 si no existe o es de otra cuenta."""
+    page = get_object_or_404(
+        ComicPage.objects.select_related(
+            "album__source_language", "album__target_language"
+        ),
+        pk=pk,
+        album__owner=request.user,
+    )
+    expire_if_stale(page)
+    expire_translation_if_stale(page)
+    return page
+
+
+def queue_translation(request, page, region=None):
+    """Encola la traducción y deja el mensaje para el usuario."""
+    if not start_translation(page, region):
+        messages.info(request, "Esta página ya se está traduciendo.")
+        return
+    page.refresh_from_db()
+    level, text = translation_feedback(page)
+    messages.add_message(request, level, text)
+
+
+@require_POST
+@private_view
+def page_translate(request, pk):
+    """Traduce con IA las regiones sin aprobar de una página (HU-16).
+
+    Solo acepta POST: un GET responde 405. Si no hay nada que traducir, por
+    ejemplo porque la página no tiene texto (CA-16.5), no encola nada.
+    """
+    page = owned_page_or_404(request, pk)
+    if not can_translate(page):
+        messages.info(request, "Esta página no tiene texto pendiente de traducir.")
+    else:
+        queue_translation(request, page)
+    return redirect(page.get_absolute_url())
+
+
+@require_POST
+@private_view
+def region_retranslate(request, pk):
+    """Vuelve a pedir a la IA la traducción de una sola región (HU-16).
+
+    Es el "Retry AI" del mockup: viaja la página entera como contexto, pero
+    solo se reemplaza esta región. Una región aprobada no se toca (CA-16.3).
+    """
+    region = get_object_or_404(
+        TextRegion.objects.select_related("page"),
+        pk=pk,
+        page__album__owner=request.user,
+    )
+    page = owned_page_or_404(request, region.page_id)
+    anchor = f"#region-{region.reading_order}"
+    if region.is_translation_approved or not region.needs_translation:
+        messages.info(request, "Esta región no tiene traducción pendiente.")
+    elif page.is_processing:
+        messages.info(request, "Espera a que termine el procesamiento de la página.")
+    else:
+        queue_translation(request, page, region)
+    return redirect(f"{page.get_absolute_url()}{anchor}")
 
 
 @require_POST
