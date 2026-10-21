@@ -19,6 +19,7 @@ from albums.views import (
     page_translate,
     region_correct,
     region_retranslate,
+    region_translation_edit,
 )
 
 app_name = "albums"
@@ -64,6 +65,11 @@ urlpatterns = [
         "regiones/<int:pk>/traducir/",
         region_retranslate,
         name="region_retranslate",
+    ),
+    path(
+        "regiones/<int:pk>/traduccion/",
+        region_translation_edit,
+        name="region_translation_edit",
     ),
     path(
         "paginas/<int:pk>/estado/",

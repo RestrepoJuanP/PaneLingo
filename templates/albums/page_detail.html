@@ -68,22 +68,32 @@ de pantalla anuncia número, tipo, estado y texto.
         {% endif %}
       </nav>
 
-      {% if review_count %}
+      {% if review_count or has_translations %}
         {% comment %}
-        Filtro de regiones (CA-14.3). Enlaces con ?filtro=, así que funciona
-        sin JavaScript y el resultado se puede recargar.
+        Filtros de regiones: por revisar el texto (CA-14.3) y traducciones sin
+        aprobar (CA-17.3). Enlaces con ?filtro=, así que funcionan sin
+        JavaScript y el resultado se puede recargar.
         {% endcomment %}
         <nav class="ws-group" aria-label="Filtrar regiones">
           <a
-            class="ws-group__option{% if not review_filter %} is-active{% endif %}"
+            class="ws-group__option{% if not review_filter and not unapproved_filter %} is-active{% endif %}"
             href="{{ page.get_absolute_url }}"
-            {% if not review_filter %}aria-current="true"{% endif %}
+            {% if not review_filter and not unapproved_filter %}aria-current="true"{% endif %}
           >Todas ({{ regions|length }})</a>
-          <a
-            class="ws-group__option{% if review_filter %} is-active{% endif %}"
-            href="{{ page.get_absolute_url }}?filtro=revisar"
-            {% if review_filter %}aria-current="true"{% endif %}
-          >Por revisar ({{ review_count }})</a>
+          {% if review_count %}
+            <a
+              class="ws-group__option{% if review_filter %} is-active{% endif %}"
+              href="{{ page.get_absolute_url }}?filtro=revisar"
+              {% if review_filter %}aria-current="true"{% endif %}
+            >Por revisar ({{ review_count }})</a>
+          {% endif %}
+          {% if has_translations %}
+            <a
+              class="ws-group__option{% if unapproved_filter %} is-active{% endif %}"
+              href="{{ page.get_absolute_url }}?filtro=sin-aprobar"
+              {% if unapproved_filter %}aria-current="true"{% endif %}
+            >Sin aprobar ({{ unapproved_count }})</a>
+          {% endif %}
         </nav>
       {% endif %}
 
@@ -229,6 +239,31 @@ de pantalla anuncia número, tipo, estado y texto.
               </span>
             {% endif %}
           </div>
+
+          {% if has_translations %}
+            <div class="ws-review-bar">
+              <p class="ws-review-bar__count" aria-live="polite">
+                {% if unapproved_count %}
+                  <strong>{{ unapproved_count }} {{ unapproved_count|pluralize:"traducción,traducciones" }}</strong>
+                  sin aprobar de {{ translatable_count }}
+                {% else %}
+                  <strong>Todas las traducciones están aprobadas.</strong>
+                {% endif %}
+              </p>
+              {% comment %}
+              Botones de región anterior y siguiente: solo con JavaScript, que
+              los muestra. También con Alt+↑ y Alt+↓ (ADR-002, T4).
+              {% endcomment %}
+              <div class="ws-review-bar__steps" data-region-steps hidden>
+                <button type="button" class="block-btn" data-region-step="-1" title="Región anterior (Alt+↑)">
+                  <span aria-hidden="true">↑</span> Anterior
+                </button>
+                <button type="button" class="block-btn" data-region-step="1" title="Región siguiente (Alt+↓)">
+                  Siguiente <span aria-hidden="true">↓</span>
+                </button>
+              </div>
+            </div>
+          {% endif %}
 
           {% if review_count %}
             <p class="ws-note ws-note--warning">
@@ -387,33 +422,50 @@ de pantalla anuncia número, tipo, estado y texto.
 
                   {% if region.needs_translation %}
                     {% comment %}
-                    Traducción de la región (HU-16). Retry AI del mockup:
-                    viaja la página entera como contexto, pero solo cambia
-                    esta región. Una región aprobada no se vuelve a traducir.
+                    Traducción de la región: se revisa y se edita aquí mismo
+                    (HU-17 y HU-18, fusionadas por ADR-002, T3), como el
+                    bloque "translation" del mockup. La propuesta de la IA se
+                    conserva y se puede consultar (CA-18.1). "Reintentar con
+                    IA" usa formaction para no anidar formularios.
                     {% endcomment %}
-                    <div class="block-card__translation">
+                    <form
+                      method="post"
+                      action="{{ region.get_translation_url }}"
+                      class="block-card__translation"
+                      data-region-edit
+                    >
+                      {% csrf_token %}
                       <div class="block-card__divider">
-                        <span class="block-card__label">{{ page.album.target_language.code|upper }} · traducción</span>
+                        <label class="block-card__label" for="region-translation-{{ region.reading_order }}">{{ page.album.target_language.code|upper }} · traducción</label>
                         {% include "components/badge.html" with label=region.get_translation_status_display variant=region.translation_variant %}
                       </div>
-                      {% if region.translation %}
-                        <p class="block-card__translated" lang="{{ page.album.target_language.code }}">{{ region.translation|linebreaksbr }}</p>
-                      {% elif region.translation_status == "untranslated" %}
-                        <p class="block-card__placeholder">Sin traducir todavía. Pulsa «Traducir página» o «Reintentar con IA».</p>
-                      {% else %}
-                        <p class="block-card__placeholder">Sin traducción.</p>
+                      <textarea
+                        class="block-card__text block-card__text--translation"
+                        id="region-translation-{{ region.reading_order }}"
+                        name="text"
+                        rows="2"
+                        maxlength="2000"
+                        lang="{{ page.album.target_language.code }}"
+                        placeholder="{% if region.translation_status == 'untranslated' %}Sin traducir todavía: pulsa «Traducir página», «Reintentar con IA» o escribe la tuya.{% else %}Se deja sin traducir.{% endif %}"
+                        {% if page.is_translating %}readonly{% endif %}
+                      >{{ region.translation }}</textarea>
+                      {% if region.machine_translation and region.machine_translation != region.translation %}
+                        <details class="block-card__proposal">
+                          <summary>Ver propuesta de la IA</summary>
+                          <p lang="{{ page.album.target_language.code }}">{{ region.machine_translation|linebreaksbr }}</p>
+                        </details>
                       {% endif %}
-                      {% if not region.is_translation_approved and page.was_processed and not page.is_translating %}
-                        <form method="post" action="{{ region.get_retranslate_url }}" class="block-card__actions">
-                          {% csrf_token %}
-                          <button type="submit" class="block-btn" data-submit-busy>
-                            <span class="btn__spinner" hidden aria-hidden="true"></span>
-                            <span data-submit-label data-busy-label="Traduciendo…">Reintentar con IA</span>
-                            <span class="sr-only"> la región {{ region.reading_order }}</span>
-                          </button>
-                        </form>
+                      {% if not page.is_translating %}
+                        <div class="block-card__actions">
+                          <button type="submit" class="block-btn block-btn--primary">Guardar traducción</button>
+                          {% if not region.is_translation_approved and page.was_processed %}
+                            <button type="submit" class="block-btn" formaction="{{ region.get_retranslate_url }}">
+                              Reintentar con IA<span class="sr-only"> la región {{ region.reading_order }}</span>
+                            </button>
+                          {% endif %}
+                        </div>
                       {% endif %}
-                    </div>
+                    </form>
                   {% endif %}
                 </li>
               {% endfor %}

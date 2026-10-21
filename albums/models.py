@@ -598,6 +598,10 @@ class TextRegion(models.Model):
         """Devuelve la dirección para corregir o restaurar esta región."""
         return reverse("albums:region_correct", kwargs={"pk": self.pk})
 
+    def get_translation_url(self):
+        """Devuelve la dirección para guardar la traducción editada (HU-18)."""
+        return reverse("albums:region_translation_edit", kwargs={"pk": self.pk})
+
     def get_retranslate_url(self):
         """Devuelve la dirección para volver a traducir solo esta región."""
         return reverse("albums:region_retranslate", kwargs={"pk": self.pk})

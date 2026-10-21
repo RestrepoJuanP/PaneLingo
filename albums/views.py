@@ -41,6 +41,7 @@ from albums.translating import (
     expire_translation_if_stale,
     start_translation,
 )
+from albums.translation_review import edit_translation
 
 # Longitud máxima del texto de búsqueda; el título admite 120 caracteres.
 SEARCH_MAX_LENGTH = 120
@@ -541,8 +542,24 @@ class OwnedPageMixin(PrivateViewMixin):
         return context
 
 
-# Valor de ?filtro= que deja solo las regiones pendientes de revisar (HU-14).
+# Valores de ?filtro=: las regiones pendientes de revisar el texto (HU-14)
+# y las traducciones que faltan por aprobar (HU-17, CA-17.3).
 REVIEW_FILTER = "revisar"
+UNAPPROVED_FILTER = "sin-aprobar"
+
+
+def is_unapproved(region):
+    """Indica si la región tiene texto y su traducción no está aprobada."""
+    return region.needs_translation and not region.is_translation_approved
+
+
+def filter_regions(regions, chosen):
+    """Deja solo las regiones que pide el filtro elegido."""
+    if chosen == REVIEW_FILTER:
+        return [region for region in regions if region.needs_review]
+    if chosen == UNAPPROVED_FILTER:
+        return [region for region in regions if is_unapproved(region)]
+    return regions
 
 
 class PageDetailView(OwnedPageMixin, DetailView):
@@ -562,7 +579,7 @@ class PageDetailView(OwnedPageMixin, DetailView):
         context = super().get_context_data(**kwargs)
         page = self.object
         regions = list(page.regions.all())
-        review_filter = self.request.GET.get("filtro") == REVIEW_FILTER
+        chosen = self.request.GET.get("filtro", "")
         context["regions"] = regions
         context["review_count"] = sum(region.needs_review for region in regions)
         context["corrected_count"] = sum(region.is_corrected for region in regions)
@@ -571,12 +588,9 @@ class PageDetailView(OwnedPageMixin, DetailView):
         context["ready_percent"] = (
             round(ready_count / len(regions) * 100) if regions else 0
         )
-        context["review_filter"] = review_filter
-        context["visible_regions"] = (
-            [region for region in regions if region.needs_review]
-            if review_filter
-            else regions
-        )
+        context["review_filter"] = chosen == REVIEW_FILTER
+        context["unapproved_filter"] = chosen == UNAPPROVED_FILTER
+        context["visible_regions"] = filter_regions(regions, chosen)
         context.update(page_neighbours(page))
         context.update(translation_summary(page, regions))
         return context
@@ -595,6 +609,7 @@ def translation_summary(page, regions):
         "translatable_count": len(pending),
         "translated_count": len(translated),
         "has_translations": bool(translated),
+        "unapproved_count": sum(is_unapproved(region) for region in regions),
     }
 
 
@@ -811,6 +826,36 @@ def region_retranslate(request, pk):
     else:
         queue_translation(request, page, region)
     return redirect(f"{page.get_absolute_url()}{anchor}")
+
+
+@require_POST
+@private_view
+def region_translation_edit(request, pk):
+    """Guarda la traducción editada de una región (HU-18).
+
+    Solo acepta POST. La región se busca entre las del usuario, así que una
+    ajena responde 404. Mientras la IA traduce la página no se guarda nada:
+    la tarea podría sobrescribir lo escrito.
+    """
+    region = get_object_or_404(
+        TextRegion.objects.select_related("page"),
+        pk=pk,
+        page__album__owner=request.user,
+    )
+    page = owned_page_or_404(request, region.page_id)
+    number = region.reading_order
+    if page.is_translating:
+        messages.error(
+            request,
+            "La página se está traduciendo. Guarda tu traducción cuando termine.",
+        )
+    else:
+        edit_translation(region, request.POST.get("text", ""))
+        if region.translation:
+            messages.success(request, f"Se guardó la traducción de la región {number}.")
+        else:
+            messages.success(request, f"La región {number} se deja sin traducir.")
+    return redirect(f"{page.get_absolute_url()}#region-{number}")
 
 
 @require_POST
