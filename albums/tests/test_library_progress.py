@@ -62,7 +62,18 @@ class DerivedStatusTests(ProcessingTestCase):
         add_region(self.page, 1, needs_review=True)
         self.assertEqual(self.progress().status.key, "in_review")
 
-        TextRegion.objects.update(needs_review=False)
+        set_status(self.page, ComicPage.Status.APPROVED)
+        self.assertEqual(self.progress().status.key, "completed")
+
+    def test_processed_but_not_approved_is_in_review(self):
+        """CA-26.1 — Todo procesado, pero sin aprobar: en revisión."""
+        set_status(self.page, ComicPage.Status.PROCESSED)
+        second = self.make_page(self.album)
+        set_status(second, ComicPage.Status.APPROVED)
+
+        self.assertEqual(self.progress().status.key, "in_review")
+
+        set_status(self.page, ComicPage.Status.APPROVED)
         self.assertEqual(self.progress().status.key, "completed")
 
     def test_the_percentages_count_regions(self):
@@ -93,7 +104,7 @@ class LibraryFilterTests(ProcessingTestCase):
         self.done = self.make_album(self.owner, "ja")
         self.done.title = "Ember Line"
         self.done.save()
-        set_status(self.make_page(self.done), ComicPage.Status.PROCESSED)
+        set_status(self.make_page(self.done), ComicPage.Status.APPROVED)
 
     def test_the_filter_shows_only_that_status(self):
         """CA-26.2 — "Completados" deja solo el álbum completado."""
