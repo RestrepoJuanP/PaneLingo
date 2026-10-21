@@ -75,6 +75,11 @@ def with_progress(albums):
         page_done=Count(
             "pages", filter=Q(pages__status__in=DONE_STATUSES), distinct=True
         ),
+        page_approved=Count(
+            "pages",
+            filter=Q(pages__status=ComicPage.Status.APPROVED),
+            distinct=True,
+        ),
         region_total=Count("pages__regions", distinct=True),
         region_review=Count(
             "pages__regions",
@@ -89,20 +94,21 @@ def with_progress(albums):
     )
 
 
-def derive_status(page_total, page_work, region_review):
+def derive_status(page_total, page_work, page_approved):
     """Devuelve el estado del álbum según sus páginas (HU-26, CA-26.1).
 
-    Sin páginas, borrador; con páginas por procesar, en progreso; con
-    regiones por revisar, en revisión; y si todo está procesado y revisado,
-    completado. La aprobación explícita de HU-19 afinará este último paso.
+    Tal como la tabla del criterio: sin páginas, borrador; con páginas sin
+    procesar o en proceso, en progreso; con todas "Aprobadas" (HU-19),
+    completado; y procesadas pero con alguna sin aprobar, en revisión.
+    Decisión del PO del 2026-10-21: el estado se deriva, no se elige a mano.
     """
     if not page_total:
         return ALBUM_STATUSES["draft"]
     if page_work:
         return ALBUM_STATUSES["in_progress"]
-    if region_review:
-        return ALBUM_STATUSES["in_review"]
-    return ALBUM_STATUSES["completed"]
+    if page_approved == page_total:
+        return ALBUM_STATUSES["completed"]
+    return ALBUM_STATUSES["in_review"]
 
 
 def percent(part, whole):
@@ -117,6 +123,7 @@ class AlbumProgress:
     page_total: int
     page_done: int
     page_work: int
+    page_approved: int
     region_total: int
     region_review: int
     region_corrected: int
@@ -128,6 +135,7 @@ class AlbumProgress:
             album.page_total,
             album.page_done,
             album.page_work,
+            album.page_approved,
             album.region_total,
             album.region_review,
             album.region_corrected,
@@ -151,7 +159,7 @@ class AlbumProgress:
     @property
     def status(self):
         """Estado derivado del álbum (HU-26)."""
-        return derive_status(self.page_total, self.page_work, self.region_review)
+        return derive_status(self.page_total, self.page_work, self.page_approved)
 
 
 def library_for(user):
