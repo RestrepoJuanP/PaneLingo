@@ -7,8 +7,9 @@ Referencia visual: design/screenshots/fuera-de-alcance/workspace.png.
 Composición del mockup: barra de herramientas arriba, la página sobre un
 lienzo oscuro a la izquierda y el panel de bloques de texto a la derecha. Del
 mockup quedan fuera, por no tener HU todavía: deshacer y rehacer, el zoom,
-las herramientas "Add region" y "Fix reading order", la traducción de cada
-bloque (HU-16), "Retry AI" y las notas de terminología.
+las herramientas "Add region" y "Fix reading order" y las notas de
+terminología. La traducción de cada bloque y "Retry AI" llegan con HU-16
+(ADR-002).
 
 Accesibilidad: cada región de la imagen enlaza con su bloque y cada bloque
 con su región, así que se recorren con el teclado sin JavaScript, y el lector
@@ -125,10 +126,44 @@ de pantalla anuncia número, tipo, estado y texto.
         JavaScript el enlace lleva a la página de confirmación.
         {% endcomment %}
         <a
-          class="ws-cta"
+          class="ws-btn"
           href="{{ page.get_process_url }}"
           data-modal-open="reprocesar-pagina"
         >Volver a procesar</a>
+        {% if page.is_translating %}
+          <button type="button" class="ws-cta" disabled>
+            <span class="btn__spinner" aria-hidden="true"></span>
+            Traduciendo…
+          </button>
+        {% elif can_translate %}
+          {% comment %}
+          Traducir con IA (HU-16). Las regiones aprobadas no se vuelven a
+          traducir (CA-16.3), así que repetirlo solo rehace las pendientes.
+          {% endcomment %}
+          <form method="post" action="{{ page.get_translate_url }}">
+            {% csrf_token %}
+            <button type="submit" class="ws-cta" data-submit-busy>
+              <span class="btn__spinner" hidden aria-hidden="true"></span>
+              <span data-submit-label data-busy-label="Traduciendo…">
+                {% if page.translation_failed %}Reintentar traducción{% elif has_translations %}Traducir de nuevo{% else %}Traducir página{% endif %}
+              </span>
+            </button>
+          </form>
+        {% else %}
+          <span class="ws-cta" aria-disabled="true" title="No hay texto pendiente de traducir">
+            Traducir página
+            <span class="sr-only">(no hay texto pendiente de traducir)</span>
+          </span>
+        {% endif %}
+      {% elif page.was_processed %}
+        {% comment %}
+        Página procesada sin texto: no hay nada que traducir (CA-16.5). El
+        botón se ve deshabilitado y explica el motivo.
+        {% endcomment %}
+        <span class="ws-cta" aria-disabled="true" title="Esta página no tiene texto que traducir">
+          Traducir página
+          <span class="sr-only">(esta página no tiene texto que traducir)</span>
+        </span>
       {% else %}
         <form method="post" action="{{ page.get_process_url }}">
           {% csrf_token %}
@@ -218,7 +253,7 @@ de pantalla anuncia número, tipo, estado y texto.
           <div
             class="processing-status"
             aria-live="polite"
-            {% if page.is_processing %}data-processing-poll="{{ page.get_status_url }}"{% endif %}
+            {% if page.is_processing or page.is_translating %}data-processing-poll="{{ page.get_status_url }}"{% endif %}
           >
             {% if page.is_processing %}
               <p class="ws-note">
@@ -229,8 +264,37 @@ de pantalla anuncia número, tipo, estado y texto.
                   <noscript><a href="{{ page.get_absolute_url }}">Actualizar</a></noscript>
                 </span>
               </p>
+            {% elif page.is_translating %}
+              <p class="ws-note">
+                <span class="ws-note__mark" aria-hidden="true"></span>
+                <span>
+                  Estamos traduciendo esta página con IA, con el contexto de todos
+                  sus bloques. Las traducciones aparecerán aquí en cuanto termine.
+                  <noscript><a href="{{ page.get_absolute_url }}">Actualizar</a></noscript>
+                </span>
+              </p>
             {% endif %}
           </div>
+
+          {% if page.translation_failed %}
+            {% comment %}
+            Fallo de la IA (CA-16.4): las traducciones que ya había se
+            conservan y se ofrece reintentar.
+            {% endcomment %}
+            <div class="form-errors" role="alert">
+              <span class="form-errors__icon" aria-hidden="true">!</span>
+              <div>
+                <p class="form-errors__list">{{ page.translation_error|default:"No se pudo traducir la página." }}</p>
+                <p class="processing-error__hint">
+                  {% if has_translations %}Se conservan las traducciones anteriores. {% endif %}Puedes intentarlo de nuevo.
+                </p>
+                <form method="post" action="{{ page.get_translate_url }}" class="processing-error__retry">
+                  {% csrf_token %}
+                  <button type="submit" class="block-btn">Reintentar</button>
+                </form>
+              </div>
+            </div>
+          {% endif %}
 
           {% if page.has_failed %}
             <div class="form-errors" role="alert">
@@ -320,6 +384,37 @@ de pantalla anuncia número, tipo, estado y texto.
                       {% endif %}
                     </div>
                   </form>
+
+                  {% if region.needs_translation %}
+                    {% comment %}
+                    Traducción de la región (HU-16). Retry AI del mockup:
+                    viaja la página entera como contexto, pero solo cambia
+                    esta región. Una región aprobada no se vuelve a traducir.
+                    {% endcomment %}
+                    <div class="block-card__translation">
+                      <div class="block-card__divider">
+                        <span class="block-card__label">{{ page.album.target_language.code|upper }} · traducción</span>
+                        {% include "components/badge.html" with label=region.get_translation_status_display variant=region.translation_variant %}
+                      </div>
+                      {% if region.translation %}
+                        <p class="block-card__translated" lang="{{ page.album.target_language.code }}">{{ region.translation|linebreaksbr }}</p>
+                      {% elif region.translation_status == "untranslated" %}
+                        <p class="block-card__placeholder">Sin traducir todavía. Pulsa «Traducir página» o «Reintentar con IA».</p>
+                      {% else %}
+                        <p class="block-card__placeholder">Sin traducción.</p>
+                      {% endif %}
+                      {% if not region.is_translation_approved and page.was_processed and not page.is_translating %}
+                        <form method="post" action="{{ region.get_retranslate_url }}" class="block-card__actions">
+                          {% csrf_token %}
+                          <button type="submit" class="block-btn" data-submit-busy>
+                            <span class="btn__spinner" hidden aria-hidden="true"></span>
+                            <span data-submit-label data-busy-label="Traduciendo…">Reintentar con IA</span>
+                            <span class="sr-only"> la región {{ region.reading_order }}</span>
+                          </button>
+                        </form>
+                      {% endif %}
+                    </div>
+                  {% endif %}
                 </li>
               {% endfor %}
             </ol>
@@ -356,6 +451,9 @@ de pantalla anuncia número, tipo, estado y texto.
           se conservan las actuales.
           {% if corrected_count %}
             <strong>Se perderán {{ corrected_count }} {{ corrected_count|pluralize:"corrección,correcciones" }} que hiciste a mano.</strong>
+          {% endif %}
+          {% if translated_count %}
+            <strong>También se borrarán {{ translated_count }} {{ translated_count|pluralize:"traducción,traducciones" }}.</strong>
           {% endif %}
         </p>
         <form method="post" action="{{ page.get_process_url }}">

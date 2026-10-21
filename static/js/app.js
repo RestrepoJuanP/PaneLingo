@@ -518,7 +518,7 @@
           return response.json();
         })
         .then(function (state) {
-          if (state.is_processing) {
+          if (state.is_processing || state.is_translating) {
             schedule(PROCESSING_POLL_MS);
             return;
           }

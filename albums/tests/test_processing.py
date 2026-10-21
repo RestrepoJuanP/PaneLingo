@@ -204,7 +204,13 @@ class LiveRefreshTests(ProcessingTestCase):
         state = self.client.get(self.page.get_status_url()).json()
 
         self.assertEqual(
-            state, {"status": "processing", "is_processing": True, "region_count": 0}
+            state,
+            {
+                "status": "processing",
+                "is_processing": True,
+                "is_translating": False,
+                "region_count": 0,
+            },
         )
 
     def test_the_status_reports_the_finished_result(self):
@@ -214,7 +220,13 @@ class LiveRefreshTests(ProcessingTestCase):
         state = self.client.get(self.page.get_status_url()).json()
 
         self.assertEqual(
-            state, {"status": "processed", "is_processing": False, "region_count": 2}
+            state,
+            {
+                "status": "processed",
+                "is_processing": False,
+                "is_translating": False,
+                "region_count": 2,
+            },
         )
 
     def test_the_status_of_a_foreign_page_is_not_found(self):
