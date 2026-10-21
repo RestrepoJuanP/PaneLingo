@@ -44,8 +44,31 @@ jobs:
       - name: Django system checks
         run: python manage.py check
 
-      - name: Pruebas automaticas
-        run: python manage.py test
+      # Las pruebas corren bajo coverage.py; la configuracion (fuentes, minimo)
+      # esta en pyproject.toml. Si baja del minimo, el paso falla y la PR no
+      # puede fusionarse.
+      - name: Pruebas automaticas con cobertura
+        run: coverage run manage.py test
+
+      - name: Reporte de cobertura
+        run: |
+          coverage report
+          {
+            echo "### Cobertura de codigo"
+            echo
+            echo '```'
+            coverage report
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          coverage html
+
+      - name: Publicar el reporte HTML de cobertura
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobertura-html
+          path: htmlcov/
+          retention-days: 14
 
       # pip-audit es un paso obligatorio del Quality Gate y no debe eliminarse.
       # Si una dependencia reporta una vulnerabilidad sin version corregida,

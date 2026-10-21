@@ -21,3 +21,14 @@ max-complexity = 10
 [tool.black]
 line-length = 88
 target-version = ["py312"]
+
+# Cobertura de código (coverage.py). Se mide en cada pull request en la CI y
+# falla si baja del mínimo, para que no se fusione código sin probar.
+[tool.coverage.run]
+source = ["accounts", "albums", "config"]
+omit = ["*/migrations/*", "*/tests/*", "config/asgi.py", "config/wsgi.py"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+fail_under = 90
