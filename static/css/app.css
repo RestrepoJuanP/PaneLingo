@@ -3980,11 +3980,10 @@ button.ws-group__step:disabled {
   order: 2;
 }
 
-.block-card__translated {
-  margin: 0;
-  padding: 9px 11px;
-  border: 1.5px solid var(--surface-muted-3);
-  border-radius: var(--r-md);
+/* Traducción editable: como en el mockup, más peso y fondo blanco que el
+   texto de origen, con borde punteado mientras no hay traducción. */
+.block-card__text--translation {
+  border-width: 1.5px;
   background: var(--surface);
   color: var(--ink-900);
   font-size: var(--fs-body);
@@ -3992,15 +3991,52 @@ button.ws-group__step:disabled {
   line-height: 1.5;
 }
 
-.block-card__placeholder {
-  margin: 0;
-  padding: 9px 11px;
-  border: 1.5px dashed var(--danger-border);
-  border-radius: var(--r-md);
+.block-card__text--translation:placeholder-shown {
+  border-style: dashed;
+  border-color: var(--danger-border);
+}
+
+.block-card__proposal {
+  margin-top: var(--sp-3);
   color: var(--muted);
-  font-size: var(--fs-sm);
-  font-style: italic;
+  font-size: var(--fs-label-sm);
   line-height: 1.5;
+}
+
+.block-card__proposal summary {
+  width: fit-content;
+  color: var(--brand);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.block-card__proposal p {
+  margin: var(--sp-2) 0 0;
+  padding: var(--sp-3) var(--sp-5);
+  border-radius: var(--r-md);
+  background: var(--surface-subtle-2);
+  color: var(--ink-700);
+}
+
+/* Contador de traducciones sin aprobar y región anterior/siguiente. */
+.ws-review-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  margin-top: var(--sp-5);
+}
+
+.ws-review-bar__count {
+  margin: 0;
+  color: var(--ink-600);
+  font-size: var(--fs-label-sm);
+}
+
+.ws-review-bar__steps {
+  display: flex;
+  gap: var(--sp-2);
 }
 
 .block-card__translation .block-card__actions {

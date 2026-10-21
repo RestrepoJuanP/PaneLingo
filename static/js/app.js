@@ -623,6 +623,61 @@
     if (match) {
       select(match[1], "hash");
     }
+
+    // Recorrer las regiones en orden de lectura (HU-17, CA-17.2): botones
+    // "Anterior" y "Siguiente" y Alt+↑ / Alt+↓. Se usa Alt para no chocar
+    // con las flechas solas, que pasan de página, ni con los atajos de los
+    // lectores de pantalla (ADR-002, T4). Solo se mueve la selección y el
+    // foco: no se guarda ni se cambia nada (CA-17.4).
+    function step(direction) {
+      var items = Array.prototype.slice.call(
+        workspace.querySelectorAll("[data-region-item]"),
+      );
+      if (!items.length) {
+        return;
+      }
+      var current = items.findIndex(function (item) {
+        return item.classList.contains("is-selected");
+      });
+      var next = Math.min(
+        Math.max(current + direction, 0),
+        items.length - 1,
+      );
+      if (current === -1) {
+        next = direction > 0 ? 0 : items.length - 1;
+      }
+      var number = items[next].dataset.regionItem;
+      select(number, "keys");
+      window.history.replaceState(null, "", "#region-" + number);
+      var head = items[next].querySelector(".block-card__head");
+      if (head) {
+        head.focus({ preventScroll: true });
+      }
+    }
+
+    var steps = document.querySelector("[data-region-steps]");
+    if (steps) {
+      steps.hidden = false;
+      steps.addEventListener("click", function (event) {
+        var button = event.target.closest("[data-region-step]");
+        if (button) {
+          step(Number(button.dataset.regionStep));
+        }
+      });
+    }
+
+    document.addEventListener("keydown", function (event) {
+      var isStepKey =
+        event.altKey &&
+        !event.ctrlKey &&
+        !event.metaKey &&
+        (event.key === "ArrowDown" || event.key === "ArrowUp");
+      if (!isStepKey || document.querySelector(".modal:not([hidden])")) {
+        return;
+      }
+      event.preventDefault();
+      step(event.key === "ArrowDown" ? 1 : -1);
+    });
   }
 
   /* ---------------------------------------------------------------------------

@@ -122,7 +122,7 @@ class UnsavedChangesTests(CorrectionTestCase):
         content = self.client.get(self.page.get_absolute_url()).content.decode()
 
         self.assertIn("data-region-workspace", content)
-        self.assertEqual(content.count("data-region-edit"), 2)
+        self.assertEqual(content.count('class="block-card__body" data-region-edit'), 2)
 
     def test_reprocessing_warns_about_manual_corrections(self):
         """CP-15.4 — Volver a procesar avisa de que se perderán las correcciones."""
