@@ -56,6 +56,8 @@ ACTION_ROUTES = [
     "albums:region_translation_edit",
     "albums:region_approve",
     "albums:region_unapprove",
+    "albums:archive",
+    "albums:unarchive",
 ]
 
 # Argumentos con los que resolver las rutas que llevan parámetros en la URL.
@@ -73,6 +75,8 @@ ROUTE_ARGS = {
     "albums:region_translation_edit": {"pk": 1},
     "albums:region_approve": {"pk": 1},
     "albums:region_unapprove": {"pk": 1},
+    "albums:archive": {"pk": 1},
+    "albums:unarchive": {"pk": 1},
     "albums:page_image": {"pk": 1},
     "albums:page_thumbnail": {"pk": 1},
     "albums:page_detail": {"pk": 1},
