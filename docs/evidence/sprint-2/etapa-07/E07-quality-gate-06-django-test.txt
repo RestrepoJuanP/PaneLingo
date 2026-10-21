@@ -1,0 +1,68 @@
+==============================================================================
+PaneLingo — Evidencia del Quality Gate
+==============================================================================
+Etapa           : 07
+Paso            : 6 de 7 — Django — pruebas automaticas
+Comando         : python manage.py test
+Herramienta     : Python 3.14.5 / Django 5.2.18
+Fecha y hora    : 2026-10-21T11:06:54-05:00
+Rama            : feature/HU-16-ai-translation
+Commit          : dc4a3a7c64929d17fc915ced5fffa6d1c2d76bca
+Arbol de trabajo: con cambios sin versionar
+Directorio      : /c/Users/ASUS/Documents/Universidad/6 SEMESTRE/PROYECTO INTEGRADOR 2/Proyecto Panelingo/PaneLingo-HU-16
+==============================================================================
+
+Creating test database for alias 'default'...
+.......................................................................................................................................................................................................................................................................................................................................................Fallo inesperado al traducir la página 1.
+Traceback (most recent call last):
+  File "C:\Users\ASUS\Documents\Universidad\6 SEMESTRE\PROYECTO INTEGRADOR 2\Proyecto Panelingo\PaneLingo-HU-16\albums\translating.py", line 145, in run_translation
+    get_translator().translate(request) if request.numbers_to_translate else []
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py", line 1176, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py", line 1180, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py", line 1241, in _execute_mock_call
+    raise effect
+RuntimeError: fallo
+....................Method Not Allowed (GET): /cuentas/salir/
+Method Not Allowed (GET): /paginas/1/traducir/
+Method Not Allowed (GET): /regiones/1/corregir/
+Method Not Allowed (GET): /regiones/1/traducir/
+.Not Found: /albumes/1/
+Not Found: /albumes/1/editar/
+Not Found: /albumes/1/renombrar/
+Not Found: /albumes/1/portada/
+Not Found: /paginas/1/eliminar/
+Not Found: /paginas/1/
+Not Found: /paginas/1/imagen/
+Not Found: /paginas/1/procesar/
+Not Found: /paginas/1/estado/
+Not Found: /paginas/1/miniatura/
+Not Found: /albumes/1/cargar/
+..............................Azure Read respondió 401.
+Azure Read respondió 403.
+Azure Read respondió 429.
+Azure Read respondió 500.
+Azure Read respondió 503.
+..No se pudo contactar con Azure Read: <urlopen error sin red>
+...........................Gemini respondió 401.
+Gemini respondió 403.
+Gemini respondió 429.
+Gemini respondió 503.
+Gemini respondió 500.
+..No se pudo contactar con Gemini: <urlopen error sin red>
+......
+----------------------------------------------------------------------
+Ran 431 tests in 12.693s
+
+OK
+Destroying test database for alias 'default'...
+Found 431 test(s).
+System check identified no issues (0 silenced).
+
+==============================================================================
+Codigo de salida: 0  (CORRECTO)
+==============================================================================
