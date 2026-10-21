@@ -141,8 +141,14 @@ class Album(models.Model):
 
     @property
     def cover_url(self):
-        """Dirección de la portada subida, o cadena vacía si usa la predeterminada."""
-        return self.cover_image.url if self.cover_image else ""
+        """Dirección de la portada subida, o cadena vacía si usa la predeterminada.
+
+        Apunta a la vista protegida, no a MEDIA_URL: la portada es una imagen
+        del usuario y solo la puede descargar su propietario (DT-02).
+        """
+        if not self.cover_image:
+            return ""
+        return reverse("albums:album_cover", kwargs={"pk": self.pk})
 
     @property
     def language_pair(self):
@@ -340,6 +346,23 @@ class ComicPage(models.Model):
         """Devuelve la dirección del estado de procesamiento, en JSON."""
         return reverse("albums:page_status", kwargs={"pk": self.pk})
 
+    # Las imágenes se piden por estas direcciones protegidas y nunca por
+    # MEDIA_URL: así una página ajena responde 404 aunque se conozca su
+    # dirección (HU-11, CA-11.4, deuda DT-02).
+
+    def get_image_url(self):
+        """Devuelve la dirección protegida de la imagen original."""
+        return reverse("albums:page_image", kwargs={"pk": self.pk})
+
+    def get_thumbnail_url(self):
+        """Devuelve la dirección protegida de la miniatura."""
+        return reverse("albums:page_thumbnail", kwargs={"pk": self.pk})
+
+    @property
+    def display_image_url(self):
+        """Dirección de la miniatura, que cae en el original si no la hay."""
+        return self.get_thumbnail_url()
+
     @property
     def is_processing(self):
         """Indica si la página se está procesando y aún no se dio por perdida."""
@@ -389,11 +412,13 @@ class ComicPage(models.Model):
 
 
 class TextRegion(models.Model):
-    """Región de una página que contiene texto, detectada por HU-12.
+    """Región de una página que contiene texto.
+
+    HU-12 la detecta con su posición y su tipo; HU-13 le añade el texto
+    reconocido, la confianza del OCR y si necesita revisión.
 
     La posición se guarda en píxeles de la imagen original, no en
-    porcentajes: así no depende del tamaño con que se muestre la página y
-    sirve igual para recortar la región en el OCR de HU-13.
+    porcentajes: así no depende del tamaño con que se muestre la página.
     """
 
     class Kind(models.TextChoices):
@@ -416,6 +441,33 @@ class TextRegion(models.Model):
     y = models.PositiveIntegerField(_("posición vertical"))
     width = models.PositiveIntegerField(_("ancho"))
     height = models.PositiveIntegerField(_("alto"))
+    source_text = models.TextField(
+        _("texto de origen"),
+        blank=True,
+        help_text=_("Texto que reconoció el OCR, en orden de lectura (HU-13)."),
+    )
+    confidence = models.FloatField(
+        _("confianza"),
+        null=True,
+        blank=True,
+        help_text=_("De 0 a 1. Vacía si el proveedor no la informó."),
+    )
+    needs_review = models.BooleanField(
+        _("necesita revisión"),
+        default=False,
+        help_text=_("Texto vacío, de baja confianza o en otro alfabeto."),
+    )
+    corrected_text = models.TextField(
+        _("texto corregido"),
+        blank=True,
+        help_text=_("Corrección del usuario (HU-15). Vacía y corregida: sin texto."),
+    )
+    is_corrected = models.BooleanField(
+        _("revisada por el usuario"),
+        default=False,
+        help_text=_("Distingue una corrección vacía de una región sin corregir."),
+    )
+    corrected_at = models.DateTimeField(_("corregida"), null=True, blank=True)
     created_at = models.DateTimeField(_("detectada"), auto_now_add=True)
 
     class Meta:
@@ -432,6 +484,30 @@ class TextRegion(models.Model):
     def __str__(self):
         """Devuelve la región identificada por su número de orden."""
         return f"Región {self.reading_order}"
+
+    @property
+    def final_text(self):
+        """Texto que vale para traducir: el corregido si lo hay, si no el del OCR.
+
+        Es el que debe usar la traducción de HU-16 (CA-15.2).
+        """
+        return self.corrected_text if self.is_corrected else self.source_text
+
+    @property
+    def has_nothing_to_translate(self):
+        """Indica si el usuario vació la región a propósito (CA-15.5)."""
+        return self.is_corrected and not self.corrected_text
+
+    def get_correct_url(self):
+        """Devuelve la dirección para corregir o restaurar esta región."""
+        return reverse("albums:region_correct", kwargs={"pk": self.pk})
+
+    @property
+    def confidence_percent(self):
+        """Devuelve la confianza como porcentaje entero, o None si no hay."""
+        if self.confidence is None:
+            return None
+        return round(self.confidence * 100)
 
     @property
     def overlay_style(self):

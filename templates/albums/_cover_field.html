@@ -13,7 +13,7 @@ el archivo se envía igual. Sin portada se usa la predeterminada.
       {% if form.instance.cover_image %}
         <img
           class="cover-field__img"
-          src="{{ form.instance.cover_image.url }}"
+          src="{{ form.instance.cover_url }}"
           alt="Portada actual del álbum"
           data-cover-current
         />

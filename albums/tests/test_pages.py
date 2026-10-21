@@ -167,7 +167,7 @@ class PageUploadSuccessTests(PageUploadTestCase):
         response = self.client.get(self.album.get_absolute_url())
 
         self.assertContains(response, "Página 1")
-        self.assertContains(response, ComicPage.objects.get().thumbnail.url)
+        self.assertContains(response, ComicPage.objects.get().get_thumbnail_url())
         self.assertNotContains(response, "Este álbum aún no tiene páginas")
 
     def test_the_grid_serves_the_thumbnail_and_not_the_original(self):
@@ -178,8 +178,10 @@ class PageUploadSuccessTests(PageUploadTestCase):
 
         content = self.client.get(self.album.get_absolute_url()).content.decode()
 
-        self.assertIn(page.thumbnail.url, content)
-        self.assertNotIn(page.image.url, content)
+        self.assertIn(page.get_thumbnail_url(), content)
+        self.assertNotIn(page.get_image_url(), content)
+        # Ni miniatura ni original salen por MEDIA_URL (HU-11, DT-02).
+        self.assertNotIn(page.thumbnail.url, content)
         self.assertIn('loading="lazy"', content)
 
 

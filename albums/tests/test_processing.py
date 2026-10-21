@@ -236,8 +236,12 @@ class RegionDisplayTests(ProcessingTestCase):
         response = self.client.get(self.page.get_absolute_url())
 
         self.assertContains(response, 'class="region-box region-box--balloon"', count=2)
-        self.assertContains(response, 'aria-label="Región 1: globo de diálogo"')
-        self.assertContains(response, 'aria-label="Región 2: globo de diálogo"')
+        self.assertContains(
+            response, 'aria-label="Región 1: globo de diálogo. Texto: こんにちは"'
+        )
+        self.assertContains(
+            response, 'aria-label="Región 2: globo de diálogo. Texto: ありがとう"'
+        )
         self.assertContains(response, 'href="#region-1"')
         self.assertContains(response, 'id="region-1"')
 
@@ -473,3 +477,90 @@ class OwnershipTests(ProcessingTestCase):
         self.assertIn("/cuentas/ingresar/", response.url)
         self.page.refresh_from_db()
         self.assertEqual(self.page.status, ComicPage.Status.PENDING)
+
+
+class OcrTextTests(ProcessingTestCase):
+    """HU-13 — Extraer el texto de las regiones con OCR."""
+
+    def regions(self):
+        """Devuelve las regiones guardadas, en orden de lectura."""
+        return list(self.page.regions.order_by("reading_order"))
+
+    def test_each_region_keeps_its_text_and_confidence(self):
+        """CP-13.1 — Cada región guarda su texto y su confianza."""
+        self.process()
+
+        first, second = self.regions()
+        self.assertEqual(first.source_text, "こんにちは")
+        self.assertAlmostEqual(first.confidence, 0.97)
+        self.assertEqual(first.confidence_percent, 97)
+        self.assertEqual(second.source_text, "ありがとう")
+        self.assertFalse(first.needs_review)
+
+    def test_the_text_is_shown_in_the_source_language(self):
+        """CP-13.1 — El texto se muestra en la página con su idioma."""
+        self.process()
+
+        response = self.client.get(self.page.get_absolute_url())
+
+        self.assertContains(response, '<span class="region-list__text" lang="ja">')
+        self.assertContains(response, "こんにちは")
+        self.assertContains(response, "Confianza 97 %")
+
+    def test_a_reliable_page_is_left_processed(self):
+        """CP-13.3 — Sin regiones dudosas, la página queda "Procesada"."""
+        self.process()
+
+        self.assertEqual(self.page.status, ComicPage.Status.PROCESSED)
+
+    def test_low_confidence_marks_the_region_and_the_page(self):
+        """CP-13.3 — Una región dudosa deja la página en "Necesita revisión"."""
+        doubtful = DetectedRegion(260, 50, 120, 80, "たぶん", 0.42)
+        reliable = DetectedRegion(40, 40, 120, 80, "たしかに", 0.98)
+
+        with use_provider(FakeOcrProvider(regions=[doubtful, reliable])):
+            self.process()
+
+        first, second = self.regions()
+        self.assertTrue(first.needs_review)
+        self.assertFalse(second.needs_review)
+        self.assertEqual(self.page.status, ComicPage.Status.NEEDS_REVIEW)
+        response = self.client.get(self.page.get_absolute_url())
+        self.assertContains(response, "1 necesita revisión.")
+        self.assertContains(response, '<span class="badge badge--warning">')
+
+    def test_text_in_another_script_needs_review(self):
+        """CP-13.2 — En un álbum japonés, un texto solo en latín se revisa."""
+        latin = DetectedRegion(260, 50, 120, 80, "Hello", 0.99)
+
+        with use_provider(FakeOcrProvider(regions=[latin])):
+            self.process()
+
+        self.assertTrue(self.regions()[0].needs_review)
+        self.assertEqual(self.page.status, ComicPage.Status.NEEDS_REVIEW)
+
+    def test_a_region_without_text_keeps_the_rest(self):
+        """CP-13.5 — Si falla el OCR de una región, el resto conserva su texto."""
+        empty = DetectedRegion(260, 50, 120, 80, "", None)
+        reliable = DetectedRegion(40, 40, 120, 80, "たしかに", 0.98)
+
+        with use_provider(FakeOcrProvider(regions=[empty, reliable])):
+            self.process()
+
+        first, second = self.regions()
+        self.assertEqual(first.source_text, "")
+        self.assertTrue(first.needs_review)
+        self.assertEqual(second.source_text, "たしかに")
+        self.assertContains(
+            self.client.get(self.page.get_absolute_url()), "Sin texto reconocido"
+        )
+
+    def test_the_text_survives_signing_out(self):
+        """CP-13.1 — El texto queda guardado aunque se cierre sesión."""
+        self.process()
+        self.client.logout()
+        self.client.login(email=self.owner.email, password=PASSWORD)
+
+        response = self.client.get(self.page.get_absolute_url())
+
+        self.assertContains(response, "ありがとう")

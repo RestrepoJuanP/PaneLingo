@@ -4,8 +4,6 @@ Las rutas de negocio se incorporan a medida que avanzan las historias de
 usuario. La raíz es la biblioteca de álbumes.
 """
 
-from django.conf import settings
-from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
@@ -19,5 +17,5 @@ urlpatterns = [
     path("design-system/", views.design_system, name="design_system"),
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# MEDIA_URL no se sirve ni siquiera en desarrollo: las imágenes de los usuarios
+# solo se entregan por las vistas protegidas de albums (HU-11, deuda DT-02).

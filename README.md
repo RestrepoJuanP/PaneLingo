@@ -141,6 +141,20 @@ El proveedor se elige con `OCR_PROVIDER` en `.env` (decisión en [ADR-001](docs/
 
 La clave vive solo en `.env`; nunca en el código ni en Git.
 
+### Imágenes de los usuarios
+
+Las páginas, sus miniaturas y las portadas **no se sirven desde `/media/`**, ni siquiera en desarrollo. Se entregan por vistas protegidas (`/paginas/<id>/imagen/`, `/paginas/<id>/miniatura/`, `/albumes/<id>/portada/`) que exigen sesión y responden 404 a otras cuentas (HU-11, deuda DT-02).
+
+Cada región guarda el texto reconocido y su confianza (HU-13). Las que tienen poca confianza (por debajo de `OCR_REVIEW_THRESHOLD`, 70 % provisional), no tienen texto o están en otro alfabeto que el idioma de origen se marcan "Revisar", y la página pasa a "Necesita revisión".
+
+Para medir la precisión del OCR sobre un juego de páginas de prueba (CA-13.4), con una subcarpeta por idioma y un JSON con el texto esperado junto a cada imagen:
+
+```bash
+python manage.py ocr_accuracy_report ruta/al/juego-de-prueba --output informe-ocr.md
+```
+
+El formato de la carpeta está descrito al principio de `albums/management/commands/ocr_accuracy_report.py`.
+
 ## Recuperación de contraseña en desarrollo
 
 PaneLingo no usa un proveedor de correo real: está fuera del alcance del MVP. En desarrollo, `EMAIL_BACKEND` es el backend de consola, así que **el mensaje de recuperación se imprime en la terminal donde corre `runserver`**, no se envía a ninguna parte.

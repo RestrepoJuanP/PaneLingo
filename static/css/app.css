@@ -2639,6 +2639,26 @@ textarea {
   text-decoration: none;
 }
 
+/* Región que necesita revisión (HU-14, CA-14.3): se distingue por la forma
+   (borde discontinuo) y por el signo "!" junto al número, no solo por el
+   color. */
+.region-box--review {
+  border-style: dashed;
+  border-color: var(--warning-fg);
+}
+
+.region-box--review .region-box__number {
+  background: var(--warning-fg);
+  color: #fff;
+}
+
+/* Región elegida: su caja y su texto se resaltan a la vez (CA-14.2). */
+.region-box.is-selected,
+.region-box:target {
+  box-shadow: 0 0 0 3px var(--focus-ring);
+  background: color-mix(in srgb, var(--brand) 22%, transparent);
+}
+
 .region-box__number {
   position: absolute;
   top: -11px;
@@ -2660,9 +2680,77 @@ textarea {
   color: var(--ink-900);
 }
 
-.region-panel {
+/* Columna lateral del espacio de trabajo: datos de la página y regiones. */
+.page-side {
   position: sticky;
   top: var(--sp-10);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+}
+
+.page-info__list {
+  display: grid;
+  gap: var(--sp-3);
+  margin: var(--sp-5) 0 0;
+}
+
+.page-info__list div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--sp-5);
+}
+
+.page-info__list dt {
+  font-size: var(--fs-sm);
+  color: var(--muted);
+}
+
+.page-info__list dd {
+  margin: 0;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--ink-900);
+  text-align: right;
+}
+
+.page-info__file {
+  overflow-wrap: anywhere;
+}
+
+/* Navegación entre páginas (HU-11). */
+.page-pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-8);
+}
+
+.page-pager .btn[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.page-pager__position {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--ink-800);
+}
+
+.page-pager__hint {
+  margin-left: auto;
+  font-size: var(--fs-label-sm);
+  color: var(--muted);
+}
+
+.page-pager__hint kbd {
+  padding: 0 var(--sp-1);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  background: var(--surface-subtle);
+  font-family: var(--font-ui);
 }
 
 .region-panel__meta,
@@ -2683,7 +2771,7 @@ textarea {
 
 .region-list__link {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--sp-5);
   padding: var(--sp-4) var(--sp-5);
   border: 1px solid var(--border);
@@ -2699,6 +2787,11 @@ textarea {
   text-decoration: none;
 }
 
+.region-list__item--review .region-list__link {
+  border-left: 3px solid var(--warning);
+}
+
+.region-list__item.is-selected .region-list__link,
 .region-list__item:target .region-list__link {
   border-color: var(--brand);
   background: var(--brand-tint-2);
@@ -2715,6 +2808,122 @@ textarea {
   font-weight: 700;
   line-height: 24px;
   text-align: center;
+}
+
+.region-list__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  min-width: 0;
+}
+
+.region-list__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.region-list__confidence {
+  font-size: var(--fs-label-sm);
+  font-weight: 600;
+  color: var(--muted);
+}
+
+/* Texto reconocido por el OCR (HU-13). Conserva los saltos de línea de cada
+   globo y parte las palabras largas para no desbordar el panel. */
+.region-list__text {
+  color: var(--ink-900);
+  font-size: var(--fs-body);
+  font-weight: 500;
+  line-height: var(--lh-body);
+  overflow-wrap: anywhere;
+}
+
+.region-list__text:lang(ja) {
+  font-family: var(--font-ja), var(--font-ui);
+}
+
+.region-list__text:lang(ko) {
+  font-family: var(--font-ko), var(--font-ui);
+}
+
+.region-list__text--empty {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.region-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin-top: var(--sp-5);
+}
+
+/* El panel de texto se desplaza por su cuenta para que la imagen siga a la
+   vista mientras se recorren muchas regiones. */
+.region-list {
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: var(--sp-1);
+}
+
+/* Corrección del texto de una región (HU-15). */
+.region-list__item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.region-edit {
+  margin-left: calc(24px + var(--sp-5) + var(--sp-5));
+}
+
+.region-edit__summary {
+  width: fit-content;
+  font-size: var(--fs-label-sm);
+  font-weight: 700;
+  color: var(--brand);
+  cursor: pointer;
+}
+
+.region-edit__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  margin-top: var(--sp-3);
+}
+
+.region-edit__label {
+  font-size: var(--fs-label-sm);
+  font-weight: 600;
+  color: var(--ink-800);
+}
+
+.region-edit__text:lang(ja) {
+  font-family: var(--font-ja);
+}
+
+.region-edit__text:lang(ko) {
+  font-family: var(--font-ko);
+}
+
+.region-edit__hint,
+.region-edit__original {
+  font-size: var(--fs-label-sm);
+  color: var(--muted);
+}
+
+.region-edit__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+}
+
+.region-panel__review {
+  display: block;
+  margin-top: var(--sp-2);
+  color: var(--warning-fg);
 }
 
 .region-list__number--narration {
@@ -2748,7 +2957,11 @@ textarea {
     grid-template-columns: 1fr;
   }
 
-  .region-panel {
+  .page-side {
     position: static;
+  }
+
+  .page-pager__hint {
+    display: none;
   }
 }

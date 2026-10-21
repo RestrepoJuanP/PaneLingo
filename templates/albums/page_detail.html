@@ -34,7 +34,7 @@ el teclado sin JavaScript, y el lector de pantalla anuncia número y tipo.
         <h1 class="page-title">Página {{ page.page_number }}</h1>
         {% include "components/badge.html" with label=page.get_status_display variant=page.status_variant %}
       </div>
-      <p class="page-subtitle">{{ page.original_filename }} · {{ page.width }} × {{ page.height }} px</p>
+      <p class="page-subtitle">{{ page.album.title }} · {{ page.album.language_pair }}</p>
     </div>
 
     <div class="page-head__actions">
@@ -66,6 +66,41 @@ el teclado sin JavaScript, y el lector de pantalla anuncia número y tipo.
       {% endif %}
     </div>
   </div>
+
+  {% comment %}
+  Navegación entre páginas (HU-11, CA-11.2). Enlaces de verdad: sin
+  JavaScript funcionan igual. static/js/app.js añade las flechas del teclado.
+  {% endcomment %}
+  <nav class="page-pager" aria-label="Páginas del álbum" data-page-pager>
+    {% if previous_page %}
+      <a
+        class="btn btn--secondary btn--compact"
+        href="{{ previous_page.get_absolute_url }}"
+        rel="prev"
+        aria-label="Página anterior: página {{ previous_page.page_number }}"
+        data-page-prev
+      ><span aria-hidden="true">←</span> Anterior</a>
+    {% else %}
+      <span class="btn btn--secondary btn--compact" aria-disabled="true">
+        <span aria-hidden="true">←</span> Anterior
+      </span>
+    {% endif %}
+    <span class="page-pager__position">Página {{ page_position }} de {{ album_page_count }}</span>
+    {% if next_page %}
+      <a
+        class="btn btn--secondary btn--compact"
+        href="{{ next_page.get_absolute_url }}"
+        rel="next"
+        aria-label="Página siguiente: página {{ next_page.page_number }}"
+        data-page-next
+      >Siguiente <span aria-hidden="true">→</span></a>
+    {% else %}
+      <span class="btn btn--secondary btn--compact" aria-disabled="true">
+        Siguiente <span aria-hidden="true">→</span>
+      </span>
+    {% endif %}
+    <span class="page-pager__hint">También con las flechas <kbd>←</kbd> <kbd>→</kbd></span>
+  </nav>
 
   {% comment %}
   Mientras la página se procesa, static/js/app.js consulta su estado y recarga
@@ -105,49 +140,176 @@ el teclado sin JavaScript, y el lector de pantalla anuncia número y tipo.
     </div>
   {% endif %}
 
-  <div class="page-view">
+  {% comment %}
+  Vista dividida (HU-14): la imagen con sus regiones a un lado y el texto de
+  cada una al otro, en orden de lectura. Cada región de la imagen enlaza con
+  su texto y cada texto con su región: sin JavaScript funciona con anclas, y
+  static/js/app.js resalta a la vez las dos mitades de la región elegida.
+  {% endcomment %}
+  <div class="page-view" data-region-workspace>
     <figure class="region-canvas">
       <img
         class="region-canvas__img"
-        src="{{ page.image.url }}"
+        src="{{ page.get_image_url }}"
         alt="Página {{ page.page_number }} — {{ page.original_filename }}"
         width="{{ page.width }}"
         height="{{ page.height }}"
       />
-      {% for region in regions %}
+      {% for region in visible_regions %}
         <a
-          class="region-box region-box--{{ region.kind }}"
+          class="region-box region-box--{{ region.kind }}{% if region.needs_review %} region-box--review{% endif %}"
           id="region-box-{{ region.reading_order }}"
           href="#region-{{ region.reading_order }}"
           style="{{ region.overlay_style }}"
-          aria-label="Región {{ region.reading_order }}: {{ region.get_kind_display|lower }}"
+          data-region="{{ region.reading_order }}"
+          aria-label="Región {{ region.reading_order }}: {{ region.get_kind_display|lower }}{% if region.needs_review %}, necesita revisión{% endif %}. {% if region.has_nothing_to_translate %}Sin texto que traducir{% elif region.final_text %}Texto: {{ region.final_text }}{% else %}Sin texto reconocido{% endif %}"
         >
-          <span class="region-box__number" aria-hidden="true">{{ region.reading_order }}</span>
+          <span class="region-box__number" aria-hidden="true">{{ region.reading_order }}{% if region.needs_review %} !{% endif %}</span>
         </a>
       {% endfor %}
     </figure>
 
+    <div class="page-side">
+    <section class="card page-info" aria-labelledby="page-info-title">
+      <h2 class="card__title" id="page-info-title">Datos de la página</h2>
+      <dl class="page-info__list">
+        <div><dt>Número</dt><dd>{{ page.page_number }}</dd></div>
+        <div><dt>Archivo original</dt><dd class="page-info__file">{{ page.original_filename }}</dd></div>
+        <div><dt>Dimensiones</dt><dd>{{ page.width }} × {{ page.height }} px</dd></div>
+        <div><dt>Tamaño</dt><dd>{{ page.file_size|filesizeformat }}</dd></div>
+        <div>
+          <dt>Estado</dt>
+          <dd>{% include "components/badge.html" with label=page.get_status_display variant=page.status_variant %}</dd>
+        </div>
+        <div><dt>Cargada</dt><dd>{{ page.created_at|date:"j \d\e F \d\e Y, H:i"|lower }}</dd></div>
+      </dl>
+    </section>
+
     <aside class="card region-panel" aria-labelledby="region-panel-title">
-      <h2 class="card__title" id="region-panel-title">Regiones de texto</h2>
+      <h2 class="card__title" id="region-panel-title">Texto detectado</h2>
 
       {% if regions %}
         <p class="region-panel__meta">
           {{ regions|length }} {{ regions|length|pluralize:"región,regiones" }},
           en orden de lectura{% if page.album.source_language.code == "ja" %} de derecha a izquierda{% endif %}.
+          {% if review_count %}
+            <strong class="region-panel__review">
+              {{ review_count }} {{ review_count|pluralize:"necesita,necesitan" }} revisión.
+            </strong>
+          {% endif %}
         </p>
-        <ol class="region-list">
-          {% for region in regions %}
-            <li class="region-list__item" id="region-{{ region.reading_order }}">
-              <a class="region-list__link" href="#region-box-{{ region.reading_order }}">
-                <span class="region-list__number region-list__number--{{ region.kind }}" aria-hidden="true">{{ region.reading_order }}</span>
-                <span class="region-list__body">
-                  <span class="region-list__kind">{{ region.get_kind_display }}</span>
-                  <span class="sr-only">, región {{ region.reading_order }}</span>
-                </span>
-              </a>
-            </li>
-          {% endfor %}
-        </ol>
+
+        {% if review_count %}
+          {% comment %}
+          Filtro de regiones (CA-14.3). Son enlaces con ?filtro=, así que
+          funcionan sin JavaScript y el resultado se puede recargar. Usan el
+          patrón de pill selector del sistema de diseño.
+          {% endcomment %}
+          <nav class="region-filter" aria-label="Filtrar regiones">
+            <a
+              class="pill{% if not review_filter %} pill--selected{% endif %}"
+              href="{{ page.get_absolute_url }}"
+              {% if not review_filter %}aria-current="true"{% endif %}
+            >Todas ({{ regions|length }})</a>
+            <a
+              class="pill{% if review_filter %} pill--selected{% endif %}"
+              href="{{ page.get_absolute_url }}?filtro=revisar"
+              {% if review_filter %}aria-current="true"{% endif %}
+            >Por revisar ({{ review_count }})</a>
+          </nav>
+        {% endif %}
+
+        {% if visible_regions %}
+          <ol class="region-list">
+            {% for region in visible_regions %}
+              <li
+                class="region-list__item{% if region.needs_review %} region-list__item--review{% endif %}"
+                id="region-{{ region.reading_order }}"
+                data-region-item="{{ region.reading_order }}"
+              >
+                <a class="region-list__link" href="#region-box-{{ region.reading_order }}" data-region="{{ region.reading_order }}">
+                  <span class="region-list__number region-list__number--{{ region.kind }}" aria-hidden="true">{{ region.reading_order }}</span>
+                  <span class="region-list__body">
+                    <span class="region-list__meta">
+                      <span class="region-list__kind">{{ region.get_kind_display }}</span>
+                      {% if region.confidence_percent is not None %}
+                        <span class="region-list__confidence">Confianza {{ region.confidence_percent }} %</span>
+                      {% endif %}
+                      {% if region.needs_review %}
+                        {% include "components/badge.html" with label="Revisar" variant="warning" %}
+                      {% endif %}
+                      {% if region.is_corrected %}
+                        {% include "components/badge.html" with label="Corregida" variant="success" %}
+                      {% endif %}
+                    </span>
+                    {% comment %}
+                    El texto lleva el idioma de origen en lang para que el navegador
+                    elija la tipografía correcta y el lector de pantalla lo pronuncie
+                    en su idioma (HU-13). Se muestra el texto que vale: el corregido
+                    si lo hay, si no el del OCR (HU-15).
+                    {% endcomment %}
+                    {% if region.has_nothing_to_translate %}
+                      <span class="region-list__text region-list__text--empty">Sin texto que traducir</span>
+                    {% elif region.final_text %}
+                      <span class="region-list__text" lang="{{ page.album.source_language.code }}">{{ region.final_text|linebreaksbr }}</span>
+                    {% else %}
+                      <span class="region-list__text region-list__text--empty">Sin texto reconocido</span>
+                    {% endif %}
+                    <span class="sr-only">, región {{ region.reading_order }}</span>
+                  </span>
+                </a>
+
+                {% comment %}
+                Corrección del texto (HU-15). <details> se abre y se cierra sin
+                JavaScript y con teclado; empieza abierto en las regiones que
+                necesitan revisión. El texto del OCR nunca se pierde: se muestra
+                debajo de una corrección y se puede restaurar.
+                {% endcomment %}
+                <details class="region-edit"{% if region.needs_review %} open{% endif %}>
+                  <summary class="region-edit__summary">Corregir texto</summary>
+                  <form method="post" action="{{ region.get_correct_url }}" class="region-edit__form" data-region-edit>
+                    {% csrf_token %}
+                    <label class="region-edit__label" for="region-text-{{ region.reading_order }}">
+                      Texto de la región {{ region.reading_order }}
+                    </label>
+                    <textarea
+                      class="textarea region-edit__text"
+                      id="region-text-{{ region.reading_order }}"
+                      name="text"
+                      rows="3"
+                      maxlength="2000"
+                      lang="{{ page.album.source_language.code }}"
+                      aria-describedby="region-text-{{ region.reading_order }}-hint"
+                    >{{ region.final_text }}</textarea>
+                    <p class="region-edit__hint" id="region-text-{{ region.reading_order }}-hint">
+                      Déjalo vacío si la región no tiene nada que traducir.
+                    </p>
+                    {% if region.is_corrected %}
+                      <p class="region-edit__original">
+                        Texto del OCR:
+                        {% if region.source_text %}
+                          <span lang="{{ page.album.source_language.code }}">{{ region.source_text }}</span>
+                        {% else %}
+                          <em>sin texto reconocido</em>
+                        {% endif %}
+                      </p>
+                    {% endif %}
+                    <div class="region-edit__actions">
+                      <button type="submit" class="btn btn--primary btn--compact">Guardar corrección</button>
+                      {% if region.is_corrected %}
+                        <button type="submit" class="btn btn--secondary btn--compact" name="restore" value="1">
+                          Restaurar texto del OCR
+                        </button>
+                      {% endif %}
+                    </div>
+                  </form>
+                </details>
+              </li>
+            {% endfor %}
+          </ol>
+        {% else %}
+          <p class="region-panel__empty">No hay regiones pendientes de revisar.</p>
+        {% endif %}
       {% elif page.was_processed %}
         <p class="region-panel__empty">No se detectó texto en esta página.</p>
       {% elif page.has_failed %}
@@ -158,6 +320,7 @@ el teclado sin JavaScript, y el lector de pantalla anuncia número y tipo.
         <p class="region-panel__empty">Esta página aún no se ha procesado.</p>
       {% endif %}
     </aside>
+    </div>
   </div>
 
   {% if regions %}
@@ -175,6 +338,9 @@ el teclado sin JavaScript, y el lector de pantalla anuncia número y tipo.
           Se reemplazarán sus {{ regions|length }} {{ regions|length|pluralize:"región,regiones" }}
           de texto por las que se detecten ahora. Si el procesamiento falla,
           se conservan las actuales.
+          {% if corrected_count %}
+            <strong>Se perderán {{ corrected_count }} {{ corrected_count|pluralize:"corrección,correcciones" }} que hiciste a mano.</strong>
+          {% endif %}
         </p>
         <form method="post" action="{{ page.get_process_url }}">
           {% csrf_token %}

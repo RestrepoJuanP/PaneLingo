@@ -1,0 +1,19 @@
+==============================================================================
+PaneLingo — Evidencia del Quality Gate
+==============================================================================
+Etapa           : 05
+Paso            : 5 de 7 — Django — comprobaciones del sistema
+Comando         : python manage.py check
+Herramienta     : Python 3.14.5 / Django 5.2.18
+Fecha y hora    : 2026-10-20T15:23:59-05:00
+Rama            : feature/HU-15-correct-detected-text
+Commit          : 26529783367babf4a2566cb929b87a735b7e2493
+Arbol de trabajo: con cambios sin versionar
+Directorio      : /c/Users/ASUS/Documents/Universidad/6 SEMESTRE/PROYECTO INTEGRADOR 2/Proyecto Panelingo/PaneLingo
+==============================================================================
+
+System check identified no issues (0 silenced).
+
+==============================================================================
+Codigo de salida: 0  (CORRECTO)
+==============================================================================
