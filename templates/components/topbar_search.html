@@ -1,0 +1,59 @@
+{% comment %}
+Buscador de la barra superior, en todas las pantallas como en el mockup
+("Search albums, pages, terms…"). Busca álbumes por título (HU-50): fuera de
+la biblioteca envía a ella con ?q=; en la biblioteca, static/js/app.js filtra
+mientras se escribe. Enter envía el formulario también sin JavaScript.
+{% endcomment %}
+<form
+  class="search-bar search-bar--topbar"
+  method="get"
+  action="{% url 'albums:list' %}"
+  role="search"
+  data-live-search
+>
+  <div class="search-field">
+    <label class="sr-only" for="album-search">Buscar álbumes por título</label>
+    <svg class="search-field__icon" viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false" width="16" height="16">
+      <circle cx="7" cy="7" r="4.75" stroke="currentColor" stroke-width="1.5"/>
+      <path d="m10.5 10.5 3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+    <input
+      class="input search-field__input"
+      type="search"
+      id="album-search"
+      name="q"
+      value="{{ search_text }}"
+      maxlength="120"
+      placeholder="Buscar álbumes por título…"
+      autocomplete="off"
+      spellcheck="false"
+      {% if live_search %}aria-controls="album-results"{% endif %}
+      aria-describedby="album-search-hint"
+      data-live-search-input
+    />
+    <span class="search-field__spinner" aria-hidden="true" hidden data-live-search-spinner></span>
+    {% comment %}
+    Enlace de verdad: sin JavaScript vuelve a la biblioteca completa. Con
+    JavaScript vacía el campo y actualiza los resultados sin recargar.
+    {% endcomment %}
+    <a
+      class="search-field__clear"
+      href="{% url 'albums:list' %}"
+      aria-label="Limpiar búsqueda"
+      title="Limpiar búsqueda"
+      data-live-search-clear
+      {% if not search_text %}hidden{% endif %}
+    >
+      <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false" width="12" height="12">
+        <path d="m4 4 8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+    </a>
+    <kbd class="search-field__hint" aria-hidden="true" data-live-search-hint hidden>/</kbd>
+  </div>
+  {% if status_filter and status_filter != "todos" %}
+    {# Conserva el filtro de estado (HU-26) al buscar. #}
+    <input type="hidden" name="estado" value="{{ status_filter }}" data-live-search-filter />
+  {% endif %}
+  <p class="sr-only" id="album-search-hint">Los resultados se actualizan mientras escribes.</p>
+  <button type="submit" class="sr-only" data-live-search-submit>Buscar</button>
+</form>

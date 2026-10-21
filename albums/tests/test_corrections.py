@@ -77,7 +77,7 @@ class CorrectRegionTests(CorrectionTestCase):
         self.assertContains(response, 'for="region-text-1"')
         self.assertContains(response, 'id="region-text-1"')
         self.assertContains(response, self.first.get_correct_url())
-        self.assertContains(response, "Corregir texto")
+        self.assertContains(response, "JA · texto de origen")
 
 
 class TranslationTextTests(CorrectionTestCase):

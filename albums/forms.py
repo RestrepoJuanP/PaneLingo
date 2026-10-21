@@ -2,11 +2,35 @@
 
 from django import forms
 from django.core.files.uploadedfile import UploadedFile
+from django.db.models import Case, IntegerField, Value, When
 
 from accounts.forms import AccessibleFormMixin
 from albums.models import Album, Language
 from albums.signals import delete_stored_name
 from albums.validators import InvalidPageImageError, validate_page_image
+
+# Orden de los pills de idioma, como en el modal "Create new album" del
+# mockup: primero los idiomas de origen habituales del manga, el manhwa y el
+# manhua; en destino, primero los de llegada más comunes. El resto del
+# catálogo sigue detrás, por nombre.
+LANGUAGE_ORDER = {
+    "source_language": ["ja", "ko", "zh-hans", "fr"],
+    "target_language": ["en", "es", "de", "pt-br"],
+}
+
+
+def languages_in_order(preferred_codes):
+    """Devuelve el catálogo con los idiomas indicados primero y en ese orden."""
+    position = Case(
+        *[
+            When(code=code, then=Value(index))
+            for index, code in enumerate(preferred_codes)
+        ],
+        default=Value(len(preferred_codes)),
+        output_field=IntegerField(),
+    )
+    return Language.objects.annotate(position=position).order_by("position", "name")
+
 
 # Longitud máxima del título, la misma que declara el modelo.
 TITLE_MAX_LENGTH = 120
@@ -106,8 +130,8 @@ class AlbumForm(AccessibleFormMixin, forms.ModelForm):
         self._previous_cover_name = (
             self.instance.cover_image.name if self.instance.pk else ""
         )
-        for name in ("source_language", "target_language"):
-            self.fields[name].queryset = Language.objects.all()
+        for name, preferred in LANGUAGE_ORDER.items():
+            self.fields[name].queryset = languages_in_order(preferred)
             # Sin opción vacía: un pill "Elige un idioma" sería una opción
             # más del grupo, indistinguible de un idioma real. Que no haya
             # ninguno marcado ya comunica que falta elegir, y el campo es

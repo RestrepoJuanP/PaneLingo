@@ -117,10 +117,10 @@ class LiveSearchTests(AlbumEditTestCase):
 
     def test_clear_is_hidden_until_there_is_a_search(self):
         """HU-50 — El botón de limpiar solo se ve cuando hay texto buscado."""
-        hidden_clear = "data-live-search-clear\n          hidden"
+        hidden_clear = r"data-live-search-clear\s+hidden"
 
-        self.assertContains(self.search(""), hidden_clear)
-        self.assertNotContains(self.search("yokai"), hidden_clear)
+        self.assertRegex(self.search("").content.decode(), hidden_clear)
+        self.assertNotRegex(self.search("yokai").content.decode(), hidden_clear)
         self.assertContains(self.search("yokai"), 'aria-label="Limpiar búsqueda"')
 
     def test_live_requests_receive_only_the_results_block(self):

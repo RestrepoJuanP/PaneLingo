@@ -1,46 +1,59 @@
+{% load design %}
 {% comment %}
-Tarjeta de álbum.
-Adaptación al Sprint 1: el metadato del mockup ("24 pages · 7 approved ·
-93 blocks left") se reduce al número de páginas, porque en este sprint no
-existen bloques, aprobaciones ni traducciones. La barra de progreso está
-construida en el sistema de diseño pero no se muestra aquí.
-{% endcomment %}
-{% comment %}
+Tarjeta de álbum, como en el mockup: portada con el estado derivado (HU-26)
+y el par de idiomas, título con menú "···", metadatos de páginas, barra de
+progreso (regiones listas en índigo y por revisar en ámbar) y fecha de
+edición. Recibe el álbum anotado por albums.insights.library_for y su
+progreso en album.progress.
+
 data-album-id permite a la búsqueda automática reconocer qué tarjetas siguen
 tras filtrar, para desplazarlas a su sitio nuevo en lugar de que salten.
 {% endcomment %}
-<article class="album-card" data-album-id="{{ seed }}">
-  <a href="{{ album_url|default:'#' }}" tabindex="-1" aria-hidden="true">
-    {% include "components/album_cover.html" with seed=seed cover_image=cover_image lang_pair=lang_pair status_label=status_label status_variant=status_variant extra_class="album-card__cover" %}
+{% with progress=album.progress %}
+<article class="album-card" data-album-id="{{ album.pk }}">
+  <a href="{{ album.get_absolute_url }}" tabindex="-1" aria-hidden="true">
+    {% include "components/album_cover.html" with seed=album.pk cover_image=album.cover_url lang_pair=album.language_pair status_label=progress.status.label status_variant=progress.status.variant extra_class="album-card__cover" %}
   </a>
 
   <div class="album-card__body">
     <div class="album-card__head">
-      <a class="album-card__title" href="{{ album_url|default:'#' }}">{{ title }}</a>
-      {% if edit_url %}
-        {% comment %}
-        El lápiz lleva a la edición completa del álbum (título, idiomas y
-        portada). El aria-label incluye el título para que un lector de
-        pantalla distinga un "Editar" de otro al recorrer la rejilla.
-        {% endcomment %}
-        <a
-          class="btn-icon"
-          href="{{ edit_url }}"
-          aria-label="Editar «{{ title }}»"
-          title="Editar"
-        >
-          <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false" width="15" height="15">
-            <path d="M11.2 1.8a1.6 1.6 0 0 1 2.3 2.3l-7.6 7.6L2.5 13l1.3-3.4 7.4-7.8Z"
-                  stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
-          </svg>
-        </a>
-      {% endif %}
+      <a class="album-card__title" href="{{ album.get_absolute_url }}">{{ album.title }}</a>
+      {% comment %}
+      Menú de acciones con <details>: se abre y cierra con teclado y sin
+      JavaScript. El script solo lo cierra al pulsar fuera o Escape.
+      {% endcomment %}
+      <details class="card-menu" data-card-menu>
+        <summary class="card-menu__toggle" aria-label="Acciones de «{{ album.title }}»" title="Acciones">···</summary>
+        <div class="card-menu__list">
+          <a class="card-menu__item" href="{{ album.get_absolute_url }}">Abrir álbum</a>
+          <a class="card-menu__item" href="{{ album.get_edit_url }}" aria-label="Editar «{{ album.title }}»">Editar álbum</a>
+          <a class="card-menu__item" href="{{ album.get_upload_url }}">Cargar páginas</a>
+          <span class="card-menu__item card-menu__item--danger" aria-disabled="true" title="Llega en un sprint posterior">
+            Eliminar <span class="sr-only">(no disponible todavía)</span>
+          </span>
+        </div>
+      </details>
     </div>
 
-    <p class="album-card__meta">{{ page_count }} {{ page_count|pluralize:"página,páginas" }}</p>
+    <p class="album-card__meta">
+      {{ progress.page_total }} {{ progress.page_total|pluralize:"página,páginas" }}
+      · {{ progress.page_done }} {{ progress.page_done|pluralize:"procesada,procesadas" }}
+      · {{ progress.region_review }} por revisar
+    </p>
 
-    {% if edited_label %}
-      <p class="album-card__edited">Editado hace {{ edited_label }}</p>
-    {% endif %}
+    <div class="split-progress">
+      <div
+        class="split-progress__track"
+        role="img"
+        aria-label="{{ progress.percent_ready }} % de las regiones listas, {{ progress.percent_review }} % por revisar"
+      >
+        <span class="split-progress__ready" style="width: {{ progress.percent_ready }}%"></span>
+        <span class="split-progress__review" style="width: {{ progress.percent_review }}%"></span>
+      </div>
+      <span class="split-progress__value">{{ progress.percent_ready }}%</span>
+    </div>
+
+    <p class="album-card__edited">Editado hace {{ album.updated_at|short_since }}</p>
   </div>
 </article>
+{% endwith %}

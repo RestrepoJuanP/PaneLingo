@@ -1,13 +1,15 @@
 {% comment %}
-Ítem de la navegación lateral.
-Los destinos fuera del alcance del Sprint 1 se maquetan deshabilitados,
-con aria-disabled y una indicación textual de que llegan más adelante.
+Ítem de la navegación lateral, como en el mockup.
+Los destinos que aún no existen se ven igual que el resto pero no son
+enlaces: llevan aria-disabled y explican el motivo en el título y para los
+lectores de pantalla. badge muestra un contador, como "Review & export".
 {% endcomment %}
 {% if disabled %}
-  <span class="nav-item" aria-disabled="true">
+  <span class="nav-item" aria-disabled="true" title="{{ reason|default:'Disponible en un sprint posterior' }}">
     {% include "components/nav_icon.html" with icon=icon %}
     <span class="nav-item__label">{{ label }}</span>
-    <span class="nav-item__soon">Próximo sprint</span>
+    {% if badge %}<span class="nav-item__badge" title="Regiones por revisar">{{ badge }}</span>{% endif %}
+    <span class="sr-only">({{ reason|default:"disponible en un sprint posterior"|lower }})</span>
   </span>
 {% else %}
   <a
@@ -17,5 +19,6 @@ con aria-disabled y una indicación textual de que llegan más adelante.
   >
     {% include "components/nav_icon.html" with icon=icon %}
     <span class="nav-item__label">{{ label }}</span>
+    {% if badge %}<span class="nav-item__badge">{{ badge }}</span>{% endif %}
   </a>
 {% endif %}

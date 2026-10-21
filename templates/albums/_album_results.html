@@ -1,8 +1,8 @@
 {% comment %}
-Bloque de resultados de la biblioteca: contador, rejilla o estado vacío.
-Se incluye en album_list.html y es también lo único que devuelve la vista a
-la búsqueda automática (cabecera X-Live-Search), para que cada pulsación
-descargue y procese unas pocas tarjetas en lugar de la página entera.
+Bloque de resultados de la biblioteca: título, filtros por estado (HU-26),
+rejilla o estado vacío. Se incluye en album_list.html y es también lo único
+que devuelve la vista a la búsqueda automática (cabecera X-Live-Search), así
+que los contadores de los filtros siguen a lo que se escribe.
 {% endcomment %}
 {% url 'albums:create' as create_url %}
 {% url 'albums:list' as list_url %}
@@ -11,24 +11,35 @@ descargue y procese unas pocas tarjetas en lugar de la página entera.
     <div class="section-head__left">
       <h2 class="section-title">Álbumes</h2>
       <span class="section-count" data-live-search-count>
-        {% if search_text %}
+        {% if search_text or status_filter != "todos" %}
           {{ albums|length }} de {{ total_album_count }}
         {% else %}
           {{ albums|length }} {{ albums|length|pluralize:"álbum,álbumes" }}
         {% endif %}
       </span>
     </div>
+    <nav class="pill-group" aria-label="Filtrar por estado">
+      {% for filter in status_filters %}
+        <a
+          class="pill{% if filter.active %} pill--selected{% endif %}"
+          href="{{ list_url }}?estado={{ filter.slug }}{% if search_text %}&amp;q={{ search_text|urlencode }}{% endif %}"
+          {% if filter.active %}aria-current="page"{% endif %}
+        >{{ filter.label }} <span class="pill__count">{{ filter.count }}</span></a>
+      {% endfor %}
+    </nav>
   </div>
 {% endif %}
 
 {% if albums %}
   <div class="album-grid">
     {% for album in albums %}
-      {% include "components/album_card.html" with seed=album.pk title=album.title page_count=album.page_count edited_label=album.updated_at|timesince lang_pair=album.language_pair status_label=album.get_status_display status_variant="neutral" album_url=album.get_absolute_url edit_url=album.get_edit_url cover_image=album.cover_url %}
+      {% include "components/album_card.html" %}
     {% endfor %}
   </div>
 {% elif search_text %}
   {% include "components/empty_state.html" with title="Ningún álbum coincide con tu búsqueda" body="Prueba con otra parte del título o limpia la búsqueda para ver todos tus álbumes." action_label="Limpiar búsqueda" action_url=list_url %}
+{% elif total_album_count %}
+  {% include "components/empty_state.html" with title="Ningún álbum en este estado" body="El estado de cada álbum se calcula a partir de sus páginas. Elige otro filtro para ver el resto." action_label="Ver todos los álbumes" action_url=list_url %}
 {% else %}
   {% include "components/empty_state.html" with title="Todavía no tienes álbumes" body="Un álbum agrupa las páginas de un cómic, un tomo de manga o una temporada de webtoon. Crea el primero para empezar a organizar tu trabajo." action_label="Crear mi primer álbum" action_url=create_url action_modal="crear-album" %}
 {% endif %}

@@ -4,10 +4,11 @@
 Cargar páginas — HU-09.
 Referencia visual: design/screenshots/upload-and-scan.png.
 
-Del mockup queda fuera todo lo que pertenece a OCR y traducción: el panel
-"Scan settings" completo, el orden de lectura, "Why we ask for whole pages"
-y el botón "Start translating". Aquí solo se cargan archivos y se informa
-del resultado de cada uno.
+Composición del mockup: zona de carga y cola a la izquierda, y una columna
+lateral a la derecha. "Scan settings", el orden de lectura e "Import from
+scanner" no tienen HU y quedan fuera; en su lugar la columna explica qué
+pasa después de cargar (el procesamiento es manual, HU-12) y conserva la
+nota "Why we ask for whole pages", que es puramente informativa.
 {% endcomment %}
 
 {% block title %}Cargar páginas · {{ album.title }} · PaneLingo{% endblock %}
@@ -31,6 +32,8 @@ del resultado de cada uno.
     </div>
   </div>
 
+  <div class="upload-layout">
+  <div class="upload-layout__main">
   <form method="post" action="{{ album.get_upload_url }}" enctype="multipart/form-data">
     {% csrf_token %}
 
@@ -38,8 +41,9 @@ del resultado de cada uno.
       <span class="dropzone__mark" aria-hidden="true"></span>
       <span class="dropzone__title">Arrastra aquí las páginas completas</span>
       <span class="dropzone__body">
-        {{ allowed_extensions }}, hasta {{ max_file_size_mb }} MB por archivo.
-        Puedes seleccionar varias a la vez.
+        Sube la página entera, no globos recortados: PaneLingo usa toda la
+        composición para acertar con el orden de lectura.
+        {{ allowed_extensions }}, hasta {{ max_file_size_mb }} MB cada una.
       </span>
       <span class="dropzone__actions">
         <span class="btn btn--primary">Elegir archivos</span>
@@ -128,4 +132,39 @@ del resultado de cada uno.
       {% endfor %}
     </div>
   {% endif %}
+  </div>
+
+  <aside class="upload-layout__side" aria-label="Información sobre la carga">
+    <section class="card upload-next">
+      <h2 class="card__title">Después de cargar</h2>
+      <ol class="upload-next__steps">
+        <li>
+          <span class="upload-next__number" aria-hidden="true">1</span>
+          <span><strong>Abre la página</strong> desde la rejilla del álbum.</span>
+        </li>
+        <li>
+          <span class="upload-next__number" aria-hidden="true">2</span>
+          <span><strong>Pulsa «Procesar página»</strong> para detectar sus regiones y su texto.</span>
+        </li>
+        <li>
+          <span class="upload-next__number" aria-hidden="true">3</span>
+          <span><strong>Revisa el texto detectado</strong> y corrige lo que el OCR no leyó bien.</span>
+        </li>
+      </ol>
+    </section>
+
+    <section class="upload-why">
+      <h2 class="upload-why__title">Por qué pedimos páginas completas</h2>
+      <p class="upload-why__body">
+        Un globo recortado pierde quién habla, qué pasa detrás y en qué punto de
+        la secuencia de viñetas cae la frase. Con la página entera, PaneLingo
+        agrupa los globos por viñeta, sigue el orden de lectura y separa la
+        narración del diálogo.
+      </p>
+      <p class="upload-why__meta">
+        {{ allowed_extensions }} · hasta {{ max_file_size_mb }} MB por página
+      </p>
+    </section>
+  </aside>
+  </div>
 {% endblock %}

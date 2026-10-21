@@ -65,5 +65,10 @@ parte visible hasta que se llega a ellas.
         {% include "components/badge.html" with label=status_label variant=status_variant %}
       {% endif %}
     </div>
+    {% if bar %}
+      <div class="page-thumb__bar" aria-hidden="true">
+        <span class="page-thumb__bar-fill page-thumb__bar-fill--{{ bar }}" style="width: {{ percent|default:0 }}%"></span>
+      </div>
+    {% endif %}
   </div>
 </article>

@@ -42,8 +42,8 @@ class SplitViewTests(DetectedTextTestCase):
 
         self.assertLess(content.index("たぶん"), content.index("たしかに"))
         self.assertIn("Globo de diálogo", content)
-        self.assertIn("Confianza 42 %", content)
-        self.assertIn("Confianza 98 %", content)
+        self.assertIn("42 % baja", content)
+        self.assertIn("98 % alta", content)
 
 
 class LinkedSelectionTests(DetectedTextTestCase):
@@ -76,7 +76,7 @@ class ReviewHighlightTests(DetectedTextTestCase):
         self.assertIn("region-box--review", content)
         self.assertIn("1 !", content)
         self.assertIn("necesita revisión", content)
-        self.assertIn("region-list__item--review", content)
+        self.assertIn("block-card--review", content)
 
     def test_only_pending_regions_can_be_shown(self):
         """CP-14.3 — El filtro "Por revisar" deja solo las regiones dudosas."""
@@ -85,7 +85,7 @@ class ReviewHighlightTests(DetectedTextTestCase):
         self.assertIn("たぶん", content)
         self.assertNotIn("たしかに", content)
         self.assertIn("Por revisar (1)", content)
-        self.assertIn('pill pill--selected"', content)
+        self.assertIn('ws-group__option is-active"', content)
 
     def test_without_doubtful_regions_there_is_no_filter(self):
         """CP-14.3 — Flujo alternativo: si nada necesita revisión, no hay filtro."""
@@ -125,5 +125,5 @@ class KeyboardAndScreenReaderTests(DetectedTextTestCase):
         """CP-14.5 — Cajas y textos son enlaces, así que se recorren con Tab."""
         content = self.workspace()
 
-        self.assertEqual(content.count('class="region-list__link"'), 2)
+        self.assertEqual(content.count('class="block-card__head"'), 2)
         self.assertEqual(content.count('class="region-box region-box--'), 2)

@@ -21,7 +21,7 @@ class PageSelectionTests(ProcessingTestCase):
         """CP-11.2 — Se ven número, nombre, dimensiones, estado y fecha."""
         response = self.client.get(self.second.get_absolute_url())
 
-        self.assertContains(response, '<h1 class="page-title">Página 2</h1>')
+        self.assertContains(response, '<h1 class="sr-only">Página 2 de')
         self.assertContains(response, "pagina.png")
         self.assertContains(response, "400 × 560 px")
         self.assertContains(response, "Pendiente de procesamiento")
@@ -167,3 +167,29 @@ class CoverAccessTests(ProcessingTestCase):
         self.assertEqual(self.album.cover_url, "")
         address = reverse("albums:album_cover", kwargs={"pk": self.album.pk})
         self.assertEqual(self.client.get(address).status_code, 404)
+
+
+class OpenWorkspaceTests(ProcessingTestCase):
+    """CP-11.2 — El detalle del álbum abre el espacio de trabajo."""
+
+    def test_the_workspace_opens_on_the_first_page_with_work(self):
+        """CP-11.2 — "Abrir espacio de trabajo" lleva a la primera pendiente."""
+        self.page.status = ComicPage.Status.PROCESSED
+        self.page.save()
+        second = self.make_page(self.album)
+
+        response = self.client.get(self.album.get_absolute_url())
+
+        self.assertContains(response, "Abrir espacio de trabajo")
+        self.assertContains(
+            response,
+            f'class="btn btn--primary" href="{second.get_absolute_url()}"',
+        )
+
+    def test_an_album_without_pages_offers_to_add_them(self):
+        """CP-11.3 — Flujo alternativo: sin páginas no hay espacio de trabajo."""
+        self.page.delete()
+
+        response = self.client.get(self.album.get_absolute_url())
+
+        self.assertNotContains(response, "Abrir espacio de trabajo")
