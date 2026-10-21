@@ -602,6 +602,14 @@ class TextRegion(models.Model):
         """Devuelve la dirección para guardar la traducción editada (HU-18)."""
         return reverse("albums:region_translation_edit", kwargs={"pk": self.pk})
 
+    def get_approve_url(self):
+        """Devuelve la dirección para aprobar la traducción (HU-19)."""
+        return reverse("albums:region_approve", kwargs={"pk": self.pk})
+
+    def get_unapprove_url(self):
+        """Devuelve la dirección para retirar la aprobación (HU-19)."""
+        return reverse("albums:region_unapprove", kwargs={"pk": self.pk})
+
     def get_retranslate_url(self):
         """Devuelve la dirección para volver a traducir solo esta región."""
         return reverse("albums:region_retranslate", kwargs={"pk": self.pk})
