@@ -4,9 +4,10 @@ import unicodedata
 
 from django.conf import settings
 from django.contrib import messages
-from django.http import JsonResponse
-from django.shortcuts import redirect
+from django.http import FileResponse, Http404, JsonResponse
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.views.decorators.http import require_POST
 from django.views.generic import (
     CreateView,
     DeleteView,
@@ -16,9 +17,10 @@ from django.views.generic import (
     UpdateView,
 )
 
-from accounts.access import PrivateViewMixin
+from accounts.access import PrivateViewMixin, private_view
+from albums.corrections import correct_region, restore_region
 from albums.forms import AlbumForm, AlbumRenameForm
-from albums.models import Album, ComicPage
+from albums.models import Album, ComicPage, TextRegion
 from albums.processing import expire_if_stale, start_processing
 from albums.services import create_pages_from_upload
 
@@ -376,21 +378,56 @@ class OwnedPageMixin(PrivateViewMixin):
         return context
 
 
-class PageDetailView(OwnedPageMixin, DetailView):
-    """Vista de una página con sus regiones de texto resaltadas (HU-12).
+# Valor de ?filtro= que deja solo las regiones pendientes de revisar (HU-14).
+REVIEW_FILTER = "revisar"
 
-    Es la vista mínima que necesita CA-12.2. HU-11 la amplía con los
-    metadatos de la página y la navegación entre páginas, y HU-14 con el
-    texto de cada región.
+
+class PageDetailView(OwnedPageMixin, DetailView):
+    """Espacio de trabajo de una página (HU-11, HU-12, HU-13 y HU-14).
+
+    Muestra la página a tamaño completo con sus datos y la navegación a la
+    anterior y a la siguiente (HU-11), sus regiones resaltadas (HU-12) y el
+    texto reconocido de cada una (HU-13). Por decisión del 2026-10-20, la
+    página seleccionada es directamente el espacio de trabajo: no hay un
+    visor aparte.
     """
 
     template_name = "albums/page_detail.html"
 
     def get_context_data(self, **kwargs):
-        """Añade las regiones en orden de lectura."""
+        """Añade las regiones, las páginas vecinas y la posición en el álbum."""
         context = super().get_context_data(**kwargs)
-        context["regions"] = list(self.object.regions.all())
+        page = self.object
+        regions = list(page.regions.all())
+        review_filter = self.request.GET.get("filtro") == REVIEW_FILTER
+        context["regions"] = regions
+        context["review_count"] = sum(region.needs_review for region in regions)
+        context["corrected_count"] = sum(region.is_corrected for region in regions)
+        context["review_filter"] = review_filter
+        context["visible_regions"] = (
+            [region for region in regions if region.needs_review]
+            if review_filter
+            else regions
+        )
+        context.update(page_neighbours(page))
         return context
+
+
+def page_neighbours(page):
+    """Devuelve la página anterior, la siguiente y la posición en el álbum.
+
+    Se ordena por número de página y no por posición en una lista: tras
+    eliminar páginas hay huecos en la numeración (HU-10) y "anterior" debe
+    saltarlos.
+    """
+    siblings = page.album.pages.order_by("page_number")
+    number = page.page_number
+    return {
+        "previous_page": siblings.filter(page_number__lt=number).last(),
+        "next_page": siblings.filter(page_number__gt=number).first(),
+        "page_position": siblings.filter(page_number__lte=number).count(),
+        "album_page_count": siblings.count(),
+    }
 
 
 class PageStatusView(OwnedPageMixin, DetailView):
@@ -466,3 +503,76 @@ class PageProcessView(OwnedPageMixin, DetailView):
         level, text = processing_feedback(page)
         messages.add_message(request, level, text)
         return redirect(page.get_absolute_url())
+
+
+def stored_file_response(field):
+    """Entrega un archivo guardado, o 404 si no existe.
+
+    Si el archivo falta en disco se responde 404 y no 500: para quien lo pide
+    es lo mismo que una imagen que no existe.
+    """
+    if not field:
+        raise Http404("La imagen no existe.")
+    try:
+        handle = field.open("rb")
+    except (FileNotFoundError, OSError) as error:
+        raise Http404("La imagen no existe.") from error
+    return FileResponse(handle)
+
+
+class PageImageView(OwnedPageMixin, DetailView):
+    """Imagen original o miniatura de una página propia (HU-11, CA-11.4).
+
+    Sustituye al servicio directo de MEDIA_URL, que entregaba la imagen a
+    cualquiera que conociera su dirección (deuda DT-02). Hereda el filtro por
+    propietario, así que una página ajena responde 404, y PrivateViewMixin,
+    que exige sesión e impide que el navegador guarde la imagen en caché.
+    """
+
+    variant = "image"
+
+    def render_to_response(self, context, **response_kwargs):
+        """Entrega el archivo en lugar de una plantilla."""
+        page = self.object
+        if self.variant == "thumbnail" and page.thumbnail:
+            return stored_file_response(page.thumbnail)
+        return stored_file_response(page.image)
+
+
+class AlbumCoverView(OwnedAlbumMixin, DetailView):
+    """Portada subida de un álbum propio (HU-49), con el mismo control (DT-02)."""
+
+    def render_to_response(self, context, **response_kwargs):
+        """Entrega la portada, o 404 si el álbum usa la predeterminada."""
+        return stored_file_response(self.object.cover_image)
+
+
+@require_POST
+@private_view
+def region_correct(request, pk):
+    """Guarda la corrección del texto de una región, o la deshace (HU-15).
+
+    Solo acepta POST: un GET responde 405 antes incluso de pedir sesión.
+    La región se busca entre las de las páginas del usuario, así que una
+    región ajena responde 404 (CLAUDE.md, aislamiento por propietario).
+    """
+    region = get_object_or_404(
+        TextRegion.objects.select_related("page__album__source_language"),
+        pk=pk,
+        page__album__owner=request.user,
+    )
+    number = region.reading_order
+    if request.POST.get("restore") == "1":
+        restore_region(region)
+        messages.success(
+            request, f"Se restauró el texto del OCR de la región {number}."
+        )
+    else:
+        correct_region(region, request.POST.get("text", ""))
+        if region.has_nothing_to_translate:
+            messages.success(
+                request, f"La región {number} quedó sin texto que traducir."
+            )
+        else:
+            messages.success(request, f"Se guardó la corrección de la región {number}.")
+    return redirect(f"{region.page.get_absolute_url()}#region-{number}")

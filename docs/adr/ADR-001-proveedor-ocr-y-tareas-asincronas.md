@@ -134,6 +134,8 @@ Las preguntas al PO de la definición de listo siguen abiertas. Para no bloquear
 | S3 | ¿Cómo se distingue un globo de un cuadro narrativo? | Heurística: luminosidad media del interior de la región. Fondo claro → globo; fondo oscuro o de color → cuadro narrativo | Ningún proveedor lo clasifica. Es una primera aproximación, medible con el juego de páginas de prueba y corregible a mano en HU-15 |
 | S4 | Cómo se forman las regiones y en qué orden se leen | Las líneas que devuelve el proveedor se agrupan en una región cuando sus cajas se tocan o están separadas por menos de la altura de una línea. Las regiones se agrupan después en filas por solapamiento vertical; dentro de cada fila van de derecha a izquierda si el idioma de origen es japonés, y de izquierda a derecha en el resto | CA-12.1 y CA-12.2. El coreano (webtoon) y el chino simplificado se leen de izquierda a derecha |
 | S5 | Juego de páginas de prueba | Pendiente: lo aporta el equipo o el PO. Las pruebas automáticas no lo necesitan porque usan el proveedor simulado | Lo necesita la medición de precisión de HU-13 (CA-13.4) |
+| S6 | HU-13, CA-13.2: "el reconocimiento se hace en el idioma de origen" | **Decidido el 2026-10-20:** no se fuerza el idioma en Azure (ver §2.1). Se comprueba el resultado: si el texto de una región tiene letras y ninguna es del alfabeto del idioma de origen (kana o kanji en japonés, hangul en coreano, hanzi en chino, latino en el resto), la región se marca para revisión | Cumple el objetivo del criterio, que es que no pase inadvertido un texto mal reconocido, sin perder texto por forzar el idioma |
+| S7 | HU-13, CA-13.3: umbral de confianza | **70 % provisional** (`OCR_REVIEW_THRESHOLD`), el que propone el backlog. Una región sin texto o sin confianza también se marca | Pendiente de confirmar por el PO con el juego de páginas de prueba |
 
 ## 5. Estrategia de pruebas automáticas de HU-12
 
@@ -149,6 +151,8 @@ Responde a la tabla del documento maestro del Sprint 2: cada funcionalidad lleva
 | Rutas nuevas | Auditoría existente `config/tests/test_route_access.py` | Garantiza que las rutas nuevas exigen sesión |
 
 ## 6. Pendientes fuera de este ADR
+
+- Ejecutar `python manage.py ocr_accuracy_report <carpeta>` sobre el juego de páginas de prueba (S5) y acordar con el PO los umbrales de CA-13.4 (`OCR_ACCURACY_THRESHOLDS`). El informe resultante es la evidencia de precisión de HU-13.
 
 - Que el PO responda S2 (y, de paso, S3). S1 quedó resuelto: hay estado "Error".
 - Actualizar en el issue #12 el texto de CA-12.4 y avisar a los responsables de HU-22 y HU-26 del estado nuevo.

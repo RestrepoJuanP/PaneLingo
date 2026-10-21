@@ -234,3 +234,19 @@ OCR_TIMEOUT_SECONDS = 30
 # una tarea. Cinco minutos multiplican por treinta el objetivo de 10 s por
 # página, así que un procesamiento sano nunca llega a este límite.
 PROCESSING_STALE_AFTER = 300
+
+# Confianza mínima, de 0 a 1, para dar por bueno el texto de una región (HU-13,
+# CA-13.3). Por debajo, la región se marca para revisión y la página pasa a
+# "Necesita revisión". Valor PROVISIONAL propuesto en el backlog: el PO debe
+# confirmarlo con el juego de páginas de prueba.
+OCR_REVIEW_THRESHOLD = 0.70
+
+# Precisión mínima por idioma de origen, en porcentaje de regiones que
+# conservan su texto y su orden (CA-13.4). La usa el comando
+# ocr_accuracy_report. None significa "por definir con el PO".
+OCR_ACCURACY_THRESHOLDS = {
+    "ja": None,
+    "ko": None,
+    "zh-hans": None,
+    "en": None,
+}

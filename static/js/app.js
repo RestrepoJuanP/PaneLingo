@@ -535,6 +535,132 @@
   }
 
   /* ---------------------------------------------------------------------------
+     Navegación entre páginas con el teclado (HU-11).
+
+     Las flechas izquierda y derecha siguen los enlaces "Anterior" y
+     "Siguiente". No actúan mientras se escribe en un campo ni con un modal
+     abierto, para no robarle las flechas a quien está editando.
+     ------------------------------------------------------------------------ */
+
+  function bindPagePager(pager) {
+    var previous = pager.querySelector("[data-page-prev]");
+    var next = pager.querySelector("[data-page-next]");
+
+    document.addEventListener("keydown", function (event) {
+      if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) {
+        return;
+      }
+      var target = event.target;
+      var isTyping =
+        target.isContentEditable ||
+        /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName);
+      if (isTyping || document.querySelector(".modal:not([hidden])")) {
+        return;
+      }
+      var link = null;
+      if (event.key === "ArrowLeft") {
+        link = previous;
+      } else if (event.key === "ArrowRight") {
+        link = next;
+      }
+      if (!link) {
+        return;
+      }
+      event.preventDefault();
+      window.location.href = link.href;
+    });
+  }
+
+  /* ---------------------------------------------------------------------------
+     Región elegida en el espacio de trabajo (HU-14, CA-14.2).
+
+     Cada región está dos veces: su caja sobre la imagen y su texto en el
+     panel. Elegir cualquiera de las dos resalta ambas y lleva el texto a la
+     vista dentro del panel. Sin JavaScript, las anclas y :target hacen lo
+     mismo de forma más básica.
+     ------------------------------------------------------------------------ */
+
+  function bindRegionSelection(workspace) {
+    function partsOf(number) {
+      return workspace.querySelectorAll(
+        '[data-region="' + number + '"], [data-region-item="' + number + '"]',
+      );
+    }
+
+    function select(number, origin) {
+      Array.prototype.forEach.call(
+        workspace.querySelectorAll(".is-selected"),
+        function (element) {
+          element.classList.remove("is-selected");
+          element.removeAttribute("aria-current");
+        },
+      );
+      Array.prototype.forEach.call(partsOf(number), function (element) {
+        element.classList.add("is-selected");
+        if (element.matches("a")) {
+          element.setAttribute("aria-current", "true");
+        }
+      });
+      var item = workspace.querySelector('[data-region-item="' + number + '"]');
+      if (item && origin !== "list") {
+        item.scrollIntoView({ block: "nearest" });
+      }
+    }
+
+    workspace.addEventListener("click", function (event) {
+      var trigger = event.target.closest("[data-region]");
+      if (!trigger) {
+        return;
+      }
+      // El foco se queda donde el usuario hizo clic: no se salta al ancla.
+      event.preventDefault();
+      var number = trigger.dataset.region;
+      select(number, trigger.closest("[data-region-item]") ? "list" : "image");
+      window.history.replaceState(null, "", "#region-" + number);
+    });
+
+    var match = /^#region-(?:box-)?(\d+)$/.exec(window.location.hash);
+    if (match) {
+      select(match[1], "hash");
+    }
+  }
+
+  /* ---------------------------------------------------------------------------
+     Correcciones sin guardar (HU-15, CA-15.4).
+
+     Si hay un texto corregido que no se ha guardado y el usuario intenta
+     salir de la página (enlace, flechas de navegación, recarga o cierre de
+     la pestaña), el navegador pide confirmación. Al guardar una región no se
+     avisa por esa región, pero sí si quedan otras editadas sin guardar.
+     ------------------------------------------------------------------------ */
+
+  function bindUnsavedCorrections(workspace) {
+    var fields = workspace.querySelectorAll("[data-region-edit] textarea");
+    if (!fields.length) {
+      return;
+    }
+    var submittingForm = null;
+
+    workspace.addEventListener("submit", function (event) {
+      if (event.target.matches("[data-region-edit]")) {
+        submittingForm = event.target;
+      }
+    });
+
+    window.addEventListener("beforeunload", function (event) {
+      var unsaved = Array.prototype.some.call(fields, function (field) {
+        return field.value !== field.defaultValue && field.form !== submittingForm;
+      });
+      if (!unsaved) {
+        return;
+      }
+      event.preventDefault();
+      // Requisito de algunos navegadores para mostrar el aviso.
+      event.returnValue = "";
+    });
+  }
+
+  /* ---------------------------------------------------------------------------
      Arranque
      ------------------------------------------------------------------------ */
 
@@ -603,6 +729,18 @@
     Array.prototype.forEach.call(
       document.querySelectorAll("[data-processing-poll]"),
       bindProcessingPoll,
+    );
+    Array.prototype.forEach.call(
+      document.querySelectorAll("[data-page-pager]"),
+      bindPagePager,
+    );
+    Array.prototype.forEach.call(
+      document.querySelectorAll("[data-region-workspace]"),
+      bindRegionSelection,
+    );
+    Array.prototype.forEach.call(
+      document.querySelectorAll("[data-region-workspace]"),
+      bindUnsavedCorrections,
     );
   }
 

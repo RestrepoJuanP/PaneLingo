@@ -150,6 +150,8 @@ class AlbumCoverTests(AlbumEditTestCase):
 
         content = self.client.get(reverse("albums:list")).content.decode()
 
-        self.assertIn(self.album.cover_image.url, content)
+        self.assertIn(self.album.cover_url, content)
+        # La portada se sirve por la vista protegida, nunca por MEDIA_URL (DT-02).
+        self.assertNotIn(self.album.cover_image.url, content)
         self.assertIn(f'href="{self.album.get_edit_url()}"', content)
         self.assertIn('enctype="multipart/form-data"', content)
