@@ -4078,3 +4078,63 @@ button.ws-group__step:disabled {
   font-size: var(--fs-label-sm);
   line-height: 1.4;
 }
+
+/* Archivar álbumes (HU-69). */
+.card-menu__form {
+  margin: 0;
+}
+
+button.card-menu__item {
+  width: 100%;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+button.card-menu__item:hover {
+  background: var(--surface-muted);
+  color: var(--ink-900);
+}
+
+.album-detail__form {
+  margin: 0;
+}
+
+.archived-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-8);
+  padding: var(--sp-5) var(--sp-7);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-xl);
+  background: var(--surface-subtle);
+}
+
+.archived-banner__text {
+  margin: 0;
+  color: var(--ink-600);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}
+
+.toast__action {
+  margin: 0;
+}
+
+.toast__undo {
+  padding: 0 var(--sp-2);
+  border: none;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}

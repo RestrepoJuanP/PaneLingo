@@ -162,13 +162,25 @@ class AlbumProgress:
         return derive_status(self.page_total, self.page_work, self.page_approved)
 
 
-def library_for(user):
-    """Álbumes del usuario con su progreso, más recientes primero."""
+def library_for(user, archived=False):
+    """Álbumes del usuario con su progreso, más recientes primero.
+
+    Por defecto, solo los activos; con archived=True, solo los archivados
+    (HU-69, CA-69.2).
+    """
     return with_progress(
-        Album.objects.filter(owner=user).select_related(
-            "source_language", "target_language"
-        )
+        Album.objects.filter(
+            owner=user, archived_at__isnull=not archived
+        ).select_related("source_language", "target_language")
     ).order_by("-updated_at")
+
+
+def active_pages(user):
+    """Páginas de los álbumes activos del usuario.
+
+    Los archivados no cuentan en estadísticas ni avisos (HU-69, CA-69.5).
+    """
+    return ComicPage.objects.filter(album__owner=user, album__archived_at__isnull=True)
 
 
 # Color de la barra de cada página en la rejilla, como en el mockup. El chip
@@ -218,22 +230,31 @@ def time_greeting(now=None):
     return "Buenas noches"
 
 
-def processed_since(user, since):
-    """Páginas del usuario cuya detección terminó desde la fecha indicada."""
-    return ComicPage.objects.filter(
-        album__owner=user, status__in=DONE_STATUSES, updated_at__gte=since
-    ).count()
+def processed_since(user, since, include_archived=True):
+    """Páginas del usuario cuya detección terminó desde la fecha indicada.
+
+    La cuota mensual cuenta también las de álbumes archivados, porque ese
+    uso del OCR ya se hizo; las estadísticas de la biblioteca, no (CA-69.5).
+    """
+    pages = (
+        ComicPage.objects.filter(album__owner=user)
+        if include_archived
+        else active_pages(user)
+    )
+    return pages.filter(status__in=DONE_STATUSES, updated_at__gte=since).count()
 
 
 def library_stats(user, progress_list):
     """Las cuatro tarjetas de estadísticas de la biblioteca."""
     now = timezone.now()
-    this_week = processed_since(user, now - timedelta(days=7))
-    last_week = processed_since(user, now - timedelta(days=14)) - this_week
+    this_week = processed_since(user, now - timedelta(days=7), False)
+    last_week = processed_since(user, now - timedelta(days=14), False) - this_week
     active = sum(1 for item in progress_list if item.status.key == "in_progress")
     in_review = sum(item.region_review for item in progress_list)
     recent = TextRegion.objects.filter(
-        page__album__owner=user, confidence__isnull=False
+        page__album__owner=user,
+        page__album__archived_at__isnull=True,
+        confidence__isnull=False,
     ).order_by("-created_at")[:500]
     average = TextRegion.objects.filter(pk__in=recent).aggregate(
         value=Avg("confidence")
@@ -272,7 +293,7 @@ def resume_page(user):
 
     Si no queda trabajo pendiente en ninguna, la última procesada.
     """
-    pages = ComicPage.objects.filter(album__owner=user).select_related(
+    pages = active_pages(user).select_related(
         "album__source_language", "album__target_language"
     )
     return (
@@ -303,4 +324,8 @@ def monthly_quota(user):
 
 def review_total(user):
     """Regiones del usuario que necesitan revisión."""
-    return TextRegion.objects.filter(page__album__owner=user, needs_review=True).count()
+    return TextRegion.objects.filter(
+        page__album__owner=user,
+        page__album__archived_at__isnull=True,
+        needs_review=True,
+    ).count()

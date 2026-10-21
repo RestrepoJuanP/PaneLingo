@@ -22,6 +22,24 @@ exportación" y "Eliminar" se ven deshabilitados: no tienen HU todavía.
     <span aria-hidden="true">←</span> Todos los álbumes
   </a>
 
+  {% if album.is_archived %}
+    {% comment %}
+    Álbum archivado (HU-69, CA-69.4): sigue accesible y se puede devolver a
+    la biblioteca desde aquí.
+    {% endcomment %}
+    <div class="archived-banner" role="status">
+      <p class="archived-banner__text">
+        <strong>Este álbum está archivado.</strong>
+        No aparece en tu biblioteca ni en los resúmenes, pero sus páginas y
+        traducciones se conservan.
+      </p>
+      <form method="post" action="{{ album.get_unarchive_url }}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn--secondary btn--compact">Desarchivar</button>
+      </form>
+    </div>
+  {% endif %}
+
   <div class="album-detail">
     {% include "components/album_cover.html" with seed=album.pk cover_image=album.cover_url extra_class="album-detail__cover" %}
 
@@ -54,6 +72,13 @@ exportación" y "Eliminar" se ven deshabilitados: no tienen HU todavía.
           aria-disabled="true"
           title="Llega con la revisión final (HU-27)"
         >Revisión y exportación</span>
+        {% if not album.is_archived %}
+          <form method="post" action="{{ album.get_archive_url }}" class="album-detail__form">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ album.get_absolute_url }}" />
+            <button type="submit" class="btn btn--secondary">Archivar</button>
+          </form>
+        {% endif %}
         {% comment %}
         Eliminar álbum no tiene HU, CA ni CP. Se maqueta con el estilo
         destructivo del mockup pero deshabilitado, con la razón a la vista,

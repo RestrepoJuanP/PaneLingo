@@ -16,6 +16,8 @@ from albums.views import (
     PageStatusView,
     PageUploadView,
     UploadChooseView,
+    album_archive,
+    album_unarchive,
     page_translate,
     region_approve,
     region_correct,
@@ -94,6 +96,8 @@ urlpatterns = [
         name="page_delete",
     ),
     path("albumes/<int:pk>/editar/", AlbumUpdateView.as_view(), name="edit"),
+    path("albumes/<int:pk>/archivar/", album_archive, name="archive"),
+    path("albumes/<int:pk>/desarchivar/", album_unarchive, name="unarchive"),
     path(
         "albumes/<int:pk>/renombrar/",
         AlbumRenameView.as_view(),
