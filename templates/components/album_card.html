@@ -28,6 +28,17 @@ tras filtrar, para desplazarlas a su sitio nuevo en lugar de que salten.
           <a class="card-menu__item" href="{{ album.get_absolute_url }}">Abrir álbum</a>
           <a class="card-menu__item" href="{{ album.get_edit_url }}" aria-label="Editar «{{ album.title }}»">Editar álbum</a>
           <a class="card-menu__item" href="{{ album.get_upload_url }}">Cargar páginas</a>
+          {% comment %}
+          Archivar y desarchivar (HU-69): formularios POST dentro del menú.
+          Vuelven a la biblioteca con el mismo filtro y la misma búsqueda.
+          {% endcomment %}
+          <form method="post" action="{% if album.is_archived %}{{ album.get_unarchive_url }}{% else %}{{ album.get_archive_url }}{% endif %}" class="card-menu__form">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}" />
+            <button type="submit" class="card-menu__item">
+              {% if album.is_archived %}Desarchivar{% else %}Archivar{% endif %}<span class="sr-only"> «{{ album.title }}»</span>
+            </button>
+          </form>
           <span class="card-menu__item card-menu__item--danger" aria-disabled="true" title="Llega en un sprint posterior">
             Eliminar <span class="sr-only">(no disponible todavía)</span>
           </span>
@@ -53,7 +64,9 @@ tras filtrar, para desplazarlas a su sitio nuevo en lugar de que salten.
       <span class="split-progress__value">{{ progress.percent_ready }}%</span>
     </div>
 
-    <p class="album-card__edited">Editado hace {{ album.updated_at|short_since }}</p>
+    <p class="album-card__edited">
+      {% if album.is_archived %}Archivado hace {{ album.archived_at|short_since }} · {% endif %}Editado hace {{ album.updated_at|short_since }}
+    </p>
   </div>
 </article>
 {% endwith %}

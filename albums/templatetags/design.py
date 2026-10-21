@@ -69,6 +69,19 @@ def cover_panels(seed):
 
 
 @register.filter
+def undo_archive_pk(extra_tags):
+    """Álbum que se puede desarchivar desde el aviso de "archivado" (HU-69).
+
+    La vista de archivar marca el mensaje con "undo-archive:<pk>".
+    """
+    for tag in (extra_tags or "").split():
+        if tag.startswith("undo-archive:"):
+            value = tag.split(":", 1)[1]
+            return int(value) if value.isdigit() else None
+    return None
+
+
+@register.filter
 def short_since(moment):
     """Tiempo transcurrido con una sola unidad: "2 horas" y no "2 horas, 37
     minutos", como las fechas de edición del mockup."""

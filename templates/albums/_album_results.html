@@ -6,7 +6,7 @@ que los contadores de los filtros siguen a lo que se escribe.
 {% endcomment %}
 {% url 'albums:create' as create_url %}
 {% url 'albums:list' as list_url %}
-{% if total_album_count %}
+{% if total_album_count or archived_count %}
   <div class="section-head">
     <div class="section-head__left">
       <h2 class="section-title">Álbumes</h2>
@@ -36,8 +36,12 @@ que los contadores de los filtros siguen a lo que se escribe.
       {% include "components/album_card.html" %}
     {% endfor %}
   </div>
+{% elif status_filter == "archivados" and not search_text %}
+  {% include "components/empty_state.html" with title="No tienes álbumes archivados" body="Archiva desde el menú «···» de un álbum los que ya no estés trabajando: dejan de estorbar sin perderse." action_label="Ver todos los álbumes" action_url=list_url %}
 {% elif search_text %}
   {% include "components/empty_state.html" with title="Ningún álbum coincide con tu búsqueda" body="Prueba con otra parte del título o limpia la búsqueda para ver todos tus álbumes." action_label="Limpiar búsqueda" action_url=list_url %}
+{% elif not total_album_count and archived_count %}
+  {% include "components/empty_state.html" with title="Todos tus álbumes están archivados" body="Recupera uno desde «Archivados» o crea uno nuevo." action_label="Ver archivados" action_url=list_url|add:"?estado=archivados" %}
 {% elif total_album_count %}
   {% include "components/empty_state.html" with title="Ningún álbum en este estado" body="El estado de cada álbum se calcula a partir de sus páginas. Elige otro filtro para ver el resto." action_label="Ver todos los álbumes" action_url=list_url %}
 {% else %}

@@ -106,6 +106,15 @@ class Album(models.Model):
     )
     created_at = models.DateTimeField(_("creado"), auto_now_add=True)
     updated_at = models.DateTimeField(_("actualizado"), auto_now=True)
+    archived_at = models.DateTimeField(
+        _("archivado"),
+        null=True,
+        blank=True,
+        help_text=_(
+            "Fecha en que se archivó (HU-69). Vacía si está activo. No cambia "
+            "el estado derivado del álbum."
+        ),
+    )
 
     class Meta:
         verbose_name = _("álbum")
@@ -134,6 +143,19 @@ class Album(models.Model):
     def get_upload_url(self):
         """Devuelve la dirección para cargar páginas en este álbum."""
         return reverse("albums:upload", kwargs={"pk": self.pk})
+
+    @property
+    def is_archived(self):
+        """Indica si el álbum está archivado (HU-69)."""
+        return self.archived_at is not None
+
+    def get_archive_url(self):
+        """Devuelve la dirección para archivar este álbum (HU-69)."""
+        return reverse("albums:archive", kwargs={"pk": self.pk})
+
+    def get_unarchive_url(self):
+        """Devuelve la dirección para desarchivar este álbum (HU-69)."""
+        return reverse("albums:unarchive", kwargs={"pk": self.pk})
 
     def get_rename_url(self):
         """Devuelve la dirección para renombrar este álbum."""

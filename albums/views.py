@@ -6,7 +6,8 @@ from django.conf import settings
 from django.contrib import messages
 from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 from django.views.generic import (
     CreateView,
@@ -18,6 +19,7 @@ from django.views.generic import (
 )
 
 from accounts.access import PrivateViewMixin, private_view
+from albums.archiving import archive_album, unarchive_album
 from albums.corrections import correct_region, restore_region
 from albums.forms import AlbumForm, AlbumRenameForm
 from albums.insights import (
@@ -59,13 +61,18 @@ def normalize_search_text(text):
     return "".join(char for char in decomposed if not unicodedata.combining(char))
 
 
+# Valor de ?estado= que muestra los álbumes archivados (HU-69, CA-69.2).
+ARCHIVED_FILTER = "archivados"
+
+
 class AlbumListView(PrivateViewMixin, ListView):
     """Biblioteca de álbumes del usuario autenticado (HU-05, HU-26, HU-50).
 
     Como en el mockup: saludo, estadísticas, banda para seguir trabajando,
     filtros por estado y tarjetas con su progreso. El estado de cada álbum se
     deriva de sus páginas (HU-26), y el filtro (?estado=) se combina con la
-    búsqueda por título (?q=, HU-50).
+    búsqueda por título (?q=, HU-50). Los álbumes archivados solo aparecen
+    con el filtro "Archivados" (HU-69).
     """
 
     model = Album
@@ -73,12 +80,15 @@ class AlbumListView(PrivateViewMixin, ListView):
     context_object_name = "albums"
 
     def get_queryset(self):
-        """Devuelve solo los álbumes de quien hace la petición, con su progreso.
+        """Devuelve los álbumes activos de quien hace la petición.
 
         El filtrado por propietario ocurre aquí, en el servidor. Es la única
         barrera que impide ver la biblioteca de otra cuenta.
         """
-        albums = library_for(self.request.user)
+        return self.search(library_for(self.request.user))
+
+    def search(self, albums):
+        """Deja solo los álbumes cuyo título contiene el texto buscado."""
         search_text = self.get_search_text()
         if not search_text:
             return albums
@@ -98,7 +108,7 @@ class AlbumListView(PrivateViewMixin, ListView):
         """Devuelve el filtro de estado elegido (parámetro estado)."""
         chosen = self.request.GET.get("estado", "")
         valid = {slug for slug, _label, _status in LIBRARY_FILTERS}
-        return chosen if chosen in valid else "todos"
+        return chosen if chosen in valid | {ARCHIVED_FILTER} else "todos"
 
     def is_live_request(self):
         """Indica si la petición viene de la búsqueda automática."""
@@ -116,22 +126,18 @@ class AlbumListView(PrivateViewMixin, ListView):
             return ["albums/_album_results.html"]
         return super().get_template_names()
 
-    def get_context_data(self, **kwargs):
-        """Añade progreso, filtros y, en la página completa, el resumen."""
-        context = super().get_context_data(**kwargs)
-        albums = list(context["albums"])
+    @staticmethod
+    def with_progress_of(albums):
+        """Lista de álbumes con su progreso calculado."""
+        albums = list(albums)
         for album in albums:
             album.progress = AlbumProgress.of(album)
+        return albums
 
-        chosen = self.get_status_filter()
-        status_by_slug = {slug: status for slug, _label, status in LIBRARY_FILTERS}
-        wanted = status_by_slug[chosen]
-        context["albums"] = [
-            album
-            for album in albums
-            if wanted is None or album.progress.status.key == wanted
-        ]
-        context["status_filters"] = [
+    @staticmethod
+    def status_filters(albums, archived, chosen):
+        """Pills de filtro con su recuento, más "Archivados" (HU-69)."""
+        filters = [
             {
                 "slug": slug,
                 "label": label,
@@ -144,12 +150,44 @@ class AlbumListView(PrivateViewMixin, ListView):
             }
             for slug, label, status in LIBRARY_FILTERS
         ]
+        if archived:
+            filters.append(
+                {
+                    "slug": ARCHIVED_FILTER,
+                    "label": "Archivados",
+                    "count": len(archived),
+                    "active": chosen == ARCHIVED_FILTER,
+                }
+            )
+        return filters
+
+    def get_context_data(self, **kwargs):
+        """Añade progreso, filtros y, en la página completa, el resumen."""
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        albums = self.with_progress_of(context["albums"])
+        archived = self.with_progress_of(self.search(library_for(user, archived=True)))
+
+        chosen = self.get_status_filter()
+        if chosen == ARCHIVED_FILTER:
+            context["albums"] = archived
+        else:
+            status_by_slug = {slug: status for slug, _l, status in LIBRARY_FILTERS}
+            wanted = status_by_slug[chosen]
+            context["albums"] = [
+                album
+                for album in albums
+                if wanted is None or album.progress.status.key == wanted
+            ]
+        context["status_filters"] = self.status_filters(albums, archived, chosen)
         context["status_filter"] = chosen
         context["search_text"] = self.get_search_text()
         context["live_search"] = True
-        context["total_album_count"] = Album.objects.filter(
-            owner=self.request.user
+        owned = Album.objects.filter(owner=user)
+        context["total_album_count"] = owned.filter(
+            archived_at__isnull=chosen != ARCHIVED_FILTER
         ).count()
+        context["archived_count"] = owned.filter(archived_at__isnull=False).count()
         if not self.is_live_request():
             context.update(self.get_summary(albums))
         context["form"] = kwargs.get("form") or AlbumForm()
@@ -157,7 +195,10 @@ class AlbumListView(PrivateViewMixin, ListView):
         return context
 
     def get_summary(self, albums):
-        """Saludo, estadísticas y página por la que seguir (cabecera)."""
+        """Saludo, estadísticas y página por la que seguir (cabecera).
+
+        Solo con los álbumes activos: los archivados no cuentan (CA-69.5).
+        """
         user = self.request.user
         progress = [album.progress for album in albums]
         resume = resume_page(user)
@@ -954,6 +995,48 @@ def region_unapprove(request, pk):
         unapprove_translation(region)
         messages.success(request, f"Se retiró la aprobación de la región {number}.")
     return redirect(review_address(page, number))
+
+
+def back_to(request, fallback):
+    """Dirección a la que volver tras archivar: la de la página de origen.
+
+    Solo se acepta una dirección de este mismo sitio, para que el parámetro
+    next no sirva para redirigir a otro dominio.
+    """
+    target = request.POST.get("next", "")
+    if url_has_allowed_host_and_scheme(target, allowed_hosts={request.get_host()}):
+        return target
+    return fallback
+
+
+@require_POST
+@private_view
+def album_archive(request, pk):
+    """Archiva un álbum propio (HU-69, CA-69.1).
+
+    Sin confirmación, porque se puede deshacer: el aviso trae "Deshacer".
+    Un álbum de otra cuenta responde 404 (CA-69.6).
+    """
+    album = get_object_or_404(Album, pk=pk, owner=request.user)
+    if not album.is_archived:
+        archive_album(album)
+    messages.success(
+        request,
+        f"Álbum «{album.title}» archivado.",
+        extra_tags=f"undo-archive:{album.pk}",
+    )
+    return redirect(back_to(request, reverse("albums:list")))
+
+
+@require_POST
+@private_view
+def album_unarchive(request, pk):
+    """Devuelve un álbum archivado a la biblioteca (HU-69, CA-69.3)."""
+    album = get_object_or_404(Album, pk=pk, owner=request.user)
+    if album.is_archived:
+        unarchive_album(album)
+    messages.success(request, f"Álbum «{album.title}» devuelto a la biblioteca.")
+    return redirect(back_to(request, album.get_absolute_url()))
 
 
 @require_POST
