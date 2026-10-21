@@ -41,7 +41,13 @@ from albums.translating import (
     expire_translation_if_stale,
     start_translation,
 )
-from albums.translation_review import edit_translation
+from albums.translation_review import (
+    approve_translation,
+    can_approve,
+    clean_translation,
+    edit_translation,
+    unapprove_translation,
+)
 
 # Longitud máxima del texto de búsqueda; el título admite 120 caracteres.
 SEARCH_MAX_LENGTH = 120
@@ -610,6 +616,7 @@ def translation_summary(page, regions):
         "translated_count": len(translated),
         "has_translations": bool(translated),
         "unapproved_count": sum(is_unapproved(region) for region in regions),
+        "approved_count": len(pending) - sum(is_unapproved(r) for r in regions),
     }
 
 
@@ -856,6 +863,97 @@ def region_translation_edit(request, pk):
         else:
             messages.success(request, f"La región {number} se deja sin traducir.")
     return redirect(f"{page.get_absolute_url()}#region-{number}")
+
+
+def owned_region_or_404(request, pk):
+    """Región de una página del usuario, o 404 si es de otra cuenta."""
+    return get_object_or_404(
+        TextRegion.objects.select_related("page"),
+        pk=pk,
+        page__album__owner=request.user,
+    )
+
+
+def review_address(page, number, filter_value=""):
+    """Dirección del espacio de trabajo en una región, conservando el filtro."""
+    query = f"?filtro={filter_value}" if filter_value == UNAPPROVED_FILTER else ""
+    return f"{page.get_absolute_url()}{query}#region-{number}"
+
+
+def next_unapproved_number(page, current):
+    """Número de la siguiente región sin aprobar, o None si no queda ninguna.
+
+    Busca primero después de la actual y luego desde el principio, para que
+    "Aprobar y pasar a la siguiente" recorra toda la página (ADR-002, T2).
+    """
+    pending = [
+        region.reading_order
+        for region in page.regions.order_by("reading_order")
+        if is_unapproved(region)
+    ]
+    later = [number for number in pending if number > current]
+    return (later or pending or [None])[0]
+
+
+def save_posted_translation(region, posted):
+    """Guarda la traducción enviada con "Aprobar" si cambió (HU-18).
+
+    Así no se pierde lo escrito al aprobar directamente desde el campo.
+    """
+    if posted is None or clean_translation(posted) == region.translation:
+        return
+    edit_translation(region, posted)
+    region.refresh_from_db()
+
+
+@require_POST
+@private_view
+def region_approve(request, pk):
+    """Aprueba la traducción de una región y pasa a la siguiente (HU-19).
+
+    Solo acepta POST. Una región sin traducción no se aprueba (CA-19.3). Si
+    con esta aprobación quedan todas, la página pasa a "Aprobada"
+    (CA-19.2).
+    """
+    region = owned_region_or_404(request, pk)
+    page = owned_page_or_404(request, region.page_id)
+    number = region.reading_order
+    filter_value = request.POST.get("filtro", "")
+    if page.is_translating:
+        messages.error(request, "La página se está traduciendo. Espera a que termine.")
+        return redirect(review_address(page, number, filter_value))
+
+    save_posted_translation(region, request.POST.get("text"))
+    if not can_approve(region):
+        messages.error(
+            request,
+            f"La región {number} todavía no tiene traducción que aprobar.",
+        )
+        return redirect(review_address(page, number, filter_value))
+
+    approve_translation(region)
+    page.refresh_from_db()
+    if page.status == ComicPage.Status.APPROVED:
+        messages.success(
+            request, "Todas las traducciones están aprobadas: página aprobada."
+        )
+        return redirect(review_address(page, number))
+    messages.success(request, f"Región {number} aprobada.")
+    following = next_unapproved_number(page, number) or number
+    return redirect(review_address(page, following, filter_value))
+
+
+@require_POST
+@private_view
+def region_unapprove(request, pk):
+    """Retira la aprobación de una región: vuelve a "Editada" (CA-19.4)."""
+    region = owned_region_or_404(request, pk)
+    page = owned_page_or_404(request, region.page_id)
+    number = region.reading_order
+    if region.is_translation_approved:
+        unapprove_translation(region)
+        messages.success(request, f"Se retiró la aprobación de la región {number}.")
+    return redirect(review_address(page, number))
 
 
 @require_POST

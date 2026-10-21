@@ -1,4 +1,4 @@
-"""Revisión y edición de las traducciones de una página (HU-17 y HU-18).
+"""Revisión, edición y aprobación de las traducciones (HU-17, HU-18 y HU-19).
 
 La propuesta de la IA (machine_translation) no se toca al editar: se
 conserva para consultarla (CA-18.1). Lo que cambia es el texto de trabajo
@@ -38,6 +38,55 @@ def leave_page_approval(page):
         ComicPage.Status.NEEDS_REVIEW if pending else ComicPage.Status.PROCESSED
     )
     page.save(update_fields=["status", "updated_at"])
+
+
+def can_approve(region):
+    """Indica si la región se puede aprobar (CA-19.3).
+
+    Hace falta una traducción: una propuesta de la IA o una edición. Una
+    edición vacía cuenta, porque es la decisión de dejarla sin traducir
+    (ADR-002, T1); una región que nunca se tradujo, no.
+    """
+    return region.needs_translation and region.translation_status in (
+        TextRegion.TranslationStatus.GENERATED,
+        TextRegion.TranslationStatus.EDITED,
+    )
+
+
+def refresh_page_approval(page):
+    """Pone la página en "Aprobada" si todas sus regiones lo están (CA-19.2).
+
+    Cuentan las regiones con texto que traducir (ADR-002, T5). Si alguna
+    deja de estar aprobada, la página sale de "Aprobada" (CA-19.4).
+    """
+    regions = [region for region in page.regions.all() if region.needs_translation]
+    all_approved = bool(regions) and all(
+        region.is_translation_approved for region in regions
+    )
+    if not all_approved:
+        leave_page_approval(page)
+        return
+    if page.status != ComicPage.Status.APPROVED:
+        page.status = ComicPage.Status.APPROVED
+        page.save(update_fields=["status", "updated_at"])
+
+
+def approve_translation(region):
+    """Aprueba la traducción de la región con su fecha (CA-19.1)."""
+    with transaction.atomic():
+        region.translation_status = TextRegion.TranslationStatus.APPROVED
+        region.approved_at = timezone.now()
+        region.save(update_fields=["translation_status", "approved_at"])
+        refresh_page_approval(region.page)
+
+
+def unapprove_translation(region):
+    """Retira la aprobación: la región vuelve a "Editada" (CA-19.4)."""
+    with transaction.atomic():
+        region.translation_status = TextRegion.TranslationStatus.EDITED
+        region.approved_at = None
+        region.save(update_fields=["translation_status", "approved_at"])
+        refresh_page_approval(region.page)
 
 
 def edit_translation(region, text):

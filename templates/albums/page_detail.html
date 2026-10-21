@@ -116,7 +116,18 @@ de pantalla anuncia número, tipo, estado y texto.
 
       <span class="ws-toolbar__spacer"></span>
 
-      {% if regions %}
+      {% if has_translations %}
+        {% comment %}
+        Progreso de la página: traducciones aprobadas (HU-19), como el
+        contador "Approved blocks" del mockup.
+        {% endcomment %}
+        <div class="ws-progress">
+          <span class="ws-progress__track" aria-hidden="true">
+            <span class="ws-progress__bar" style="width: {% widthratio approved_count translatable_count 100 %}%;"></span>
+          </span>
+          <span class="ws-progress__label">{{ approved_count }}/{{ translatable_count }} aprobadas</span>
+        </div>
+      {% elif regions %}
         <div class="ws-progress">
           <span class="ws-progress__track" aria-hidden="true">
             <span class="ws-progress__bar" style="width: {{ ready_percent }}%;"></span>
@@ -455,13 +466,47 @@ de pantalla anuncia número, tipo, estado y texto.
                           <p lang="{{ page.album.target_language.code }}">{{ region.machine_translation|linebreaksbr }}</p>
                         </details>
                       {% endif %}
+                      {% if unapproved_filter %}
+                        <input type="hidden" name="filtro" value="sin-aprobar" />
+                      {% endif %}
                       {% if not page.is_translating %}
+                        {% comment %}
+                        Aprobar (HU-19). "Aprobar" guarda también lo escrito y
+                        pasa a la siguiente región sin aprobar; con
+                        Ctrl+Enter desde el campo (ADR-002, T2 y T4). Sin
+                        traducción no se puede aprobar y se explica por qué
+                        (CA-19.3); al escribir una, static/js/app.js lo
+                        habilita.
+                        {% endcomment %}
                         <div class="block-card__actions">
-                          <button type="submit" class="block-btn block-btn--primary">Guardar traducción</button>
-                          {% if not region.is_translation_approved and page.was_processed %}
-                            <button type="submit" class="block-btn" formaction="{{ region.get_retranslate_url }}">
-                              Reintentar con IA<span class="sr-only"> la región {{ region.reading_order }}</span>
+                          {% if region.is_translation_approved %}
+                            <span class="block-approved">
+                              <span aria-hidden="true">✓</span> Aprobada{% if region.approved_at %} el {{ region.approved_at|date:"j \d\e F, H:i"|lower }}{% endif %}
+                            </span>
+                            <button type="submit" class="block-btn" formaction="{{ region.get_unapprove_url }}">
+                              Retirar aprobación<span class="sr-only"> de la región {{ region.reading_order }}</span>
                             </button>
+                            <button type="submit" class="block-btn">Guardar traducción</button>
+                          {% else %}
+                            <button
+                              type="submit"
+                              class="block-btn block-btn--primary"
+                              formaction="{{ region.get_approve_url }}"
+                              title="Aprobar y pasar a la siguiente (Ctrl+Enter)"
+                              data-approve
+                              {% if region.translation_status == "untranslated" %}disabled aria-describedby="approve-hint-{{ region.reading_order }}" data-approve-pending{% endif %}
+                            >Aprobar<span class="sr-only"> la región {{ region.reading_order }}</span></button>
+                            <button type="submit" class="block-btn">Guardar traducción</button>
+                            {% if page.was_processed %}
+                              <button type="submit" class="block-btn" formaction="{{ region.get_retranslate_url }}">
+                                Reintentar con IA<span class="sr-only"> la región {{ region.reading_order }}</span>
+                              </button>
+                            {% endif %}
+                            {% if region.translation_status == "untranslated" %}
+                              <p class="block-card__hint" id="approve-hint-{{ region.reading_order }}">
+                                Para aprobarla necesita una traducción: tradúcela con IA o escríbela.
+                              </p>
+                            {% endif %}
                           {% endif %}
                         </div>
                       {% endif %}

@@ -1194,6 +1194,37 @@
     apply(readPreference("panelingo.regions") !== "0");
   }
 
+  /* ---------------------------------------------------------------------------
+     Aprobar traducciones (HU-19).
+
+     Ctrl+Enter (o Cmd+Enter) en el campo de una traducción pulsa "Aprobar",
+     que guarda lo escrito y pasa a la siguiente región sin aprobar (ADR-002,
+     T2 y T4). En una región sin traducir, "Aprobar" se habilita en cuanto se
+     escribe algo: sin traducción no se puede aprobar (CA-19.3).
+     ------------------------------------------------------------------------ */
+
+  function bindTranslationApproval(workspace) {
+    workspace.addEventListener("input", function (event) {
+      var form = event.target.closest(".block-card__translation");
+      var pending = form && form.querySelector("[data-approve-pending]");
+      if (pending) {
+        pending.disabled = !event.target.value.trim();
+      }
+    });
+
+    workspace.addEventListener("keydown", function (event) {
+      if (event.key !== "Enter" || !(event.ctrlKey || event.metaKey)) {
+        return;
+      }
+      var form = event.target.closest(".block-card__translation");
+      var approve = form && form.querySelector("[data-approve]");
+      if (approve && !approve.disabled) {
+        event.preventDefault();
+        approve.click();
+      }
+    });
+  }
+
   function init() {
     bindDisclosureMenus();
     Array.prototype.forEach.call(
@@ -1227,6 +1258,10 @@
     Array.prototype.forEach.call(
       document.querySelectorAll("[data-region-workspace]"),
       bindUnsavedCorrections,
+    );
+    Array.prototype.forEach.call(
+      document.querySelectorAll("[data-region-workspace]"),
+      bindTranslationApproval,
     );
     Array.prototype.forEach.call(
       document.querySelectorAll("[data-live-search]"),
