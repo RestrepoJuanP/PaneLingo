@@ -223,7 +223,7 @@ class EditApprovedTests(ReviewTestCase):
         self.assertIsNone(self.second.approved_at)
 
     def test_the_page_stops_being_approved(self):
-        """CP-18.2 — Si la página estaba aprobada, deja de estarlo."""
+        """CP-18.2 / CP-22.2 — Editar retira el estado "Aprobada"."""
         self.approve(self.first)
         self.approve(self.second)
         ComicPage.objects.filter(pk=self.page.pk).update(

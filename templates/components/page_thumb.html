@@ -9,7 +9,14 @@ visita haría la pantalla inservible. Ver albums/services.build_thumbnail.
 loading="lazy" evita además descargar las páginas que quedan fuera de la
 parte visible hasta que se llega a ellas.
 {% endcomment %}
-<article class="page-thumb">
+<article
+  class="page-thumb"
+  {% if status_url and is_processing %}
+    data-page-status-poll="{{ status_url }}"
+    data-page-status-value="{{ status_value }}"
+    data-page-number="{{ number }}"
+  {% endif %}
+>
   <figure class="page-thumb__figure">
     {% if image_url %}
       <img
@@ -62,12 +69,18 @@ parte visible hasta que se llega a ellas.
         <span class="page-thumb__label">Página {{ number }}</span>
       {% endif %}
       {% if status_label %}
-        {% include "components/badge.html" with label=status_label variant=status_variant %}
+        <span data-page-status-badge>
+          {% include "components/badge.html" with label=status_label variant=status_variant %}
+        </span>
       {% endif %}
     </div>
     {% if bar %}
       <div class="page-thumb__bar" aria-hidden="true">
-        <span class="page-thumb__bar-fill page-thumb__bar-fill--{{ bar }}" style="width: {{ percent|default:0 }}%"></span>
+        <span
+          class="page-thumb__bar-fill page-thumb__bar-fill--{{ bar }}"
+          style="width: {{ percent|default:0 }}%"
+          data-page-status-bar
+        ></span>
       </div>
     {% endif %}
   </div>

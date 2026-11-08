@@ -535,6 +535,70 @@
   }
 
   /* ---------------------------------------------------------------------------
+     Estado de las páginas en el detalle del álbum (HU-22, CA-22.3).
+
+     Cada tarjeta que está procesándose consulta el mismo endpoint privado que
+     usa el espacio de trabajo. Cuando termina, actualiza el chip y la barra y
+     anuncia el cambio sin recargar la pantalla. Un fallo de red se reintenta,
+     igual que en el sondeo de la página individual.
+     ------------------------------------------------------------------------ */
+
+  function bindAlbumPageStatusPoll(card) {
+    var url = card.dataset.pageStatusPoll;
+    var pageNumber = card.dataset.pageNumber;
+    var badge = card.querySelector("[data-page-status-badge] .badge");
+    var bar = card.querySelector("[data-page-status-bar]");
+    var liveRegion = document.querySelector("[data-page-status-live]");
+
+    function schedule(delay) {
+      window.setTimeout(check, delay);
+    }
+
+    function update(state) {
+      var previous = card.dataset.pageStatusValue;
+      card.dataset.pageStatusValue = state.status;
+      if (badge) {
+        badge.textContent = state.status_label;
+        badge.className = "badge badge--" + state.status_variant;
+      }
+      if (bar) {
+        bar.className =
+          "page-thumb__bar-fill page-thumb__bar-fill--" +
+          state.progress_bar;
+        bar.style.width = state.progress_percent + "%";
+      }
+      if (liveRegion && previous !== state.status) {
+        liveRegion.textContent =
+          "Página " + pageNumber + ": " + state.status_label + ".";
+      }
+    }
+
+    function check() {
+      fetch(url, {
+        headers: { Accept: "application/json" },
+        credentials: "same-origin",
+      })
+        .then(function (response) {
+          if (!response.ok) {
+            throw new Error("HTTP " + response.status);
+          }
+          return response.json();
+        })
+        .then(function (state) {
+          update(state);
+          if (state.is_processing) {
+            schedule(PROCESSING_POLL_MS);
+          }
+        })
+        .catch(function () {
+          schedule(PROCESSING_POLL_MS * 4);
+        });
+    }
+
+    schedule(PROCESSING_POLL_MS);
+  }
+
+  /* ---------------------------------------------------------------------------
      Navegación entre páginas con el teclado (HU-11).
 
      Las flechas izquierda y derecha siguen los enlaces "Anterior" y
@@ -1246,6 +1310,10 @@
     Array.prototype.forEach.call(
       document.querySelectorAll("[data-processing-poll]"),
       bindProcessingPoll,
+    );
+    Array.prototype.forEach.call(
+      document.querySelectorAll("[data-page-status-poll]"),
+      bindAlbumPageStatusPoll,
     );
     Array.prototype.forEach.call(
       document.querySelectorAll("[data-page-pager]"),

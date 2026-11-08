@@ -679,22 +679,31 @@ def page_neighbours(page):
 
 
 class PageStatusView(OwnedPageMixin, DetailView):
-    """Estado de procesamiento de una página, en JSON (HU-12).
+    """Estado de procesamiento de una página, en JSON (HU-12 y HU-22).
 
     Lo consulta la vista de la página mientras está "Procesando", para
-    recargarse sola en cuanto termina la detección. Hereda el filtro por
-    propietario: una página ajena responde 404, igual que su vista.
+    recargarse sola en cuanto termina la detección. El detalle del álbum usa
+    los datos de presentación para actualizar el chip sin recargar a mano.
+    Hereda el filtro por propietario: una página ajena responde 404, igual
+    que su vista.
     """
 
     def render_to_response(self, context, **response_kwargs):
         """Devuelve el estado como JSON en lugar de una plantilla."""
         page = self.object
+        page.region_total = page.regions.count()
+        page.region_review = page.regions.filter(needs_review=True).count()
+        card = page_card(page)
         return JsonResponse(
             {
                 "status": page.status,
+                "status_label": str(page.short_status_display),
+                "status_variant": page.status_variant,
                 "is_processing": page.is_processing,
                 "is_translating": page.is_translating,
-                "region_count": page.regions.count(),
+                "region_count": page.region_total,
+                "progress_bar": card["bar"],
+                "progress_percent": card["percent"],
             }
         )
 
