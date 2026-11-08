@@ -113,7 +113,7 @@ class ProcessPageTests(ProcessingTestCase):
 
     @mock.patch("albums.tasks.process_page_task")
     def test_the_page_moves_to_processing_and_the_task_is_queued(self, task):
-        """CP-12.1 — Al pulsar "Procesar página" pasa a "Procesando" y se encola."""
+        """CP-12.1 / CP-22.2 — Al procesar, pasa a "Procesando"."""
         response = self.process()
 
         self.assertEqual(self.page.status, ComicPage.Status.PROCESSING)
@@ -135,7 +135,7 @@ class ProcessPageTests(ProcessingTestCase):
         self.assertFalse(self.page.regions.exists())
 
     def test_finished_detection_leaves_the_page_processed(self):
-        """CP-12.1 — Al terminar, la página queda "Procesada" con sus regiones."""
+        """CP-12.1 / CP-22.2 — Al terminar, la página queda "Procesada"."""
         response = self.process()
 
         self.assertEqual(self.page.status, ComicPage.Status.PROCESSED)
@@ -198,7 +198,7 @@ class LiveRefreshTests(ProcessingTestCase):
 
     @mock.patch("albums.tasks.process_page_task")
     def test_the_status_reports_processing(self, task):
-        """CP-12.1 — El estado indica que la detección sigue en curso."""
+        """CP-12.1 / CP-22.3 — El estado informa que el proceso continúa."""
         self.process()
 
         state = self.client.get(self.page.get_status_url()).json()
@@ -207,14 +207,18 @@ class LiveRefreshTests(ProcessingTestCase):
             state,
             {
                 "status": "processing",
+                "status_label": "Procesando",
+                "status_variant": "progress",
                 "is_processing": True,
                 "is_translating": False,
                 "region_count": 0,
+                "progress_bar": "brand",
+                "progress_percent": 0,
             },
         )
 
     def test_the_status_reports_the_finished_result(self):
-        """CP-12.1 — Al terminar, el estado indica cuántas regiones hay."""
+        """CP-12.1 / CP-22.3 — Al terminar, informa el nuevo estado."""
         self.process()
 
         state = self.client.get(self.page.get_status_url()).json()
@@ -223,9 +227,13 @@ class LiveRefreshTests(ProcessingTestCase):
             state,
             {
                 "status": "processed",
+                "status_label": "Procesada",
+                "status_variant": "success",
                 "is_processing": False,
                 "is_translating": False,
                 "region_count": 2,
+                "progress_bar": "success",
+                "progress_percent": 100,
             },
         )
 
@@ -528,7 +536,7 @@ class OcrTextTests(ProcessingTestCase):
         self.assertEqual(self.page.status, ComicPage.Status.PROCESSED)
 
     def test_low_confidence_marks_the_region_and_the_page(self):
-        """CP-13.3 — Una región dudosa deja la página en "Necesita revisión"."""
+        """CP-13.3 / CP-22.2 — Una región dudosa exige revisión."""
         doubtful = DetectedRegion(260, 50, 120, 80, "たぶん", 0.42)
         reliable = DetectedRegion(40, 40, 120, 80, "たしかに", 0.98)
 

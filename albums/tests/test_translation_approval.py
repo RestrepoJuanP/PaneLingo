@@ -81,7 +81,7 @@ class PageApprovalTests(ApprovalTestCase):
     """CP-19.2 — La página queda aprobada cuando todas sus regiones lo están."""
 
     def test_approving_the_last_region_approves_the_page(self):
-        """CP-19.2 — Al aprobar la última pendiente, la página pasa a "Aprobada"."""
+        """CP-19.2 / CP-22.2 — La última aprobación aprueba la página."""
         self.post_approve(self.first)
         self.assertNotEqual(self.page.status, ComicPage.Status.APPROVED)
 

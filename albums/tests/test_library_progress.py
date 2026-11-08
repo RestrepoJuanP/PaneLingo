@@ -5,6 +5,7 @@ del mockup (HU-22, HU-26): todas las cifras salen de páginas y regiones.
 """
 
 from datetime import timedelta
+from unittest import mock
 
 from django.urls import reverse
 from django.utils import timezone
@@ -190,7 +191,7 @@ class PageFilterTests(ProcessingTestCase):
         set_status(self.ready, ComicPage.Status.PROCESSED)
 
     def test_the_filter_shows_only_those_pages(self):
-        """CA-22.4 — "Por revisar" muestra solo esa página y el recuento."""
+        """CP-22.4 — "Por revisar" muestra solo esa página y el recuento."""
         response = self.client.get(
             self.album.get_absolute_url(), {"estado": "por-revisar"}
         )
@@ -200,7 +201,7 @@ class PageFilterTests(ProcessingTestCase):
         self.assertContains(response, "1 de 3 mostradas")
 
     def test_the_progress_card_splits_the_pages(self):
-        """CA-22.4 — La tarjeta de progreso reparte las páginas por estado."""
+        """CP-22.4 — La tarjeta de progreso reparte las páginas por estado."""
         response = self.client.get(self.album.get_absolute_url())
 
         progress = response.context["page_progress"]
@@ -218,6 +219,46 @@ class PageFilterTests(ProcessingTestCase):
 
         self.assertEqual(cards[self.ready]["percent"], 100)
         self.assertEqual(cards[self.page]["percent"], 0)
+
+    def test_each_page_shows_its_status_as_text(self):
+        """CP-22.1 — Cada página muestra un chip con texto y color."""
+        response = self.client.get(self.album.get_absolute_url())
+
+        self.assertContains(response, "Pendiente")
+        self.assertContains(response, "Revisar")
+        self.assertContains(response, "Procesada")
+        self.assertContains(response, "badge--neutral")
+        self.assertContains(response, "badge--warning")
+        self.assertContains(response, "badge--success")
+
+
+class PageStatusLiveTests(ProcessingTestCase):
+    """CP-22.3 — El estado cambia en pantalla sin recargar a mano."""
+
+    @mock.patch("albums.tasks.process_page_task")
+    def test_a_processing_card_polls_and_has_a_live_region(self, task):
+        """CP-22.3 — La tarjeta consulta el estado y anuncia el cambio."""
+        self.process()
+
+        response = self.client.get(self.album.get_absolute_url())
+
+        self.assertContains(
+            response, f'data-page-status-poll="{self.page.get_status_url()}"'
+        )
+        self.assertContains(response, 'data-page-status-value="processing"')
+        self.assertContains(response, 'data-page-number="1"')
+        self.assertContains(response, 'aria-live="polite"')
+        self.assertContains(response, "data-page-status-live")
+        self.assertContains(response, "data-page-status-badge")
+        self.assertContains(response, "data-page-status-bar")
+
+    def test_a_finished_card_does_not_keep_polling(self):
+        """CP-22.3 — Una página terminada deja de consultar su estado."""
+        self.process()
+
+        response = self.client.get(self.album.get_absolute_url())
+
+        self.assertNotContains(response, "data-page-status-poll")
 
 
 class SidebarTests(ProcessingTestCase):
