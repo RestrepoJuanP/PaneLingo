@@ -451,7 +451,7 @@ class AlbumDetailView(OwnedAlbumMixin, DetailView):
 
     @staticmethod
     def page_progress(pages):
-        """Reparto de páginas para la tarjeta de progreso del mockup."""
+        """Reparte las páginas por estado para HU-22 y HU-25."""
         total = len(pages)
         ready = sum(
             1
@@ -462,6 +462,23 @@ class AlbumDetailView(OwnedAlbumMixin, DetailView):
             1 for page in pages if page.status == ComicPage.Status.NEEDS_REVIEW
         )
         pending = total - ready - review
+        pending_count = sum(
+            1
+            for page in pages
+            if page.status in (ComicPage.Status.PENDING, ComicPage.Status.FAILED)
+        )
+        processing_count = sum(
+            1 for page in pages if page.status == ComicPage.Status.PROCESSING
+        )
+        review_count = sum(
+            1
+            for page in pages
+            if page.status
+            in (ComicPage.Status.PROCESSED, ComicPage.Status.NEEDS_REVIEW)
+        )
+        approved_count = sum(
+            1 for page in pages if page.status == ComicPage.Status.APPROVED
+        )
         return {
             "ready": ready,
             "review": review,
@@ -469,6 +486,10 @@ class AlbumDetailView(OwnedAlbumMixin, DetailView):
             "ready_percent": percent(ready, total),
             "review_percent": percent(review, total),
             "pending_percent": percent(pending, total),
+            "pending_count": pending_count,
+            "processing_count": processing_count,
+            "review_count": review_count,
+            "approved_count": approved_count,
         }
 
 

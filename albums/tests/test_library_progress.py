@@ -45,6 +45,25 @@ def set_status(page, status):
     page.refresh_from_db()
 
 
+def add_pages(album, statuses):
+    """Añade páginas ligeras con los estados indicados para probar resúmenes."""
+    first_number = album.pages.count() + 1
+    pages = [
+        ComicPage(
+            album=album,
+            page_number=first_number + offset,
+            image=f"pages/tests/{album.pk}-{first_number + offset}.png",
+            original_filename=f"pagina-{first_number + offset}.png",
+            width=400,
+            height=560,
+            file_size=100,
+            status=status,
+        )
+        for offset, status in enumerate(statuses)
+    ]
+    return ComicPage.objects.bulk_create(pages)
+
+
 class DerivedStatusTests(ProcessingTestCase):
     """CA-26.1 — El estado del álbum se deriva de sus páginas."""
 
@@ -147,7 +166,7 @@ class LibraryFilterTests(ProcessingTestCase):
 
         self.assertContains(response, "Completado")
         self.assertContains(response, "En progreso")
-        self.assertContains(response, "split-progress__ready")
+        self.assertContains(response, "progress__fill")
 
 
 class LibrarySummaryTests(ProcessingTestCase):
@@ -177,6 +196,84 @@ class LibrarySummaryTests(ProcessingTestCase):
 
         self.assertEqual(time_greeting(morning), "Buenos días")
         self.assertEqual(time_greeting(evening), "Buenas noches")
+
+
+class AlbumApprovalProgressTests(ProcessingTestCase):
+    """HU-25 — El progreso del álbum se mide por páginas aprobadas."""
+
+    def make_twenty_four_pages(self):
+        """Prepara 24 páginas, ocho aprobadas, como en los antecedentes."""
+        set_status(self.page, ComicPage.Status.APPROVED)
+        add_pages(
+            self.album,
+            [ComicPage.Status.APPROVED] * 7 + [ComicPage.Status.PROCESSED] * 16,
+        )
+
+    def test_library_and_detail_show_approved_page_progress(self):
+        """CP-25.1 — Biblioteca y detalle muestran 8 de 24 y 33 %."""
+        self.make_twenty_four_pages()
+
+        library = self.client.get(reverse("albums:list"))
+        detail = self.client.get(self.album.get_absolute_url())
+        expected = "8 de 24 páginas aprobadas (33 %)"
+
+        self.assertContains(library, expected)
+        self.assertContains(detail, expected)
+        self.assertContains(library, 'role="progressbar"')
+        self.assertContains(library, 'aria-valuenow="33"')
+        self.assertContains(library, f'aria-valuetext="{expected}"')
+        self.assertContains(detail, f'aria-valuetext="{expected}"')
+
+    def test_progress_changes_when_one_more_page_is_approved(self):
+        """CP-25.2 — Una aprobación cambia el progreso de 33 % a 38 %."""
+        self.make_twenty_four_pages()
+        page = self.album.pages.filter(status=ComicPage.Status.PROCESSED).first()
+
+        set_status(page, ComicPage.Status.APPROVED)
+        response = self.client.get(self.album.get_absolute_url())
+
+        self.assertContains(response, "9 de 24 páginas aprobadas (38 %)")
+        self.assertContains(response, 'aria-valuenow="38"')
+
+    def test_detail_breaks_pages_down_into_four_states(self):
+        """CP-25.3 — El detalle desglosa los cuatro grupos solicitados."""
+        set_status(self.page, ComicPage.Status.FAILED)
+        add_pages(
+            self.album,
+            [
+                ComicPage.Status.PENDING,
+                ComicPage.Status.PROCESSING,
+                ComicPage.Status.PROCESSED,
+                ComicPage.Status.NEEDS_REVIEW,
+                ComicPage.Status.APPROVED,
+            ],
+        )
+
+        response = self.client.get(self.album.get_absolute_url())
+        breakdown = response.context["page_progress"]
+
+        self.assertEqual(breakdown["pending_count"], 2)
+        self.assertEqual(breakdown["processing_count"], 1)
+        self.assertEqual(breakdown["review_count"], 2)
+        self.assertEqual(breakdown["approved_count"], 1)
+        self.assertContains(response, "Pendientes")
+        self.assertContains(response, "En proceso")
+        self.assertContains(response, "En revisión")
+        self.assertContains(response, "Aprobadas")
+
+    def test_album_without_pages_says_so_instead_of_showing_zero_percent(self):
+        """CP-25.4 — Un álbum vacío muestra “Sin páginas”, no “0 %”."""
+        empty = self.make_album(self.owner, "ko")
+        empty.title = "Álbum vacío"
+        empty.save(update_fields=["title"])
+
+        detail = self.client.get(empty.get_absolute_url())
+        library = self.client.get(reverse("albums:list"), {"q": "Álbum vacío"})
+
+        self.assertContains(detail, "Sin páginas")
+        self.assertNotContains(detail, "0 %")
+        self.assertContains(library, "Sin páginas")
+        self.assertNotContains(library, "0 %")
 
 
 class PageFilterTests(ProcessingTestCase):

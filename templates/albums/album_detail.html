@@ -2,7 +2,7 @@
 
 {% load design %}
 {% comment %}
-Detalle de álbum — HU-08, HU-22, HU-26.
+Detalle de álbum — HU-08, HU-22, HU-25, HU-26.
 Referencia visual: design/PaneLingo.dc.html (album) y
 design/screenshots/album-detail.png. Estado derivado, acciones, tarjeta de
 progreso, filtros de página y miniaturas con estado y barra. "Revisión y
@@ -95,26 +95,21 @@ exportación" y "Eliminar" se ven deshabilitados: no tienen HU todavía.
       </p>
     </div>
 
-    {% if page_total %}
-      <section class="album-progress" aria-labelledby="album-progress-title">
-        <h2 class="album-progress__title" id="album-progress-title">Progreso de las páginas</h2>
-        <div
-          class="split-progress__track split-progress__track--thick"
-          role="img"
-          aria-label="{{ page_progress.ready }} listas, {{ page_progress.review }} por revisar y {{ page_progress.pending }} sin procesar"
-        >
-          <span class="split-progress__ready" style="width: {{ page_progress.ready_percent }}%"></span>
-          <span class="split-progress__review" style="width: {{ page_progress.review_percent }}%"></span>
-          <span class="split-progress__pending" style="width: {{ page_progress.pending_percent }}%"></span>
-        </div>
+    <section class="album-progress" aria-labelledby="album-progress-title">
+      <h2 class="album-progress__title" id="album-progress-title">Progreso de las páginas</h2>
+      {% if page_total %}
+        <p class="album-detail__meta">{{ progress.approved_text }}</p>
+        {% include "components/progress_bar.html" with percent=progress.percent_approved value_text=progress.approved_text label="Progreso de páginas aprobadas" %}
         <dl class="album-progress__legend">
-          <div><dt><span class="legend-dot legend-dot--brand"></span>Listas</dt><dd>{{ page_progress.ready }}</dd></div>
-          <div><dt><span class="legend-dot legend-dot--warning"></span>Por revisar</dt><dd>{{ page_progress.review }}</dd></div>
-          <div><dt><span class="legend-dot legend-dot--muted"></span>Sin procesar</dt><dd>{{ page_progress.pending }}</dd></div>
-          <div><dt><span class="legend-dot legend-dot--ink"></span>Regiones corregidas</dt><dd>{{ progress.region_corrected }}</dd></div>
+          <div><dt><span class="legend-dot legend-dot--muted"></span>Pendientes</dt><dd>{{ page_progress.pending_count }}</dd></div>
+          <div><dt><span class="legend-dot legend-dot--ink"></span>En proceso</dt><dd>{{ page_progress.processing_count }}</dd></div>
+          <div><dt><span class="legend-dot legend-dot--warning"></span>En revisión</dt><dd>{{ page_progress.review_count }}</dd></div>
+          <div><dt><span class="legend-dot legend-dot--brand"></span>Aprobadas</dt><dd>{{ page_progress.approved_count }}</dd></div>
         </dl>
-      </section>
-    {% endif %}
+      {% else %}
+        <p class="album-detail__meta">{{ progress.approved_text }}</p>
+      {% endif %}
+    </section>
   </div>
 
   <div class="section-head">

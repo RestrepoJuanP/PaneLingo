@@ -157,6 +157,21 @@ class AlbumProgress:
         return percent(self.region_review, self.region_total)
 
     @property
+    def percent_approved(self):
+        """Porcentaje de páginas aprobadas (HU-25)."""
+        return percent(self.page_approved, self.page_total)
+
+    @property
+    def approved_text(self):
+        """Resumen textual accesible del progreso por páginas (HU-25)."""
+        if not self.page_total:
+            return "Sin páginas"
+        return (
+            f"{self.page_approved} de {self.page_total} páginas aprobadas "
+            f"({self.percent_approved} %)"
+        )
+
+    @property
     def status(self):
         """Estado derivado del álbum (HU-26)."""
         return derive_status(self.page_total, self.page_work, self.page_approved)
