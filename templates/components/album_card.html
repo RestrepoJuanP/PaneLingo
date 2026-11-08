@@ -1,10 +1,9 @@
 {% load design %}
 {% comment %}
 Tarjeta de álbum, como en el mockup: portada con el estado derivado (HU-26)
-y el par de idiomas, título con menú "···", metadatos de páginas, barra de
-progreso (regiones listas en índigo y por revisar en ámbar) y fecha de
-edición. Recibe el álbum anotado por albums.insights.library_for y su
-progreso en album.progress.
+y el par de idiomas, título con menú "···", metadatos de páginas, progreso
+por páginas aprobadas (HU-25) y fecha de edición. Recibe el álbum anotado por
+albums.insights.library_for y su progreso en album.progress.
 
 data-album-id permite a la búsqueda automática reconocer qué tarjetas siguen
 tras filtrar, para desplazarlas a su sitio nuevo en lugar de que salten.
@@ -52,17 +51,12 @@ tras filtrar, para desplazarlas a su sitio nuevo en lugar de que salten.
       · {{ progress.region_review }} por revisar
     </p>
 
-    <div class="split-progress">
-      <div
-        class="split-progress__track"
-        role="img"
-        aria-label="{{ progress.percent_ready }} % de las regiones listas, {{ progress.percent_review }} % por revisar"
-      >
-        <span class="split-progress__ready" style="width: {{ progress.percent_ready }}%"></span>
-        <span class="split-progress__review" style="width: {{ progress.percent_review }}%"></span>
-      </div>
-      <span class="split-progress__value">{{ progress.percent_ready }}%</span>
-    </div>
+    {% if progress.page_total %}
+      <p class="album-card__meta">{{ progress.approved_text }}</p>
+      {% include "components/progress_bar.html" with percent=progress.percent_approved value_text=progress.approved_text label="Progreso de páginas aprobadas" %}
+    {% else %}
+      <p class="album-card__meta">{{ progress.approved_text }}</p>
+    {% endif %}
 
     <p class="album-card__edited">
       {% if album.is_archived %}Archivado hace {{ album.archived_at|short_since }} · {% endif %}Editado hace {{ album.updated_at|short_since }}

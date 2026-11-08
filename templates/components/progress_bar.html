@@ -1,8 +1,6 @@
 {% comment %}
-Barra de progreso.
-Construida y documentada, pero NO usada en las pantallas del Sprint 1:
-una barra al 0% en cada álbum comunicaría un avance que no existe, porque
-la función de traducción llega en un sprint posterior.
+Barra de progreso accesible. HU-25 la usa para el porcentaje de páginas
+aprobadas; value_text comunica también la fracción que origina el porcentaje.
 {% endcomment %}
 <div class="progress{% if slim %} progress--slim{% endif %}">
   <div
@@ -12,10 +10,13 @@ la función de traducción llega en un sprint posterior.
     aria-valuemin="0"
     aria-valuemax="100"
     aria-label="{{ label|default:'Progreso' }}"
+    {% if value_text %}aria-valuetext="{{ value_text }}"{% endif %}
   >
     <div class="progress__fill" style="width: {{ percent|default:0 }}%"></div>
   </div>
   {% if show_value %}
-    <span class="progress__value">{{ percent|default:0 }}%</span>
+    <span class="progress__value">
+      {% if value_text %}{{ value_text }}{% else %}{{ percent|default:0 }}%{% endif %}
+    </span>
   {% endif %}
 </div>
