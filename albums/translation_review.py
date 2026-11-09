@@ -33,7 +33,10 @@ def leave_page_approval(page):
     """
     if page.status != ComicPage.Status.APPROVED:
         return
-    pending = page.regions.filter(needs_review=True).exists()
+    pending = page.regions.filter(
+        needs_review=True,
+        skip_translation=False,
+    ).exists()
     page.status = (
         ComicPage.Status.NEEDS_REVIEW if pending else ComicPage.Status.PROCESSED
     )

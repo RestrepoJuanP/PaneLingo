@@ -84,7 +84,10 @@ def with_progress(albums):
         region_review=Count(
             "pages__regions",
             filter=(
-                Q(pages__regions__needs_review=True)
+                Q(
+                    pages__regions__needs_review=True,
+                    pages__regions__skip_translation=False,
+                )
                 & ~Q(
                     pages__regions__translation_status=(
                         TextRegion.TranslationStatus.APPROVED
@@ -277,7 +280,7 @@ def pages_with_progress(album):
         region_review=Count(
             "regions",
             filter=(
-                Q(regions__needs_review=True)
+                Q(regions__needs_review=True, regions__skip_translation=False)
                 & ~Q(
                     regions__translation_status=(TextRegion.TranslationStatus.APPROVED)
                 )
@@ -413,6 +416,7 @@ def review_total(user):
             page__album__owner=user,
             page__album__archived_at__isnull=True,
             needs_review=True,
+            skip_translation=False,
         )
         .exclude(translation_status=TextRegion.TranslationStatus.APPROVED)
         .count()

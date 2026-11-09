@@ -3298,6 +3298,32 @@ textarea {
   color: var(--ink-900);
 }
 
+.block-card__region-link {
+  display: flex;
+  flex: 1 1 240px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: inherit;
+}
+
+.block-card__region-link:hover {
+  color: inherit;
+  text-decoration: none;
+}
+
+.block-card__manage {
+  display: flex;
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+.block-card__manage form {
+  margin: 0;
+}
+
 .block-card__head:hover {
   background: var(--surface-subtle);
   color: var(--ink-900);
@@ -3471,6 +3497,16 @@ textarea {
   margin-top: 11px;
 }
 
+.block-card__skip-note {
+  margin: 0;
+  padding: var(--sp-4) var(--sp-5);
+  border-top: 1px solid var(--divider);
+  background: var(--surface-subtle);
+  color: var(--muted);
+  font-size: var(--fs-label-sm);
+  line-height: 1.5;
+}
+
 .block-btn {
   padding: 8px 12px;
   border: 1px solid var(--border-strong);
@@ -3497,6 +3533,16 @@ textarea {
 
 .block-btn--primary:hover {
   border-color: var(--brand-surface-border);
+}
+
+.block-btn--danger {
+  border-color: var(--danger-border-soft);
+  color: var(--danger);
+}
+
+.block-btn--danger:hover {
+  border-color: var(--danger-border);
+  background: var(--danger-bg);
 }
 
 .processing-error__hint {

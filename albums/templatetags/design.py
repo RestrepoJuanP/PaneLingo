@@ -82,6 +82,16 @@ def undo_archive_pk(extra_tags):
 
 
 @register.filter
+def undo_region_pk(extra_tags):
+    """Región eliminada que puede restaurarse desde el aviso (HU-86)."""
+    for tag in (extra_tags or "").split():
+        if tag.startswith("undo-region:"):
+            value = tag.split(":", 1)[1]
+            return int(value) if value.isdigit() else None
+    return None
+
+
+@register.filter
 def short_since(moment):
     """Tiempo transcurrido con una sola unidad: "2 horas" y no "2 horas, 37
     minutos", como las fechas de edición del mockup."""

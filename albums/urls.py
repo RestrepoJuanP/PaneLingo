@@ -26,7 +26,11 @@ from albums.views import (
     region_add,
     region_approve,
     region_correct,
+    region_delete,
+    region_enable_translation,
+    region_restore,
     region_retranslate,
+    region_skip_translation,
     region_translation_edit,
     region_unapprove,
 )
@@ -114,6 +118,26 @@ urlpatterns = [
         "regiones/<int:pk>/retirar-aprobacion/",
         region_unapprove,
         name="region_unapprove",
+    ),
+    path(
+        "regiones/<int:pk>/eliminar/",
+        region_delete,
+        name="region_delete",
+    ),
+    path(
+        "regiones/<int:pk>/restaurar/",
+        region_restore,
+        name="region_restore",
+    ),
+    path(
+        "regiones/<int:pk>/no-traducir/",
+        region_skip_translation,
+        name="region_skip_translation",
+    ),
+    path(
+        "regiones/<int:pk>/traducir-region/",
+        region_enable_translation,
+        name="region_enable_translation",
     ),
     path(
         "paginas/<int:pk>/estado/",

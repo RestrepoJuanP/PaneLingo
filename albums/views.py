@@ -47,6 +47,11 @@ from albums.manual_regions import add_manual_region
 from albums.models import Album, AlbumExport, ComicPage, TextRegion
 from albums.ocr import OcrProviderError
 from albums.processing import expire_if_stale, start_processing
+from albums.region_management import (
+    delete_region,
+    restore_deleted_region,
+    set_translation_skipped,
+)
 from albums.services import create_pages_from_upload
 from albums.translating import (
     can_translate,
@@ -268,7 +273,7 @@ class AlbumListView(PrivateViewMixin, ListView):
             "stats": library_stats(user, progress),
             "resume": resume,
             "resume_review": (
-                resume.regions.filter(needs_review=True)
+                resume.regions.filter(needs_review=True, skip_translation=False)
                 .exclude(translation_status=TextRegion.TranslationStatus.APPROVED)
                 .count()
                 if resume
@@ -921,7 +926,7 @@ class PageStatusView(OwnedPageMixin, DetailView):
         page = self.object
         page.region_total = page.regions.count()
         page.region_review = (
-            page.regions.filter(needs_review=True)
+            page.regions.filter(needs_review=True, skip_translation=False)
             .exclude(translation_status=TextRegion.TranslationStatus.APPROVED)
             .count()
         )
@@ -1133,6 +1138,70 @@ def region_add(request, pk):
         f"{page.get_absolute_url()}?region-nueva={region.reading_order}"
         f"#region-{region.reading_order}"
     )
+
+
+@require_POST
+@private_view
+def region_delete(request, pk):
+    """Elimina una región propia y ofrece deshacer desde el aviso (HU-86)."""
+    region = owned_region_or_404(request, pk)
+    page, snapshot = delete_region(request, region)
+    messages.success(
+        request,
+        "Región eliminada.",
+        extra_tags=f"undo-region:{snapshot['original_pk']}",
+    )
+    return redirect(page.get_absolute_url())
+
+
+@require_POST
+@private_view
+def region_restore(request, pk):
+    """Restaura la última región eliminada si la página no cambió (HU-86)."""
+    page, region = restore_deleted_region(request, pk, request.user)
+    if page is None:
+        raise Http404("No hay una región que restaurar.")
+    if region is None:
+        messages.warning(
+            request,
+            "La región ya no se puede restaurar porque la página cambió.",
+        )
+        return redirect(page.get_absolute_url())
+    messages.success(request, f"Región {region.reading_order} restaurada.")
+    return redirect(f"{page.get_absolute_url()}#region-{region.reading_order}")
+
+
+@require_POST
+@private_view
+def region_skip_translation(request, pk):
+    """Marca una región propia para conservar su texto original (HU-86)."""
+    region = owned_region_or_404(request, pk)
+    if region.page.is_translating:
+        messages.info(request, "Espera a que termine la traducción de la página.")
+        return redirect(
+            f"{region.page.get_absolute_url()}#region-{region.reading_order}"
+        )
+    set_translation_skipped(region, True)
+    messages.success(request, f"La región {region.reading_order} no se traducirá.")
+    return redirect(f"{region.page.get_absolute_url()}#region-{region.reading_order}")
+
+
+@require_POST
+@private_view
+def region_enable_translation(request, pk):
+    """Devuelve una región propia al flujo normal de traducción (HU-86)."""
+    region = owned_region_or_404(request, pk)
+    if region.page.is_translating:
+        messages.info(request, "Espera a que termine la traducción de la página.")
+        return redirect(
+            f"{region.page.get_absolute_url()}#region-{region.reading_order}"
+        )
+    set_translation_skipped(region, False)
+    messages.success(
+        request,
+        f"La región {region.reading_order} vuelve a estar pendiente de traducir.",
+    )
+    return redirect(f"{region.page.get_absolute_url()}#region-{region.reading_order}")
 
 
 @require_POST
