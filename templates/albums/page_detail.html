@@ -395,7 +395,11 @@ de pantalla anuncia número, tipo, estado y texto.
                   origen se edita en su propio campo. El texto del OCR nunca se
                   pierde: se muestra bajo una corrección y se puede restaurar.
                   {% endcomment %}
-                  <form method="post" action="{{ region.get_correct_url }}" class="block-card__body" data-region-edit>
+                  <form method="post" action="{{ region.get_correct_url }}" class="block-card__body" data-region-edit
+                    data-autosave
+                    data-autosave-kind="correction"
+                    data-autosave-version="{{ region.correction_version }}"
+                  >
                     {% csrf_token %}
                     <label class="block-card__label" for="region-text-{{ region.reading_order }}">
                       {{ page.album.source_language.code|upper }} · texto de origen
@@ -413,6 +417,12 @@ de pantalla anuncia número, tipo, estado y texto.
                     <p class="sr-only" id="region-text-{{ region.reading_order }}-hint">
                       Déjalo vacío si la región no tiene nada que traducir.
                     </p>
+                    <div class="autosave" aria-live="polite">
+                      <span class="autosave__status" data-autosave-status>
+                        Guardado{% if region.corrected_at %} · {{ region.corrected_at|date:"H:i" }}{% endif %}
+                      </span>
+                      <button type="button" class="autosave__retry" data-autosave-retry hidden>Reintentar</button>
+                    </div>
                     {% if region.is_corrected %}
                       <p class="block-card__original">
                         Texto del OCR:
@@ -444,6 +454,9 @@ de pantalla anuncia número, tipo, estado y texto.
                       action="{{ region.get_translation_url }}"
                       class="block-card__translation"
                       data-region-edit
+                      data-autosave
+                      data-autosave-kind="translation"
+                      data-autosave-version="{{ region.translation_version }}"
                     >
                       {% csrf_token %}
                       <div class="block-card__divider">
@@ -460,6 +473,12 @@ de pantalla anuncia número, tipo, estado y texto.
                         placeholder="{% if region.translation_status == 'untranslated' %}Sin traducir todavía: pulsa «Traducir página», «Reintentar con IA» o escribe la tuya.{% else %}Se deja sin traducir.{% endif %}"
                         {% if page.is_translating %}readonly{% endif %}
                       >{{ region.translation }}</textarea>
+                      <div class="autosave" aria-live="polite">
+                        <span class="autosave__status" data-autosave-status>
+                          Guardado{% if region.translated_at %} · {{ region.translated_at|date:"H:i" }}{% endif %}
+                        </span>
+                        <button type="button" class="autosave__retry" data-autosave-retry hidden>Reintentar</button>
+                      </div>
                       {% if region.machine_translation and region.machine_translation != region.translation %}
                         <details class="block-card__proposal">
                           <summary>Ver propuesta de la IA</summary>

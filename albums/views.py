@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 from django.views.generic import (
@@ -53,6 +54,48 @@ from albums.translation_review import (
 
 # Longitud máxima del texto de búsqueda; el título admite 120 caracteres.
 SEARCH_MAX_LENGTH = 120
+
+
+def timestamp_version(value):
+    """Convierte una fecha de guardado en una versión estable para HU-23."""
+    return value.isoformat(timespec="microseconds") if value else ""
+
+
+def is_autosave(request):
+    """Indica si la petición procede del autoguardado progresivo."""
+    return request.headers.get("X-Autosave") == "1"
+
+
+def autosave_conflicts(request, saved_at):
+    """Detecta que otra pestaña guardó después de cargar el formulario."""
+    return request.POST.get("version", "") != timestamp_version(saved_at)
+
+
+def autosave_success(saved_at):
+    """Responde al navegador con la nueva versión y la hora guardada."""
+    saved_time = timezone.localtime(saved_at).strftime("%H:%M")
+    return JsonResponse(
+        {
+            "status": "saved",
+            "message": f"Guardado · {saved_time}",
+            "version": timestamp_version(saved_at),
+        }
+    )
+
+
+def autosave_conflict(saved_at, saved_text):
+    """Informa del conflicto sin reemplazar ninguna de las dos versiones."""
+    return JsonResponse(
+        {
+            "status": "conflict",
+            "message": (
+                "Esta región cambió en otra pestaña. " "Tu texto no se sobrescribió."
+            ),
+            "version": timestamp_version(saved_at),
+            "saved_text": saved_text,
+        },
+        status=409,
+    )
 
 
 def normalize_search_text(text):
@@ -668,6 +711,9 @@ class PageDetailView(OwnedPageMixin, DetailView):
         context = super().get_context_data(**kwargs)
         page = self.object
         regions = list(page.regions.all())
+        for region in regions:
+            region.correction_version = timestamp_version(region.corrected_at)
+            region.translation_version = timestamp_version(region.translated_at)
         chosen = self.request.GET.get("filtro", "")
         context["regions"] = regions
         context["review_count"] = sum(region.needs_review for region in regions)
@@ -930,7 +976,7 @@ def region_retranslate(request, pk):
 @require_POST
 @private_view
 def region_translation_edit(request, pk):
-    """Guarda la traducción editada de una región (HU-18).
+    """Guarda manual o automáticamente la traducción (HU-18 y HU-23).
 
     Solo acepta POST. La región se busca entre las del usuario, así que una
     ajena responde 404. Mientras la IA traduce la página no se guarda nada:
@@ -943,13 +989,23 @@ def region_translation_edit(request, pk):
     )
     page = owned_page_or_404(request, region.page_id)
     number = region.reading_order
+    wants_json = is_autosave(request)
+    if wants_json and autosave_conflicts(request, region.translated_at):
+        return autosave_conflict(region.translated_at, region.translation)
     if page.is_translating:
+        message = (
+            "La página se está traduciendo. " "Guarda tu traducción cuando termine."
+        )
+        if wants_json:
+            return JsonResponse({"status": "blocked", "message": message}, status=423)
         messages.error(
             request,
-            "La página se está traduciendo. Guarda tu traducción cuando termine.",
+            message,
         )
     else:
         edit_translation(region, request.POST.get("text", ""))
+        if wants_json:
+            return autosave_success(region.translated_at)
         if region.translation:
             messages.success(request, f"Se guardó la traducción de la región {number}.")
         else:
@@ -1093,7 +1149,7 @@ def album_unarchive(request, pk):
 @require_POST
 @private_view
 def region_correct(request, pk):
-    """Guarda la corrección del texto de una región, o la deshace (HU-15).
+    """Guarda la corrección manual o automática, o la deshace (HU-15/23).
 
     Solo acepta POST: un GET responde 405 antes incluso de pedir sesión.
     La región se busca entre las de las páginas del usuario, así que una
@@ -1105,6 +1161,9 @@ def region_correct(request, pk):
         page__album__owner=request.user,
     )
     number = region.reading_order
+    wants_json = is_autosave(request)
+    if wants_json and autosave_conflicts(request, region.corrected_at):
+        return autosave_conflict(region.corrected_at, region.final_text)
     if request.POST.get("restore") == "1":
         restore_region(region)
         messages.success(
@@ -1112,6 +1171,8 @@ def region_correct(request, pk):
         )
     else:
         correct_region(region, request.POST.get("text", ""))
+        if wants_json:
+            return autosave_success(region.corrected_at)
         if region.has_nothing_to_translate:
             messages.success(
                 request, f"La región {number} quedó sin texto que traducir."
