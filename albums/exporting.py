@@ -1,4 +1,4 @@
-"""Preparación asíncrona de exportaciones DOCX aprobadas (HU-27)."""
+"""Preparación y descarga de exportaciones DOCX aprobadas (HU-27 y HU-28)."""
 
 import io
 import logging
@@ -6,6 +6,7 @@ import logging
 from django.core.files.base import ContentFile
 from django.db import transaction
 from django.utils import timezone
+from django.utils.text import slugify
 from docx import Document
 
 from albums.models import AlbumExport, TextRegion
@@ -13,6 +14,18 @@ from albums.models import AlbumExport, TextRegion
 logger = logging.getLogger(__name__)
 
 UNEXPECTED_ERROR_MESSAGE = "No se pudo preparar la exportación. Inténtalo de nuevo."
+
+
+def export_download_name(export):
+    """Construye un nombre seguro con álbum, idioma de destino y fecha."""
+    album_name = slugify(export.album.title) or f"album-{export.album_id}"
+    language_name = (
+        slugify(export.album.target_language.name)
+        or export.album.target_language.code.lower()
+    )
+    exported_at = export.finished_at or export.created_at
+    local_date = timezone.localtime(exported_at).date().isoformat()
+    return f"{album_name}_{language_name}_{local_date}.docx"
 
 
 def build_export_snapshot(album):

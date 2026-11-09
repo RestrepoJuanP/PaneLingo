@@ -116,6 +116,10 @@
             </p>
             {% if latest_export.status == "ready" %}
               <p class="export-status__detail">El archivo se preparó correctamente.</p>
+              <a
+                class="btn btn--secondary btn--compact export-status__download"
+                href="{{ latest_export.get_download_url }}"
+              >Descargar</a>
             {% elif latest_export.status == "failed" %}
               <p class="export-status__detail">{{ latest_export.error }}</p>
             {% else %}
@@ -125,6 +129,39 @@
         </div>
       {% else %}
         <p class="export-empty">Todavía no has preparado ninguna exportación.</p>
+      {% endif %}
+
+      {% if previous_exports %}
+        <section class="export-history" aria-labelledby="export-history-title">
+          <h3 class="export-history__title" id="export-history-title">Historial</h3>
+          <ul class="export-history__list">
+            {% for export in previous_exports %}
+              <li class="export-history__item">
+                <div>
+                  <p class="export-history__date">
+                    {{ export.created_at|date:"d/m/Y · H:i" }}
+                  </p>
+                  <p class="export-status__meta">
+                    {{ export.approved_count }}
+                    {{ export.approved_count|pluralize:"traducción aprobada,traducciones aprobadas" }}
+                    · DOCX
+                  </p>
+                </div>
+                {% if export.status == "ready" %}
+                  <a
+                    class="btn btn--secondary btn--compact"
+                    href="{{ export.get_download_url }}"
+                    aria-label="Descargar exportación del {{ export.created_at|date:'d/m/Y' }}"
+                  >Descargar</a>
+                {% elif export.status == "preparing" %}
+                  <span class="badge badge--progress">Preparando</span>
+                {% else %}
+                  <span class="badge badge--danger">Error</span>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        </section>
       {% endif %}
     </aside>
   </div>

@@ -23,7 +23,11 @@ from django.views.generic import (
 from accounts.access import PrivateViewMixin, private_view
 from albums.archiving import archive_album, unarchive_album
 from albums.corrections import correct_region, restore_region
-from albums.exporting import build_export_snapshot, start_album_export
+from albums.exporting import (
+    build_export_snapshot,
+    export_download_name,
+    start_album_export,
+)
 from albums.forms import AlbumForm, AlbumRenameForm
 from albums.insights import (
     LIBRARY_FILTERS,
@@ -554,12 +558,16 @@ class AlbumExportView(OwnedAlbumMixin, DetailView):
     template_name = "albums/album_export.html"
 
     def get_context_data(self, **kwargs):
-        """Añade recuentos y la exportación más reciente del álbum."""
+        """Añade recuentos, última exportación e historial del álbum."""
         context = super().get_context_data(**kwargs)
         snapshot, skipped_count = build_export_snapshot(self.object)
+        exports = list(
+            self.object.exports.select_related("album__target_language").all()
+        )
         context["approved_count"] = len(snapshot["regions"])
         context["skipped_count"] = skipped_count
-        context["latest_export"] = self.object.exports.first()
+        context["latest_export"] = exports[0] if exports else None
+        context["previous_exports"] = exports[1:]
         context["nav_current"] = "review"
         return context
 
@@ -612,6 +620,38 @@ class AlbumExportStatusView(PrivateViewMixin, View):
                 "message": messages_by_status[export.status],
                 "is_terminal": export.is_terminal,
             }
+        )
+
+
+class AlbumExportDownloadView(PrivateViewMixin, View):
+    """Entrega un DOCX terminado únicamente a su propietario (HU-28)."""
+
+    def handle_no_permission(self):
+        """Oculta la existencia del archivo también a visitantes anónimos."""
+        raise Http404("La exportación no existe.")
+
+    def get(self, request, pk):
+        """Descarga exactamente el archivo guardado para la exportación."""
+        export = get_object_or_404(
+            AlbumExport.objects.select_related("album__target_language"),
+            pk=pk,
+            album__owner=request.user,
+            status=AlbumExport.Status.READY,
+        )
+        if not export.file:
+            raise Http404("La exportación no existe.")
+        try:
+            handle = export.file.open("rb")
+        except (FileNotFoundError, OSError) as error:
+            raise Http404("La exportación no existe.") from error
+        return FileResponse(
+            handle,
+            as_attachment=True,
+            filename=export_download_name(export),
+            content_type=(
+                "application/vnd.openxmlformats-officedocument."
+                "wordprocessingml.document"
+            ),
         )
 
 

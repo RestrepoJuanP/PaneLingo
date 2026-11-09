@@ -3674,7 +3674,8 @@ textarea {
   text-decoration: none;
 }
 
-/* Revisión y exportación DOCX (HU-27), basada en la pantalla del mockup. */
+/* Revisión, exportación y descarga DOCX (HU-27 y HU-28), basada en la
+   pantalla del mockup. */
 .export-head {
   margin-bottom: var(--sp-8);
 }
@@ -3825,6 +3826,52 @@ textarea {
 .export-status__meta,
 .export-status__detail {
   margin: var(--sp-2) 0 0;
+}
+
+.export-status__download {
+  margin-top: var(--sp-5);
+}
+
+.export-history {
+  margin-top: var(--sp-7);
+  padding-top: var(--sp-6);
+  border-top: 1px solid var(--divider);
+}
+
+.export-history__title {
+  margin: 0 0 var(--sp-4);
+  color: var(--ink-800);
+  font-size: var(--fs-ui);
+  font-weight: 700;
+}
+
+.export-history__list {
+  display: grid;
+  gap: var(--sp-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.export-history__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--divider);
+}
+
+.export-history__item:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.export-history__date {
+  margin: 0;
+  color: var(--ink-800);
+  font-size: var(--fs-label-sm);
+  font-weight: 700;
 }
 
 @media (max-width: 760px) {
