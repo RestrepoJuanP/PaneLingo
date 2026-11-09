@@ -5,7 +5,7 @@ import logging
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 
-from albums.models import Album, ComicPage
+from albums.models import Album, AlbumExport, ComicPage
 
 logger = logging.getLogger(__name__)
 
@@ -64,3 +64,9 @@ def delete_page_files(sender, instance, **kwargs):
 def delete_album_cover(sender, instance, **kwargs):
     """Borra la portada de un álbum eliminado, o cuya cuenta se eliminó."""
     delete_stored_file(instance.cover_image)
+
+
+@receiver(post_delete, sender=AlbumExport)
+def delete_export_file(sender, instance, **kwargs):
+    """Borra el DOCX privado al eliminar su exportación o el álbum."""
+    delete_stored_file(instance.file)

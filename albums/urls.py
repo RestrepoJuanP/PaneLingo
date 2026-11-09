@@ -7,6 +7,8 @@ from albums.views import (
     AlbumCreateView,
     AlbumDeleteView,
     AlbumDetailView,
+    AlbumExportStatusView,
+    AlbumExportView,
     AlbumListView,
     AlbumRenameView,
     AlbumUpdateView,
@@ -34,6 +36,16 @@ urlpatterns = [
     path("albumes/nuevo/", AlbumCreateView.as_view(), name="create"),
     path("albumes/cargar/", UploadChooseView.as_view(), name="upload_choose"),
     path("albumes/<int:pk>/", AlbumDetailView.as_view(), name="detail"),
+    path(
+        "albumes/<int:pk>/exportar/",
+        AlbumExportView.as_view(),
+        name="export",
+    ),
+    path(
+        "exportaciones/<int:pk>/estado/",
+        AlbumExportStatusView.as_view(),
+        name="export_status",
+    ),
     path(
         "albumes/<int:pk>/eliminar/",
         AlbumDeleteView.as_view(),

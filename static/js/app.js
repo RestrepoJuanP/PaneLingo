@@ -599,6 +599,55 @@
   }
 
   /* ---------------------------------------------------------------------------
+     Exportación DOCX en preparación (HU-27, CA-27.4).
+
+     La pantalla consulta el estado privado mientras Huey genera el archivo.
+     Al terminar recarga una vez para mostrar el resultado completo pintado
+     por Django. Sin JavaScript, recargar manualmente ofrece el mismo estado.
+     ------------------------------------------------------------------------ */
+
+  function bindExportStatusPoll(container) {
+    var url = container.dataset.exportStatusUrl;
+    var message = container.querySelector("[data-export-status-message]");
+
+    function schedule(delay) {
+      window.setTimeout(check, delay);
+    }
+
+    function check() {
+      fetch(url, {
+        headers: { Accept: "application/json" },
+        credentials: "same-origin",
+      })
+        .then(function (response) {
+          if (!response.ok) {
+            throw new Error("HTTP " + response.status);
+          }
+          return response.json();
+        })
+        .then(function (state) {
+          if (message) {
+            message.textContent = state.message;
+          }
+          container.className =
+            "export-status export-status--" + state.status;
+          if (state.is_terminal) {
+            window.setTimeout(function () {
+              window.location.reload();
+            }, 600);
+            return;
+          }
+          schedule(PROCESSING_POLL_MS);
+        })
+        .catch(function () {
+          schedule(PROCESSING_POLL_MS * 4);
+        });
+    }
+
+    schedule(PROCESSING_POLL_MS);
+  }
+
+  /* ---------------------------------------------------------------------------
      Navegación entre páginas con el teclado (HU-11).
 
      Las flechas izquierda y derecha siguen los enlaces "Anterior" y
@@ -1469,6 +1518,10 @@
     Array.prototype.forEach.call(
       document.querySelectorAll("[data-page-status-poll]"),
       bindAlbumPageStatusPoll,
+    );
+    Array.prototype.forEach.call(
+      document.querySelectorAll("[data-export-status-poll]"),
+      bindExportStatusPoll,
     );
     Array.prototype.forEach.call(
       document.querySelectorAll("[data-page-pager]"),

@@ -2,11 +2,11 @@
 
 {% load design %}
 {% comment %}
-Detalle de álbum — HU-08, HU-22, HU-25, HU-26.
+Detalle de álbum — HU-08, HU-22, HU-25, HU-26 y HU-27.
 Referencia visual: design/PaneLingo.dc.html (album) y
 design/screenshots/album-detail.png. Estado derivado, acciones, tarjeta de
-progreso, filtros de página y miniaturas con estado y barra. "Revisión y
-exportación" sigue deshabilitada; eliminar el álbum pertenece a HU-20.
+progreso, filtros de página y miniaturas con estado y barra. La revisión y
+exportación prepara un DOCX aprobado (HU-27); eliminar pertenece a HU-20.
 {% endcomment %}
 
 {% block title %}{{ album.title }} · PaneLingo{% endblock %}
@@ -67,11 +67,7 @@ exportación" sigue deshabilitada; eliminar el álbum pertenece a HU-20.
           <a class="btn btn--primary" href="{{ album.get_upload_url }}">Añadir páginas</a>
         {% endif %}
         <a class="btn btn--secondary" href="{{ album.get_edit_url }}">Editar álbum</a>
-        <span
-          class="btn btn--secondary"
-          aria-disabled="true"
-          title="Llega con la revisión final (HU-27)"
-        >Revisión y exportación</span>
+        <a class="btn btn--secondary" href="{{ album.get_export_url }}">Revisión y exportación</a>
         {% if not album.is_archived %}
           <form method="post" action="{{ album.get_archive_url }}" class="album-detail__form">
             {% csrf_token %}
@@ -85,9 +81,6 @@ exportación" sigue deshabilitada; eliminar el álbum pertenece a HU-20.
           data-modal-open="eliminar-album"
         >Eliminar</a>
       </div>
-      <p class="album-detail__note">
-        La revisión y exportación llega en un sprint posterior.
-      </p>
     </div>
 
     <section class="album-progress" aria-labelledby="album-progress-title">

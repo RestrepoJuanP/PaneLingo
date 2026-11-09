@@ -9,6 +9,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.views import View
 from django.views.decorators.http import require_POST
 from django.views.generic import (
     CreateView,
@@ -22,6 +23,7 @@ from django.views.generic import (
 from accounts.access import PrivateViewMixin, private_view
 from albums.archiving import archive_album, unarchive_album
 from albums.corrections import correct_region, restore_region
+from albums.exporting import build_export_snapshot, start_album_export
 from albums.forms import AlbumForm, AlbumRenameForm
 from albums.insights import (
     LIBRARY_FILTERS,
@@ -37,7 +39,7 @@ from albums.insights import (
     time_greeting,
     with_progress,
 )
-from albums.models import Album, ComicPage, TextRegion
+from albums.models import Album, AlbumExport, ComicPage, TextRegion
 from albums.processing import expire_if_stale, start_processing
 from albums.services import create_pages_from_upload
 from albums.translating import (
@@ -544,6 +546,73 @@ class AlbumDetailView(OwnedAlbumMixin, DetailView):
             "review_count": review_count,
             "approved_count": approved_count,
         }
+
+
+class AlbumExportView(OwnedAlbumMixin, DetailView):
+    """Revisa y prepara un DOCX con traducciones aprobadas (HU-27)."""
+
+    template_name = "albums/album_export.html"
+
+    def get_context_data(self, **kwargs):
+        """Añade recuentos y la exportación más reciente del álbum."""
+        context = super().get_context_data(**kwargs)
+        snapshot, skipped_count = build_export_snapshot(self.object)
+        context["approved_count"] = len(snapshot["regions"])
+        context["skipped_count"] = skipped_count
+        context["latest_export"] = self.object.exports.first()
+        context["nav_current"] = "review"
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """Confirma la omisión de pendientes y encola la exportación."""
+        self.object = self.get_object()
+        if request.POST.get("format") != AlbumExport.Format.DOCX:
+            messages.error(request, "El formato solicitado no está disponible.")
+            return redirect(self.object.get_export_url())
+        snapshot, skipped_count = build_export_snapshot(self.object)
+        if not snapshot["regions"]:
+            messages.error(request, "No hay traducciones aprobadas para exportar.")
+            return redirect(self.object.get_export_url())
+        if skipped_count and request.POST.get("confirm") != "1":
+            context = self.get_context_data(object=self.object)
+            context["confirmation_required"] = True
+            return self.render_to_response(context)
+
+        export, started = start_album_export(self.object)
+        if export is None:
+            messages.error(request, "No hay traducciones aprobadas para exportar.")
+        elif started:
+            messages.success(
+                request,
+                "Preparando exportación. Puedes seguir trabajando mientras termina.",
+            )
+        else:
+            messages.info(request, "Ya hay una exportación en preparación.")
+        return redirect(self.object.get_export_url())
+
+
+class AlbumExportStatusView(PrivateViewMixin, View):
+    """Estado JSON privado de una exportación en segundo plano (HU-27)."""
+
+    def get(self, request, pk):
+        """Devuelve el estado solo si el álbum pertenece a quien consulta."""
+        export = get_object_or_404(
+            AlbumExport,
+            pk=pk,
+            album__owner=request.user,
+        )
+        messages_by_status = {
+            AlbumExport.Status.PREPARING: "Preparando exportación…",
+            AlbumExport.Status.READY: "Exportación lista.",
+            AlbumExport.Status.FAILED: export.error,
+        }
+        return JsonResponse(
+            {
+                "status": export.status,
+                "message": messages_by_status[export.status],
+                "is_terminal": export.is_terminal,
+            }
+        )
 
 
 class AlbumUpdateView(OwnedAlbumMixin, UpdateView):

@@ -1,0 +1,131 @@
+{% extends "layouts/app_shell.html" %}
+
+{% block title %}Exportar {{ album.title }} · PaneLingo{% endblock %}
+
+{% block breadcrumb %}
+  <a class="breadcrumb__link" href="{% url 'albums:list' %}">Mis álbumes</a>
+  <span class="breadcrumb__sep" aria-hidden="true">/</span>
+  <a class="breadcrumb__link" href="{{ album.get_absolute_url }}">{{ album.title }}</a>
+  <span class="breadcrumb__sep" aria-hidden="true">/</span>
+  <span class="breadcrumb__current">Revisión y exportación</span>
+{% endblock %}
+
+{% block content %}
+  <a class="back-link" href="{{ album.get_absolute_url }}">
+    <span aria-hidden="true">←</span> Volver al álbum
+  </a>
+
+  <div class="page-head export-head">
+    <div>
+      <p class="export-head__eyebrow">{{ album.language_pair }}</p>
+      <h1 class="page-title">Revisión y exportación</h1>
+      <p class="page-subtitle">
+        Genera un documento con las traducciones aprobadas de «{{ album.title }}».
+      </p>
+    </div>
+  </div>
+
+  <div class="export-grid">
+    <section class="export-panel" aria-labelledby="export-summary-title">
+      <h2 class="export-panel__title" id="export-summary-title">Contenido</h2>
+      <dl class="export-summary">
+        <div>
+          <dt>Traducciones aprobadas</dt>
+          <dd>{{ approved_count }}</dd>
+        </div>
+        <div>
+          <dt>Regiones sin aprobar</dt>
+          <dd>{{ skipped_count }}</dd>
+        </div>
+      </dl>
+
+      {% if skipped_count %}
+        <div class="export-warning" role="alert" id="export-warning">
+          <strong>
+            {{ skipped_count }} {{ skipped_count|pluralize:"región sin aprobar,regiones sin aprobar" }} no se {{ skipped_count|pluralize:"incluirá,incluirán" }}.
+          </strong>
+          <p>El DOCX contendrá únicamente el trabajo que ya aprobaste.</p>
+        </div>
+      {% endif %}
+
+      {% if confirmation_required %}
+        <p class="alert alert--error" role="alert">
+          Confirma que deseas continuar sin las regiones pendientes.
+        </p>
+      {% endif %}
+
+      <form method="post" class="export-form">
+        {% csrf_token %}
+        {% if skipped_count %}<input type="hidden" name="confirm" value="1" />{% endif %}
+
+        <fieldset class="export-format">
+          <legend class="export-panel__title">Formato</legend>
+          <label class="export-option">
+            <input type="radio" name="format" value="docx" checked />
+            <span>
+              <strong>Documento DOCX</strong>
+              <small>Guion estructurado por página y región, editable en Word o LibreOffice.</small>
+            </span>
+          </label>
+        </fieldset>
+
+        {% if approved_count %}
+          <button type="submit" class="btn btn--primary" data-submit-busy>
+            <span class="btn__spinner" hidden aria-hidden="true"></span>
+            <span data-submit-label data-busy-label="Preparando…">
+              {% if skipped_count %}Confirmar y exportar{% else %}Exportar DOCX{% endif %}
+            </span>
+          </button>
+        {% else %}
+          <p class="export-empty" id="export-empty">
+            Aprueba al menos una traducción para habilitar la exportación.
+          </p>
+          <button type="button" class="btn btn--primary" disabled aria-describedby="export-empty">
+            Exportar DOCX
+          </button>
+        {% endif %}
+      </form>
+    </section>
+
+    <aside class="export-panel export-result" aria-labelledby="export-result-title">
+      <h2 class="export-panel__title" id="export-result-title">Última exportación</h2>
+      {% if latest_export %}
+        <div
+          class="export-status export-status--{{ latest_export.status }}"
+          aria-live="polite"
+          {% if latest_export.status == "preparing" %}
+            data-export-status-poll
+            data-export-status-url="{{ latest_export.get_status_url }}"
+          {% endif %}
+        >
+          <span class="export-status__mark" aria-hidden="true"></span>
+          <div>
+            <p class="export-status__title" data-export-status-message>
+              {% if latest_export.status == "preparing" %}
+                Preparando exportación…
+              {% elif latest_export.status == "ready" %}
+                Lista para descargar
+              {% else %}
+                No se pudo preparar
+              {% endif %}
+            </p>
+            <p class="export-status__meta">
+              {{ latest_export.approved_count }}
+              {{ latest_export.approved_count|pluralize:"traducción aprobada,traducciones aprobadas" }}
+              · DOCX
+            </p>
+            {% if latest_export.status == "ready" %}
+              <p class="export-status__detail">El archivo se preparó correctamente.</p>
+            {% elif latest_export.status == "failed" %}
+              <p class="export-status__detail">{{ latest_export.error }}</p>
+            {% else %}
+              <p class="export-status__detail">Puedes seguir trabajando mientras termina.</p>
+            {% endif %}
+          </div>
+        </div>
+      {% else %}
+        <p class="export-empty">Todavía no has preparado ninguna exportación.</p>
+      {% endif %}
+    </aside>
+  </div>
+{% endblock %}

@@ -40,7 +40,11 @@ función de equipo fuera de alcance.
         {% else %}
           {% include "components/nav_item.html" with label="Espacio de trabajo" icon="workspace" disabled=True reason="Carga una página para abrir el espacio de trabajo" %}
         {% endif %}
-        {% include "components/nav_item.html" with label="Revisión y exportación" icon="review" disabled=True badge=sidebar.review_total reason="Llega con la revisión y la exportación (HU-19 y HU-27)" %}
+        {% if sidebar.review_url %}
+          {% include "components/nav_item.html" with label="Revisión y exportación" icon="review" url=sidebar.review_url current=nav_current|default:"" key="review" badge=sidebar.review_total %}
+        {% else %}
+          {% include "components/nav_item.html" with label="Revisión y exportación" icon="review" disabled=True reason="Carga una página para preparar una exportación" %}
+        {% endif %}
         {% include "components/nav_item.html" with label="Terminología" icon="terms" disabled=True reason="Disponible en un sprint posterior" %}
         {% include "components/nav_item.html" with label="Configuración" icon="settings" disabled=True reason="Disponible en un sprint posterior" %}
       </nav>
@@ -106,7 +110,11 @@ función de equipo fuera de alcance.
       {% include "components/mobile_nav_item.html" with label="Álbumes" icon="library" url=albums_url current=nav_current|default:"" key="albums" %}
       {% include "components/mobile_nav_item.html" with label="Cargar" icon="upload" url=upload_url current=nav_current|default:"" key="upload" %}
       {% include "components/mobile_nav_item.html" with label="Traducción" icon="workspace" disabled=True %}
-      {% include "components/mobile_nav_item.html" with label="Revisión" icon="review" disabled=True %}
+      {% if sidebar.review_url %}
+        {% include "components/mobile_nav_item.html" with label="Revisión" icon="review" url=sidebar.review_url current=nav_current|default:"" key="review" %}
+      {% else %}
+        {% include "components/mobile_nav_item.html" with label="Revisión" icon="review" disabled=True %}
+      {% endif %}
       {% comment %}
       "Salir" ocupa el hueco que en el mockup lleva a Configuración. Esa
       pantalla está fuera del alcance del Sprint 1, así que su ítem no
