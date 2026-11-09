@@ -7,6 +7,7 @@ from albums.views import (
     AlbumCreateView,
     AlbumDeleteView,
     AlbumDetailView,
+    AlbumExportDownloadView,
     AlbumExportStatusView,
     AlbumExportView,
     AlbumListView,
@@ -45,6 +46,11 @@ urlpatterns = [
         "exportaciones/<int:pk>/estado/",
         AlbumExportStatusView.as_view(),
         name="export_status",
+    ),
+    path(
+        "exportaciones/<int:pk>/descargar/",
+        AlbumExportDownloadView.as_view(),
+        name="export_download",
     ),
     path(
         "albumes/<int:pk>/eliminar/",

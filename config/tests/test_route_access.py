@@ -35,6 +35,7 @@ PRIVATE_ROUTES = [
     "albums:detail",
     "albums:edit",
     "albums:export",
+    "albums:export_download",
     "albums:export_status",
     "albums:rename",
     "albums:album_cover",
@@ -72,6 +73,7 @@ ROUTE_ARGS = {
     "albums:edit": {"pk": 1},
     "albums:rename": {"pk": 1},
     "albums:export": {"pk": 1},
+    "albums:export_download": {"pk": 1},
     "albums:export_status": {"pk": 1},
     "albums:album_cover": {"pk": 1},
     "albums:page_delete": {"pk": 1},
@@ -174,12 +176,18 @@ class PrivateRouteAccessTests(TestCase):
     """CP-03.2 — Las vistas privadas no son accesibles sin sesión."""
 
     def test_private_routes_redirect_anonymous_visitors(self):
-        """CP-03.2 — Toda ruta privada envía al login sin sesión."""
+        """CP-03.2 — Las rutas privadas exigen sesión sin revelar datos."""
         login_url = reverse("accounts:login")
 
         for name in PRIVATE_ROUTES:
             with self.subTest(route=name):
                 response = self.client.get(route_url(name))
+
+                # CA-28.3 exige 404 incluso sin sesión para no confirmar que
+                # existe un archivo privado con ese identificador.
+                if name == "albums:export_download":
+                    self.assertEqual(response.status_code, 404)
+                    continue
 
                 self.assertEqual(response.status_code, 302)
                 self.assertTrue(

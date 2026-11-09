@@ -765,6 +765,10 @@ class AlbumExport(models.Model):
         """Devuelve la dirección privada para consultar el estado."""
         return reverse("albums:export_status", kwargs={"pk": self.pk})
 
+    def get_download_url(self):
+        """Devuelve la dirección privada para descargar esta exportación."""
+        return reverse("albums:export_download", kwargs={"pk": self.pk})
+
     @property
     def is_terminal(self):
         """Indica si la preparación terminó, con éxito o error."""
