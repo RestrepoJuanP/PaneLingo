@@ -3674,6 +3674,169 @@ textarea {
   text-decoration: none;
 }
 
+/* Revisión y exportación DOCX (HU-27), basada en la pantalla del mockup. */
+.export-head {
+  margin-bottom: var(--sp-8);
+}
+
+.export-head__eyebrow {
+  margin: 0 0 var(--sp-2);
+  color: var(--brand);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: var(--ls-caps-tight);
+  text-transform: uppercase;
+}
+
+.export-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
+  gap: var(--sp-8);
+  align-items: start;
+}
+
+.export-panel {
+  padding: var(--sp-8);
+  border: 1px solid var(--border);
+  border-radius: var(--r-2xl);
+  background: var(--surface);
+}
+
+.export-panel__title {
+  margin: 0 0 var(--sp-6);
+  color: var(--ink-900);
+  font-size: var(--fs-section);
+  font-weight: 700;
+}
+
+.export-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-4);
+  margin: 0 0 var(--sp-6);
+}
+
+.export-summary > div {
+  padding: var(--sp-5);
+  border-radius: var(--r-lg);
+  background: var(--surface-subtle);
+}
+
+.export-summary dt {
+  color: var(--muted);
+  font-size: var(--fs-label-sm);
+}
+
+.export-summary dd {
+  margin: var(--sp-2) 0 0;
+  color: var(--ink-900);
+  font-size: var(--fs-subsection);
+  font-weight: 800;
+}
+
+.export-warning {
+  margin-bottom: var(--sp-6);
+  padding: var(--sp-5);
+  border: 1px solid var(--warning-border);
+  border-radius: var(--r-lg);
+  background: var(--warning-bg);
+  color: var(--warning-fg);
+  font-size: var(--fs-sm);
+}
+
+.export-warning p {
+  margin: var(--sp-2) 0 0;
+}
+
+.export-form {
+  display: grid;
+  gap: var(--sp-6);
+}
+
+.export-format {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.export-option {
+  display: flex;
+  gap: var(--sp-4);
+  padding: var(--sp-5);
+  border: 1px solid var(--brand);
+  border-radius: var(--r-lg);
+  background: var(--brand-tint-2);
+  cursor: pointer;
+}
+
+.export-option input {
+  margin-top: var(--sp-1);
+  accent-color: var(--brand);
+}
+
+.export-option span {
+  display: grid;
+  gap: var(--sp-2);
+}
+
+.export-option small,
+.export-empty,
+.export-status__meta,
+.export-status__detail {
+  color: var(--muted);
+  font-size: var(--fs-label-sm);
+  line-height: 1.5;
+}
+
+.export-empty {
+  margin: 0;
+}
+
+.export-status {
+  display: flex;
+  gap: var(--sp-4);
+}
+
+.export-status__mark {
+  width: var(--sp-3);
+  height: var(--sp-3);
+  flex: none;
+  margin-top: var(--sp-2);
+  border-radius: var(--r-pill);
+  background: var(--brand);
+}
+
+.export-status--ready .export-status__mark {
+  background: var(--success);
+}
+
+.export-status--failed .export-status__mark {
+  background: var(--danger);
+}
+
+.export-status__title {
+  margin: 0;
+  color: var(--ink-900);
+  font-size: var(--fs-ui);
+  font-weight: 700;
+}
+
+.export-status__meta,
+.export-status__detail {
+  margin: var(--sp-2) 0 0;
+}
+
+@media (max-width: 760px) {
+  .export-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .export-summary {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Barra de progreso doble: listas (marca) y por revisar (ámbar). */
 .split-progress {
   display: flex;

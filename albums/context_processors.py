@@ -13,6 +13,7 @@ def sidebar_summary(user):
     return {
         "has_albums": Album.objects.filter(owner=user).exists(),
         "workspace_url": page.get_absolute_url() if page else "",
+        "review_url": page.album.get_export_url() if page else "",
         "review_total": review_total(user),
         "quota": monthly_quota(user),
     }

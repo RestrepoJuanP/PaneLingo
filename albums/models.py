@@ -51,6 +51,14 @@ def album_cover_path(instance, filename):
     return f"albums/user_{instance.owner_id}/covers/{uuid.uuid4().hex}{extension}"
 
 
+def album_export_path(instance, filename):
+    """Ruta privada de un DOCX exportado, con nombre generado por el servidor."""
+    return (
+        f"albums/user_{instance.album.owner_id}/album_{instance.album_id}"
+        f"/exports/{uuid.uuid4().hex}.docx"
+    )
+
+
 class Album(models.Model):
     """Álbum: conjunto de páginas de un mismo cómic, manga o webtoon.
 
@@ -147,6 +155,10 @@ class Album(models.Model):
     def get_delete_url(self):
         """Devuelve la dirección para eliminar este álbum (HU-20)."""
         return reverse("albums:delete", kwargs={"pk": self.pk})
+
+    def get_export_url(self):
+        """Devuelve la pantalla privada de exportación del álbum (HU-27)."""
+        return reverse("albums:export", kwargs={"pk": self.pk})
 
     @property
     def is_archived(self):
@@ -683,3 +695,77 @@ class TextRegion(models.Model):
             f"left: {left:.3f}%; top: {top:.3f}%; "
             f"width: {width:.3f}%; height: {height:.3f}%;"
         )
+
+
+class AlbumExport(models.Model):
+    """Archivo DOCX preparado a partir de traducciones aprobadas (HU-27)."""
+
+    class Status(models.TextChoices):
+        """Estados de la preparación asíncrona del archivo."""
+
+        PREPARING = "preparing", _("Preparando")
+        READY = "ready", _("Lista")
+        FAILED = "failed", _("Error")
+
+    class Format(models.TextChoices):
+        """Formatos admitidos por el alcance actual."""
+
+        DOCX = "docx", _("Documento DOCX")
+
+    album = models.ForeignKey(
+        Album,
+        on_delete=models.CASCADE,
+        related_name="exports",
+        verbose_name=_("álbum"),
+    )
+    status = models.CharField(
+        _("estado"),
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PREPARING,
+    )
+    format = models.CharField(
+        _("formato"),
+        max_length=10,
+        choices=Format.choices,
+        default=Format.DOCX,
+    )
+    snapshot = models.JSONField(
+        _("contenido aprobado"),
+        default=dict,
+        help_text=_("Instantánea usada por la tarea para evitar cambios concurrentes."),
+    )
+    approved_count = models.PositiveIntegerField(_("regiones aprobadas"), default=0)
+    skipped_count = models.PositiveIntegerField(_("regiones omitidas"), default=0)
+    file = models.FileField(
+        _("archivo"),
+        upload_to=album_export_path,
+        blank=True,
+    )
+    error = models.CharField(_("error"), max_length=255, blank=True)
+    created_at = models.DateTimeField(_("creada"), auto_now_add=True)
+    finished_at = models.DateTimeField(_("terminada"), null=True, blank=True)
+
+    class Meta:
+        verbose_name = _("exportación de álbum")
+        verbose_name_plural = _("exportaciones de álbum")
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(
+                fields=["album", "-created_at"],
+                name="export_album_recent_idx",
+            )
+        ]
+
+    def __str__(self):
+        """Identifica la exportación por álbum y fecha de creación."""
+        return f"Exportación de {self.album} ({self.created_at:%Y-%m-%d %H:%M})"
+
+    def get_status_url(self):
+        """Devuelve la dirección privada para consultar el estado."""
+        return reverse("albums:export_status", kwargs={"pk": self.pk})
+
+    @property
+    def is_terminal(self):
+        """Indica si la preparación terminó, con éxito o error."""
+        return self.status in (self.Status.READY, self.Status.FAILED)
