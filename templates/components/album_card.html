@@ -61,6 +61,11 @@ tras filtrar, para desplazarlas a su sitio nuevo en lugar de que salten.
     <p class="album-card__edited">
       {% if album.is_archived %}Archivado hace {{ album.archived_at|short_since }} · {% endif %}Editado hace {{ album.updated_at|short_since }}
     </p>
+    {% if album.resume_location %}
+      <a class="album-card__continue" href="{{ album.resume_location.url }}">
+        Continuar<span class="sr-only"> «{{ album.title }}»</span>
+      </a>
+    {% endif %}
   </div>
 </article>
 {% endwith %}

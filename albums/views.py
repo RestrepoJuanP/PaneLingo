@@ -27,6 +27,7 @@ from albums.insights import (
     LIBRARY_FILTERS,
     PAGE_FILTERS,
     AlbumProgress,
+    album_resume_location,
     library_for,
     library_stats,
     page_card,
@@ -171,10 +172,19 @@ class AlbumListView(PrivateViewMixin, ListView):
 
     @staticmethod
     def with_progress_of(albums):
-        """Lista de álbumes con su progreso calculado."""
+        """Lista de álbumes con su progreso y punto para continuar."""
         albums = list(albums)
         for album in albums:
             album.progress = AlbumProgress.of(album)
+            has_pending_work = album.progress.status.key in (
+                "in_progress",
+                "in_review",
+            )
+            album.resume_location = (
+                album_resume_location(album)
+                if has_pending_work and not album.is_archived
+                else None
+            )
         return albums
 
     @staticmethod
