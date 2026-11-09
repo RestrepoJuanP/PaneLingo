@@ -116,6 +116,9 @@ de pantalla anuncia número, tipo, estado y texto.
       {% if regions %}
         <div class="ws-preview-toggle" role="group" aria-label="Vista de la página" data-preview-toggle hidden>
           <button type="button" aria-pressed="true" data-preview-mode="original">Original</button>
+          {% if page.has_cleaned_image %}
+            <button type="button" aria-pressed="false" data-preview-mode="cleaned">Limpia</button>
+          {% endif %}
           <button type="button" aria-pressed="false" data-preview-mode="translated">Traducida</button>
         </div>
       {% endif %}
@@ -168,6 +171,22 @@ de pantalla anuncia número, tipo, estado y texto.
           href="{{ page.get_process_url }}"
           data-modal-open="reprocesar-pagina"
         >Volver a procesar</a>
+        {% if page.is_cleaning %}
+          <button type="button" class="ws-btn" disabled>
+            <span class="btn__spinner" aria-hidden="true"></span>
+            Limpiando la página…
+          </button>
+        {% else %}
+          <form method="post" action="{{ page.get_clean_url }}">
+            {% csrf_token %}
+            <button type="submit" class="ws-btn" data-submit-busy>
+              <span class="btn__spinner" hidden aria-hidden="true"></span>
+              <span data-submit-label data-busy-label="Limpiando la página…">
+                {% if page.cleaning_failed %}Reintentar limpieza{% elif page.has_cleaned_image %}Limpiar de nuevo{% else %}Limpiar página{% endif %}
+              </span>
+            </button>
+          </form>
+        {% endif %}
         {% if page.is_translating %}
           <button type="button" class="ws-cta" disabled>
             <span class="btn__spinner" aria-hidden="true"></span>
@@ -272,6 +291,9 @@ de pantalla anuncia número, tipo, estado y texto.
           <img
             class="region-canvas__img"
             src="{{ page.get_image_url }}"
+            data-page-image
+            data-original-src="{{ page.get_image_url }}"
+            {% if page.has_cleaned_image %}data-cleaned-src="{{ page.get_cleaned_image_url }}"{% endif %}
             alt="Página {{ page.page_number }} — {{ page.original_filename }}"
             width="{{ page.width }}"
             height="{{ page.height }}"
@@ -373,6 +395,16 @@ de pantalla anuncia número, tipo, estado y texto.
             </p>
           {% endif %}
 
+          {% if manual_cleaning_count %}
+            <p class="ws-note ws-note--warning">
+              <span class="ws-note__mark" aria-hidden="true"></span>
+              <span>
+                <strong>{{ manual_cleaning_count }} {{ manual_cleaning_count|pluralize:"región necesita,regiones necesitan" }} limpieza manual o con IA.</strong>
+                El fondo de esas zonas no es uniforme y se conservó sin cambios.
+              </span>
+            </p>
+          {% endif %}
+
           {% comment %}
           Mientras la página se procesa, static/js/app.js consulta su estado y
           recarga la vista en cuanto termina. Sin JavaScript queda el enlace
@@ -381,7 +413,7 @@ de pantalla anuncia número, tipo, estado y texto.
           <div
             class="processing-status"
             aria-live="polite"
-            {% if page.is_processing or page.is_translating %}data-processing-poll="{{ page.get_status_url }}"{% endif %}
+            {% if page.is_processing or page.is_translating or page.is_cleaning %}data-processing-poll="{{ page.get_status_url }}"{% endif %}
           >
             {% if page.is_processing %}
               <p class="ws-note">
@@ -401,8 +433,30 @@ de pantalla anuncia número, tipo, estado y texto.
                   <noscript><a href="{{ page.get_absolute_url }}">Actualizar</a></noscript>
                 </span>
               </p>
+            {% elif page.is_cleaning %}
+              <p class="ws-note">
+                <span class="ws-note__mark" aria-hidden="true"></span>
+                <span>
+                  Limpiando la página… La copia original permanece intacta.
+                  <noscript><a href="{{ page.get_absolute_url }}">Actualizar</a></noscript>
+                </span>
+              </p>
             {% endif %}
           </div>
+
+          {% if page.cleaning_failed %}
+            <div class="form-errors" role="alert">
+              <span class="form-errors__icon" aria-hidden="true">!</span>
+              <div>
+                <p class="form-errors__list">{{ page.cleaning_error|default:"No se pudo limpiar la página." }}</p>
+                <p class="processing-error__hint">La imagen original no cambió. Puedes intentarlo de nuevo.</p>
+                <form method="post" action="{{ page.get_clean_url }}" class="processing-error__retry">
+                  {% csrf_token %}
+                  <button type="submit" class="block-btn">Reintentar</button>
+                </form>
+              </div>
+            </div>
+          {% endif %}
 
           {% if page.translation_failed %}
             {% comment %}
@@ -460,6 +514,13 @@ de pantalla anuncia número, tipo, estado y texto.
                       {% if region.is_manual %}
                         <span class="block-chip block-chip--manual">Añadida a mano</span>
                       {% endif %}
+                      {% if region.cleaning_status == "manual" %}
+                        <span class="block-chip block-chip--warning">Limpieza manual</span>
+                      {% elif region.cleaning_status == "filled" or region.cleaning_status == "ai" %}
+                        <span class="block-chip block-chip--success">Limpia</span>
+                      {% elif region.cleaning_status == "pending" and page.has_cleaned_image %}
+                        <span class="block-chip">Sin limpiar</span>
+                      {% endif %}
                       {% if region.skip_translation %}
                         <span class="block-chip">No traducir</span>
                       {% elif region.confidence_percent is not None %}
@@ -488,6 +549,12 @@ de pantalla anuncia número, tipo, estado y texto.
                         <form method="post" action="{{ region.get_skip_translation_url }}">
                           {% csrf_token %}
                           <button type="submit" class="block-btn">No traducir</button>
+                        </form>
+                      {% endif %}
+                      {% if page.has_cleaned_image and region.cleaning_status != "pending" and region.cleaning_status != "kept" %}
+                        <form method="post" action="{{ region.get_restore_cleaning_url }}">
+                          {% csrf_token %}
+                          <button type="submit" class="block-btn">Restaurar original</button>
                         </form>
                       {% endif %}
                       <button

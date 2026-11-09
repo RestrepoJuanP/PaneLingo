@@ -22,6 +22,7 @@ from albums.views import (
     UploadChooseView,
     album_archive,
     album_unarchive,
+    page_clean,
     page_translate,
     region_add,
     region_approve,
@@ -29,6 +30,7 @@ from albums.views import (
     region_delete,
     region_enable_translation,
     region_restore,
+    region_restore_cleaning,
     region_retranslate,
     region_skip_translation,
     region_translation_edit,
@@ -80,6 +82,11 @@ urlpatterns = [
         name="page_image",
     ),
     path(
+        "paginas/<int:pk>/imagen-limpia/",
+        PageImageView.as_view(variant="cleaned"),
+        name="page_cleaned_image",
+    ),
+    path(
         "paginas/<int:pk>/miniatura/",
         PageImageView.as_view(variant="thumbnail"),
         name="page_thumbnail",
@@ -98,6 +105,11 @@ urlpatterns = [
         "paginas/<int:pk>/traducir/",
         page_translate,
         name="page_translate",
+    ),
+    path(
+        "paginas/<int:pk>/limpiar/",
+        page_clean,
+        name="page_clean",
     ),
     path(
         "regiones/<int:pk>/traducir/",
@@ -128,6 +140,11 @@ urlpatterns = [
         "regiones/<int:pk>/restaurar/",
         region_restore,
         name="region_restore",
+    ),
+    path(
+        "regiones/<int:pk>/restaurar-limpieza/",
+        region_restore_cleaning,
+        name="region_restore_cleaning",
     ),
     path(
         "regiones/<int:pk>/no-traducir/",

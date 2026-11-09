@@ -22,6 +22,13 @@ from django.views.generic import (
 
 from accounts.access import PrivateViewMixin, private_view
 from albums.archiving import archive_album, unarchive_album
+from albums.cleaning import (
+    expire_cleaning_if_stale,
+    start_cleaning,
+)
+from albums.cleaning import (
+    restore_region_cleaning as restore_cleaning_area,
+)
 from albums.corrections import correct_region, restore_region
 from albums.exporting import (
     build_export_snapshot,
@@ -796,6 +803,7 @@ class OwnedPageMixin(PrivateViewMixin):
         page = super().get_object(queryset)
         expire_if_stale(page)
         expire_translation_if_stale(page)
+        expire_cleaning_if_stale(page)
         return page
 
     def get_context_data(self, **kwargs):
@@ -863,6 +871,10 @@ class PageDetailView(OwnedPageMixin, DetailView):
         context["preview_regions"] = [
             preview_for_region(region) for region in visible_regions
         ]
+        context["manual_cleaning_count"] = sum(
+            region.cleaning_status == TextRegion.CleaningStatus.MANUAL
+            for region in regions
+        )
         context.setdefault("manual_region_form", ManualRegionForm(page=page))
         context.update(page_neighbours(page))
         context.update(translation_summary(page, regions))
@@ -943,6 +955,7 @@ class PageStatusView(OwnedPageMixin, DetailView):
                 "status_variant": page.status_variant,
                 "is_processing": page.is_processing,
                 "is_translating": page.is_translating,
+                "is_cleaning": page.is_cleaning,
                 "region_count": page.region_total,
                 "progress_bar": card["bar"],
                 "progress_percent": card["percent"],
@@ -1036,6 +1049,8 @@ class PageImageView(OwnedPageMixin, DetailView):
         page = self.object
         if self.variant == "thumbnail" and page.thumbnail:
             return stored_file_response(page.thumbnail)
+        if self.variant == "cleaned":
+            return stored_file_response(page.cleaned_image)
         return stored_file_response(page.image)
 
 
@@ -1074,7 +1089,37 @@ def owned_page_or_404(request, pk):
     )
     expire_if_stale(page)
     expire_translation_if_stale(page)
+    expire_cleaning_if_stale(page)
     return page
+
+
+def cleaning_feedback(page):
+    """Devuelve el mensaje que corresponde al resultado de limpiar la página."""
+    if page.is_cleaning:
+        return messages.SUCCESS, "Limpiando la página…"
+    if page.cleaning_failed:
+        return messages.ERROR, page.cleaning_error
+    manual_count = page.regions.filter(
+        cleaning_status=TextRegion.CleaningStatus.MANUAL
+    ).count()
+    if manual_count:
+        noun = "región necesita" if manual_count == 1 else "regiones necesitan"
+        return messages.WARNING, (f"{manual_count} {noun} limpieza manual o con IA.")
+    return messages.SUCCESS, "La página quedó limpia."
+
+
+@require_POST
+@private_view
+def page_clean(request, pk):
+    """Encola la eliminación del texto original de una página propia (HU-88)."""
+    page = owned_page_or_404(request, pk)
+    if not start_cleaning(page):
+        messages.info(request, "La página no está lista para limpiarse.")
+        return redirect(page.get_absolute_url())
+    page.refresh_from_db()
+    level, text = cleaning_feedback(page)
+    messages.add_message(request, level, text)
+    return redirect(page.get_absolute_url())
 
 
 def queue_translation(request, page, region=None):
@@ -1205,6 +1250,19 @@ def region_enable_translation(request, pk):
     messages.success(
         request,
         f"La región {region.reading_order} vuelve a estar pendiente de traducir.",
+    )
+    return redirect(f"{region.page.get_absolute_url()}#region-{region.reading_order}")
+
+
+@require_POST
+@private_view
+def region_restore_cleaning(request, pk):
+    """Restaura la zona original de una región propia (HU-88, CA-88.5)."""
+    region = owned_region_or_404(request, pk)
+    restore_cleaning_area(region)
+    messages.success(
+        request,
+        f"La región {region.reading_order} quedó sin limpiar.",
     )
     return redirect(f"{region.page.get_absolute_url()}#region-{region.reading_order}")
 

@@ -98,6 +98,8 @@ def save_regions(page, regions):
     """
     has_doubtful_regions = any(region.needs_review for region in regions)
     has_translatable_regions = any(region.needs_translation for region in regions)
+    previous_cleaned_name = page.cleaned_image.name if page.cleaned_image else ""
+    cleaned_storage = page.cleaned_image.storage
     with transaction.atomic():
         page.regions.all().delete()
         TextRegion.objects.bulk_create(regions)
@@ -109,7 +111,30 @@ def save_regions(page, regions):
             page.status = ComicPage.Status.PROCESSED
         page.processing_started_at = None
         page.processing_error = ""
-        page.save(update_fields=["status", "processing_started_at", "processing_error"])
+        page.cleaned_image = ""
+        page.cleaning_state = ComicPage.CleaningState.IDLE
+        page.cleaning_started_at = None
+        page.cleaning_error = ""
+        page.save(
+            update_fields=[
+                "status",
+                "processing_started_at",
+                "processing_error",
+                "cleaned_image",
+                "cleaning_state",
+                "cleaning_started_at",
+                "cleaning_error",
+            ]
+        )
+    if previous_cleaned_name:
+        try:
+            cleaned_storage.delete(previous_cleaned_name)
+        except OSError:
+            logger.warning(
+                "No se pudo borrar la capa limpia invalidada de la página %s.",
+                page.pk,
+                exc_info=True,
+            )
 
 
 def mark_failed(page, message):

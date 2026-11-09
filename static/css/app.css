@@ -3228,6 +3228,15 @@ textarea {
   text-align: center;
 }
 
+.region-canvas.is-clean-preview .region-box {
+  display: none;
+}
+
+.region-canvas.uses-cleaned-image .page-overlay__region,
+.region-canvas.uses-cleaned-image .page-overlay__region--untranslated {
+  background: transparent;
+}
+
 .page-overlay__region--narration {
   font-style: italic;
 }
