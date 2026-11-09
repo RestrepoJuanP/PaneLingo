@@ -147,6 +147,22 @@ class EmptyRegionTests(CorrectionTestCase):
         response = self.client.get(self.page.get_absolute_url(), follow=True)
         self.assertContains(response, "Sin texto que traducir")
 
+    def test_emptying_every_region_completes_the_page(self):
+        """BUG-073 — Sin texto traducible la página queda aprobada."""
+        self.correct(self.first, text="")
+        self.correct(self.second, text="")
+
+        self.assertEqual(self.page.status, ComicPage.Status.APPROVED)
+
+    def test_restoring_text_reopens_a_completed_page(self):
+        """BUG-073 — Restaurar texto recupera el trabajo pendiente."""
+        self.correct(self.first, text="")
+        self.correct(self.second, text="")
+
+        self.correct(self.second, restore="1")
+
+        self.assertEqual(self.page.status, ComicPage.Status.PROCESSED)
+
 
 class CorrectionAccessTests(CorrectionTestCase):
     """CP-15 — Una región ajena no se puede corregir."""

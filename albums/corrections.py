@@ -10,6 +10,7 @@ from django.utils import timezone
 
 from albums.models import ComicPage
 from albums.ocr.review import text_needs_review
+from albums.translation_review import refresh_page_approval
 
 # Longitud máxima de una corrección. Un globo de cómic no se acerca ni de
 # lejos; el límite solo impide guardar textos desmesurados por error.
@@ -58,6 +59,7 @@ def correct_region(region, text):
             ]
         )
         refresh_page_review_status(region.page)
+        refresh_page_approval(region.page)
 
 
 def restore_region(region):
@@ -81,3 +83,4 @@ def restore_region(region):
             ]
         )
         refresh_page_review_status(region.page)
+        refresh_page_approval(region.page)
