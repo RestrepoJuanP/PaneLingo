@@ -667,6 +667,11 @@ class TextRegion(models.Model):
         return self.translation_status == self.TranslationStatus.APPROVED
 
     @property
+    def requires_review(self):
+        """Indica si la región aún requiere revisión por parte del traductor."""
+        return self.needs_review and not self.is_translation_approved
+
+    @property
     def translation_variant(self):
         """Devuelve la variante de color del chip de la traducción."""
         return self.TRANSLATION_VARIANTS.get(self.translation_status, "neutral")

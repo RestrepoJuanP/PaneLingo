@@ -103,8 +103,14 @@ class AlbumCoverTests(AlbumEditTestCase):
         self.assertFalse(os.path.exists(old_path))
 
     def test_fake_image_is_rejected(self):
-        """HU-49 — Un archivo que no es imagen se rechaza y no se guarda."""
+        """CP-49.2 / BUG-074 — Una imagen falsa muestra el motivo correcto."""
         self.sign_in()
+        self.client.post(
+            self.album.get_edit_url(),
+            self.edit_data(cover_image=make_upload("actual.png")),
+        )
+        self.album.refresh_from_db()
+        previous_name = self.album.cover_image.name
         fake = SimpleUploadedFile("x.png", b"no soy una imagen", "image/png")
 
         response = self.client.post(
@@ -112,9 +118,13 @@ class AlbumCoverTests(AlbumEditTestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.context["form"].errors["cover_image"])
+        self.assertEqual(
+            list(response.context["form"].errors["cover_image"]),
+            ["El archivo no es una imagen, aunque su nombre lo parezca."],
+        )
         self.album.refresh_from_db()
-        self.assertFalse(self.album.cover_image)
+        self.assertEqual(self.album.cover_image.name, previous_name)
+        self.assertTrue(os.path.exists(self.album.cover_image.path))
 
     def test_foreign_album_cover_cannot_be_changed(self):
         """HU-49 — Cambiar la portada de un álbum ajeno responde 404."""

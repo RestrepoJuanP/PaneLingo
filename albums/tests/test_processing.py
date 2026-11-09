@@ -13,6 +13,7 @@ from unittest import mock
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
+from django.urls import reverse
 from django.utils import timezone
 from huey.contrib.djhuey import HUEY
 from PIL import Image
@@ -311,16 +312,18 @@ class RegionDisplayTests(ProcessingTestCase):
 class PageWithoutTextTests(ProcessingTestCase):
     """CP-12.3 — Una página sin texto — Flujo alternativo."""
 
-    def test_the_page_is_processed_with_zero_regions(self):
-        """CP-12.3 — La página pasa a "Procesada" con 0 regiones."""
+    def test_the_page_is_completed_with_zero_regions(self):
+        """CP-12.3 / BUG-073 — Sin texto queda aprobada y completada."""
         with use_provider(FakeOcrProvider(regions=[])):
             response = self.process()
 
-        self.assertEqual(self.page.status, ComicPage.Status.PROCESSED)
+        self.assertEqual(self.page.status, ComicPage.Status.APPROVED)
         self.assertEqual(self.page.regions.count(), 0)
         self.assertContains(
             self.client.get(response.url), "No se detectó texto en esta página."
         )
+        library = self.client.get(reverse("albums:list"))
+        self.assertContains(library, "Completado")
 
 
 class DetectionFailureTests(ProcessingTestCase):

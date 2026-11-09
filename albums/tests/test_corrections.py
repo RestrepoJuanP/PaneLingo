@@ -124,13 +124,22 @@ class UnsavedChangesTests(CorrectionTestCase):
         self.assertIn("data-region-workspace", content)
         self.assertEqual(content.count('class="block-card__body" data-region-edit'), 2)
 
-    def test_reprocessing_warns_about_manual_corrections(self):
-        """CP-15.4 — Volver a procesar avisa de que se perderán las correcciones."""
+    def test_reprocessing_warning_agrees_with_one_correction(self):
+        """CP-15.4 / BUG-063 — Una corrección usa «se perderá»."""
         self.correct(self.first, text="たぶんね")
 
         response = self.client.get(self.page.get_absolute_url())
 
-        self.assertContains(response, "Se perderán 1 corrección que hiciste a mano.")
+        self.assertContains(response, "Se perderá 1 corrección que hiciste a mano.")
+
+    def test_reprocessing_warning_agrees_with_multiple_corrections(self):
+        """CP-15.4 / BUG-063 — Dos correcciones usan «se perderán»."""
+        self.correct(self.first, text="たぶんね")
+        self.correct(self.second, text="たしかです")
+
+        response = self.client.get(self.page.get_absolute_url())
+
+        self.assertContains(response, "Se perderán 2 correcciones que hiciste a mano.")
 
 
 class EmptyRegionTests(CorrectionTestCase):
@@ -146,6 +155,22 @@ class EmptyRegionTests(CorrectionTestCase):
         self.assertFalse(self.first.needs_review)
         response = self.client.get(self.page.get_absolute_url(), follow=True)
         self.assertContains(response, "Sin texto que traducir")
+
+    def test_emptying_every_region_completes_the_page(self):
+        """CP-15.5 / BUG-073 — Sin texto traducible queda aprobada."""
+        self.correct(self.first, text="")
+        self.correct(self.second, text="")
+
+        self.assertEqual(self.page.status, ComicPage.Status.APPROVED)
+
+    def test_restoring_text_reopens_a_completed_page(self):
+        """CP-15.3 / BUG-073 — Restaurar recupera el trabajo pendiente."""
+        self.correct(self.first, text="")
+        self.correct(self.second, text="")
+
+        self.correct(self.second, restore="1")
+
+        self.assertEqual(self.page.status, ComicPage.Status.PROCESSED)
 
 
 class CorrectionAccessTests(CorrectionTestCase):

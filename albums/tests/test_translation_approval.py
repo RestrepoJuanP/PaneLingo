@@ -76,6 +76,18 @@ class ApproveRegionTests(ApprovalTestCase):
         self.assertContains(response, "Aprobar y pasar a la siguiente (Ctrl+Enter)")
         self.assertContains(response, "data-approve", count=2)
 
+    def test_approval_resolves_an_ocr_review_warning(self):
+        """CP-19.1 / BUG-072 — Aprobar resuelve el aviso de revisión."""
+        TextRegion.objects.filter(pk=self.first.pk).update(needs_review=True)
+        self.first.refresh_from_db()
+
+        self.post_approve(self.first)
+        response = self.workspace()
+
+        self.assertTrue(self.first.needs_review)
+        self.assertFalse(self.first.requires_review)
+        self.assertEqual(response.context["review_count"], 0)
+
 
 class PageApprovalTests(ApprovalTestCase):
     """CP-19.2 — La página queda aprobada cuando todas sus regiones lo están."""
@@ -182,6 +194,16 @@ class WithdrawApprovalTests(ApprovalTestCase):
 
         self.assertContains(response, "Retirar aprobación", count=2)
         self.assertNotContains(response, "data-approve")
+
+    def test_withdrawing_restores_the_original_review_warning(self):
+        """CP-19.4 / BUG-072 — Retirar recupera la advertencia del OCR."""
+        TextRegion.objects.filter(pk=self.first.pk).update(needs_review=True)
+
+        self.post_unapprove(self.first)
+        response = self.workspace()
+
+        self.assertTrue(self.first.requires_review)
+        self.assertEqual(response.context["review_count"], 1)
 
 
 class ApprovalPersistsTests(ApprovalTestCase):

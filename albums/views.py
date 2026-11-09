@@ -266,7 +266,11 @@ class AlbumListView(PrivateViewMixin, ListView):
             "stats": library_stats(user, progress),
             "resume": resume,
             "resume_review": (
-                resume.regions.filter(needs_review=True).count() if resume else 0
+                resume.regions.filter(needs_review=True)
+                .exclude(translation_status=TextRegion.TranslationStatus.APPROVED)
+                .count()
+                if resume
+                else 0
             ),
             "review_regions": sum(item.region_review for item in progress),
             "active_albums": sum(
@@ -807,7 +811,7 @@ def is_unapproved(region):
 def filter_regions(regions, chosen):
     """Deja solo las regiones que pide el filtro elegido."""
     if chosen == REVIEW_FILTER:
-        return [region for region in regions if region.needs_review]
+        return [region for region in regions if region.requires_review]
     if chosen == UNAPPROVED_FILTER:
         return [region for region in regions if is_unapproved(region)]
     return regions
@@ -835,7 +839,7 @@ class PageDetailView(OwnedPageMixin, DetailView):
             region.translation_version = timestamp_version(region.translated_at)
         chosen = self.request.GET.get("filtro", "")
         context["regions"] = regions
-        context["review_count"] = sum(region.needs_review for region in regions)
+        context["review_count"] = sum(region.requires_review for region in regions)
         context["corrected_count"] = sum(region.is_corrected for region in regions)
         ready_count = len(regions) - context["review_count"]
         context["ready_count"] = ready_count
@@ -899,7 +903,11 @@ class PageStatusView(OwnedPageMixin, DetailView):
         """Devuelve el estado como JSON en lugar de una plantilla."""
         page = self.object
         page.region_total = page.regions.count()
-        page.region_review = page.regions.filter(needs_review=True).count()
+        page.region_review = (
+            page.regions.filter(needs_review=True)
+            .exclude(translation_status=TextRegion.TranslationStatus.APPROVED)
+            .count()
+        )
         card = page_card(page)
         return JsonResponse(
             {

@@ -90,20 +90,23 @@ def build_regions(page, image_bytes, detected):
 def save_regions(page, regions):
     """Reemplaza las regiones de la página y actualiza su estado.
 
-    La página queda "Necesita revisión" si alguna región lo necesita
-    (CA-13.3) y "Procesada" en caso contrario. El borrado y la inserción van
-    en la misma transacción: si algo falla al guardar, la página conserva sus
+    Sin texto que traducir queda "Aprobada" (BUG-073); en caso contrario,
+    queda "Necesita revisión" si alguna región lo necesita (CA-13.3) y
+    "Procesada" si todas son fiables. El borrado y la inserción van en la
+    misma transacción: si algo falla al guardar, la página conserva sus
     regiones anteriores (CA-12.4).
     """
     has_doubtful_regions = any(region.needs_review for region in regions)
+    has_translatable_regions = any(region.needs_translation for region in regions)
     with transaction.atomic():
         page.regions.all().delete()
         TextRegion.objects.bulk_create(regions)
-        page.status = (
-            ComicPage.Status.NEEDS_REVIEW
-            if has_doubtful_regions
-            else ComicPage.Status.PROCESSED
-        )
+        if not has_translatable_regions:
+            page.status = ComicPage.Status.APPROVED
+        elif has_doubtful_regions:
+            page.status = ComicPage.Status.NEEDS_REVIEW
+        else:
+            page.status = ComicPage.Status.PROCESSED
         page.processing_started_at = None
         page.processing_error = ""
         page.save(update_fields=["status", "processing_started_at", "processing_error"])

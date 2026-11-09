@@ -57,12 +57,12 @@ def refresh_page_approval(page):
     """Pone la página en "Aprobada" si todas sus regiones lo están (CA-19.2).
 
     Cuentan las regiones con texto que traducir (ADR-002, T5). Si alguna
-    deja de estar aprobada, la página sale de "Aprobada" (CA-19.4).
+    deja de estar aprobada, la página sale de "Aprobada" (CA-19.4). Si no
+    existe ninguna, también queda aprobada porque no hay trabajo pendiente
+    (BUG-073).
     """
     regions = [region for region in page.regions.all() if region.needs_translation]
-    all_approved = bool(regions) and all(
-        region.is_translation_approved for region in regions
-    )
+    all_approved = all(region.is_translation_approved for region in regions)
     if not all_approved:
         leave_page_approval(page)
         return
