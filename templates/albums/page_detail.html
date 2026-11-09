@@ -113,6 +113,13 @@ de pantalla anuncia número, tipo, estado y texto.
         </button>
       {% endif %}
 
+      {% if regions %}
+        <div class="ws-preview-toggle" role="group" aria-label="Vista de la página" data-preview-toggle hidden>
+          <button type="button" aria-pressed="true" data-preview-mode="original">Original</button>
+          <button type="button" aria-pressed="false" data-preview-mode="translated">Traducida</button>
+        </div>
+      {% endif %}
+
       {% if page.was_processed %}
         <button
           type="button"
@@ -269,6 +276,23 @@ de pantalla anuncia número, tipo, estado y texto.
             width="{{ page.width }}"
             height="{{ page.height }}"
           />
+          <div class="page-overlay" aria-hidden="true" data-page-overlay hidden>
+            {% for preview in preview_regions %}
+              {% if preview.status != "skipped" %}
+                <div
+                  class="page-overlay__region page-overlay__region--{{ preview.status }} page-overlay__region--{{ preview.kind }}{% if not preview.fits %} is-overflowing{% endif %}"
+                  style="{{ preview.overlay_style }} --preview-font-ratio: {{ preview.font_ratio_css }};"
+                  data-preview-region="{{ preview.region_pk }}"
+                >
+                  <span class="page-overlay__lines">
+                    {% for line in preview.lines %}<span>{{ line }}</span>{% endfor %}
+                  </span>
+                  <span class="page-overlay__notice" data-preview-untranslated {% if preview.status != "untranslated" %}hidden{% endif %}>Sin traducir</span>
+                  <span class="page-overlay__notice" data-preview-overflow {% if preview.fits %}hidden{% endif %}>El texto no cabe</span>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
           {% for region in visible_regions %}
             <a
               class="region-box region-box--{{ region.kind }}{% if region.requires_review %} region-box--review{% endif %}{% if region.is_manual %} region-box--manual{% endif %}"
