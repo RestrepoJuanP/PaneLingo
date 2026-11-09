@@ -28,7 +28,7 @@ from albums.exporting import (
     export_download_name,
     start_album_export,
 )
-from albums.forms import AlbumForm, AlbumRenameForm
+from albums.forms import AlbumForm, AlbumRenameForm, ManualRegionForm
 from albums.insights import (
     LIBRARY_FILTERS,
     PAGE_FILTERS,
@@ -43,7 +43,9 @@ from albums.insights import (
     time_greeting,
     with_progress,
 )
+from albums.manual_regions import add_manual_region
 from albums.models import Album, AlbumExport, ComicPage, TextRegion
+from albums.ocr import OcrProviderError
 from albums.processing import expire_if_stale, start_processing
 from albums.services import create_pages_from_upload
 from albums.translating import (
@@ -834,9 +836,11 @@ class PageDetailView(OwnedPageMixin, DetailView):
         context = super().get_context_data(**kwargs)
         page = self.object
         regions = list(page.regions.all())
+        manual_focus = self.request.GET.get("region-nueva", "")
         for region in regions:
             region.correction_version = timestamp_version(region.corrected_at)
             region.translation_version = timestamp_version(region.translated_at)
+            region.focus_source = manual_focus == str(region.reading_order)
         chosen = self.request.GET.get("filtro", "")
         context["regions"] = regions
         context["review_count"] = sum(region.requires_review for region in regions)
@@ -849,9 +853,22 @@ class PageDetailView(OwnedPageMixin, DetailView):
         context["review_filter"] = chosen == REVIEW_FILTER
         context["unapproved_filter"] = chosen == UNAPPROVED_FILTER
         context["visible_regions"] = filter_regions(regions, chosen)
+        context.setdefault("manual_region_form", ManualRegionForm(page=page))
         context.update(page_neighbours(page))
         context.update(translation_summary(page, regions))
         return context
+
+
+def render_page_workspace(request, page, manual_region_form, status):
+    """Vuelve a mostrar el workspace con un formulario de región inválido."""
+    view = PageDetailView()
+    view.setup(request, pk=page.pk)
+    view.object = page
+    context = view.get_context_data(
+        object=page,
+        manual_region_form=manual_region_form,
+    )
+    return view.render_to_response(context, status=status)
 
 
 def translation_summary(page, regions):
@@ -1074,6 +1091,48 @@ def page_translate(request, pk):
     else:
         queue_translation(request, page)
     return redirect(page.get_absolute_url())
+
+
+@require_POST
+@private_view
+def region_add(request, pk):
+    """Añade con OCR una región dibujada sobre una página propia (HU-85)."""
+    page = owned_page_or_404(request, pk)
+    if not page.was_processed:
+        messages.error(
+            request,
+            "Procesa la página antes de añadir una región manual.",
+        )
+        return redirect(page.get_absolute_url())
+
+    form = ManualRegionForm(request.POST, page=page)
+    if not form.is_valid():
+        return render_page_workspace(request, page, form, status=422)
+
+    try:
+        region = add_manual_region(page, **form.cleaned_data)
+    except OcrProviderError:
+        form.add_error(
+            None,
+            "No se pudo leer esta zona. Inténtalo de nuevo.",
+        )
+        return render_page_workspace(request, page, form, status=502)
+
+    if region.source_text:
+        messages.success(
+            request,
+            f"Región {region.reading_order} añadida y leída.",
+        )
+        return redirect(f"{page.get_absolute_url()}#region-{region.reading_order}")
+    else:
+        messages.warning(
+            request,
+            "No se reconoció texto en esta zona: escríbelo a mano.",
+        )
+    return redirect(
+        f"{page.get_absolute_url()}?region-nueva={region.reading_order}"
+        f"#region-{region.reading_order}"
+    )
 
 
 @require_POST

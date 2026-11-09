@@ -414,6 +414,10 @@ class ComicPage(models.Model):
         """Devuelve la dirección del estado de procesamiento, en JSON."""
         return reverse("albums:page_status", kwargs={"pk": self.pk})
 
+    def get_region_add_url(self):
+        """Devuelve la dirección para añadir una región manual (HU-85)."""
+        return reverse("albums:region_add", kwargs={"pk": self.pk})
+
     # Las imágenes se piden por estas direcciones protegidas y nunca por
     # MEDIA_URL: así una página ajena responde 404 aunque se conozca su
     # dirección (HU-11, CA-11.4, deuda DT-02).
@@ -572,6 +576,11 @@ class TextRegion(models.Model):
         _("necesita revisión"),
         default=False,
         help_text=_("Texto vacío, de baja confianza o en otro alfabeto."),
+    )
+    is_manual = models.BooleanField(
+        _("añadida manualmente"),
+        default=False,
+        help_text=_("La dibujó el traductor porque el OCR no la detectó."),
     )
     corrected_text = models.TextField(
         _("texto corregido"),

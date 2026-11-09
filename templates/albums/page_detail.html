@@ -6,10 +6,9 @@ Referencia visual: design/screenshots/fuera-de-alcance/workspace.png.
 
 Composición del mockup: barra de herramientas arriba, la página sobre un
 lienzo oscuro a la izquierda y el panel de bloques de texto a la derecha. Del
-mockup quedan fuera, por no tener HU todavía: deshacer y rehacer, el zoom,
-las herramientas "Add region" y "Fix reading order" y las notas de
-terminología. La traducción de cada bloque y "Retry AI" llegan con HU-16
-(ADR-002).
+mockup quedan fuera, por no tener HU todavía: deshacer y rehacer, "Fix reading
+order" y las notas de terminología. "Add region" llega con HU-85. La
+traducción de cada bloque y "Retry AI" llegan con HU-16 (ADR-002).
 
 Accesibilidad: cada región de la imagen enlaza con su bloque y cada bloque
 con su región, así que se recorren con el teclado sin JavaScript, y el lector
@@ -114,6 +113,17 @@ de pantalla anuncia número, tipo, estado y texto.
         </button>
       {% endif %}
 
+      {% if page.was_processed %}
+        <button
+          type="button"
+          class="ws-toggle"
+          aria-expanded="{% if manual_region_form.errors %}true{% else %}false{% endif %}"
+          aria-pressed="{% if manual_region_form.errors %}true{% else %}false{% endif %}"
+          aria-controls="manual-region-panel"
+          data-manual-region-toggle
+        >Añadir región</button>
+      {% endif %}
+
       <span class="ws-toolbar__spacer"></span>
 
       {% if has_translations %}
@@ -198,6 +208,53 @@ de pantalla anuncia número, tipo, estado y texto.
       {% endif %}
     </div>
 
+    {% if page.was_processed %}
+      <section
+        class="manual-region-panel"
+        id="manual-region-panel"
+        aria-labelledby="manual-region-title"
+        data-manual-region-panel
+        {% if not manual_region_form.errors %}hidden{% endif %}
+      >
+        <div class="manual-region-panel__copy">
+          <h2 id="manual-region-title">Añadir una región de texto</h2>
+          <p>
+            Arrastra un rectángulo sobre la página o escribe sus coordenadas en
+            píxeles. Pulsa <kbd>Escape</kbd> para cancelar el modo de dibujo.
+          </p>
+          <p class="manual-region-panel__status" role="status" aria-live="polite" data-manual-region-status></p>
+        </div>
+        <form method="post" action="{{ page.get_region_add_url }}" novalidate data-manual-region-form>
+          {% csrf_token %}
+          {% if manual_region_form.non_field_errors %}
+            <div class="form-errors" role="alert">
+              {% for error in manual_region_form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+            </div>
+          {% endif %}
+          <div class="manual-region-form__grid">
+            {% for field in manual_region_form %}
+              <div class="field">
+                <label class="label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                  <ul class="field-errors" id="{{ field.auto_id }}-error">
+                    {% for error in field.errors %}<li>{{ error }}</li>{% endfor %}
+                  </ul>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+          <div class="manual-region-form__actions">
+            <button type="button" class="btn btn--secondary" data-manual-region-cancel>Cancelar</button>
+            <button type="submit" class="btn btn--primary" data-submit-busy>
+              <span class="btn__spinner" hidden aria-hidden="true"></span>
+              <span data-submit-label data-busy-label="Leyendo región…">Añadir y leer</span>
+            </button>
+          </div>
+        </form>
+      </section>
+    {% endif %}
+
     {% comment %}
     Vista dividida (HU-14): la página sobre el lienzo y sus bloques de texto en
     el panel. static/js/app.js resalta a la vez la región y su bloque.
@@ -214,7 +271,7 @@ de pantalla anuncia número, tipo, estado y texto.
           />
           {% for region in visible_regions %}
             <a
-              class="region-box region-box--{{ region.kind }}{% if region.requires_review %} region-box--review{% endif %}"
+              class="region-box region-box--{{ region.kind }}{% if region.requires_review %} region-box--review{% endif %}{% if region.is_manual %} region-box--manual{% endif %}"
               id="region-box-{{ region.reading_order }}"
               href="#region-{{ region.reading_order }}"
               style="{{ region.overlay_style }}"
@@ -224,6 +281,7 @@ de pantalla anuncia número, tipo, estado y texto.
               <span class="region-box__number" aria-hidden="true">{{ region.reading_order }}{% if region.requires_review %} !{% endif %}</span>
             </a>
           {% endfor %}
+          <span class="manual-region-draft" data-manual-region-draft hidden aria-hidden="true"></span>
         </figure>
 
         {% comment %}
@@ -374,6 +432,9 @@ de pantalla anuncia número, tipo, estado y texto.
                   <a class="block-card__head" href="#region-box-{{ region.reading_order }}" data-region="{{ region.reading_order }}">
                     <span class="block-card__number" aria-hidden="true">{{ region.reading_order }}</span>
                     <span class="block-card__type">{{ region.get_kind_display }}</span>
+                    {% if region.is_manual %}
+                      <span class="block-chip block-chip--manual">Añadida a mano</span>
+                    {% endif %}
                     <span class="block-card__spacer"></span>
                     {% if region.confidence_percent is not None %}
                       <span class="block-chip {% if region.confidence_percent >= 70 %}block-chip--success{% else %}block-chip--warning{% endif %}" title="Confianza del OCR">
@@ -413,6 +474,7 @@ de pantalla anuncia número, tipo, estado y texto.
                       lang="{{ page.album.source_language.code }}"
                       placeholder="{% if region.has_nothing_to_translate %}Sin texto que traducir{% else %}Sin texto reconocido{% endif %}"
                       aria-describedby="region-text-{{ region.reading_order }}-hint"
+                      {% if region.focus_source %}autofocus{% endif %}
                     >{{ region.final_text }}</textarea>
                     <p class="sr-only" id="region-text-{{ region.reading_order }}-hint">
                       Déjalo vacío si la región no tiene nada que traducir.

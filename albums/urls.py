@@ -23,6 +23,7 @@ from albums.views import (
     album_archive,
     album_unarchive,
     page_translate,
+    region_add,
     region_approve,
     region_correct,
     region_retranslate,
@@ -63,6 +64,11 @@ urlpatterns = [
         "paginas/<int:pk>/procesar/",
         PageProcessView.as_view(),
         name="page_process",
+    ),
+    path(
+        "paginas/<int:pk>/regiones/",
+        region_add,
+        name="region_add",
     ),
     path(
         "paginas/<int:pk>/imagen/",

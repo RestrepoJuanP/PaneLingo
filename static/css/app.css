@@ -2958,6 +2958,63 @@ textarea {
   border-top-color: var(--accent-ink);
 }
 
+/* Formulario y modo de dibujo de regiones manuales (HU-85). */
+.manual-region-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: var(--sp-8);
+  padding: var(--sp-6) var(--sp-8);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-subtle);
+}
+
+.manual-region-panel[hidden] {
+  display: none;
+}
+
+.manual-region-panel__copy h2 {
+  margin: 0 0 var(--sp-2);
+  color: var(--ink-900);
+  font-size: var(--fs-body);
+}
+
+.manual-region-panel__copy p {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-relaxed);
+}
+
+.manual-region-panel__copy kbd {
+  padding: var(--sp-1) var(--sp-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-xs);
+  background: var(--surface);
+  color: var(--ink-800);
+  font: inherit;
+  font-weight: 700;
+}
+
+.manual-region-panel__status {
+  min-height: 1.5em;
+  margin-top: var(--sp-3) !important;
+  color: var(--brand) !important;
+  font-weight: 700;
+}
+
+.manual-region-form__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: var(--sp-4);
+}
+
+.manual-region-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sp-3);
+  margin-top: var(--sp-5);
+}
+
 /* --- Vista dividida -------------------------------------------------------- */
 
 .ws-split {
@@ -3085,6 +3142,30 @@ textarea {
 .region-box--review .region-box__number {
   background: var(--warning-fg);
   color: #fff;
+}
+
+.region-box--manual {
+  outline: 1px dashed var(--brand-surface-border);
+  outline-offset: var(--sp-1);
+}
+
+.region-canvas.is-drawing-region {
+  cursor: crosshair;
+  touch-action: none;
+  user-select: none;
+}
+
+.region-canvas.is-drawing-region .region-box {
+  pointer-events: none;
+}
+
+.manual-region-draft {
+  position: absolute;
+  z-index: 2;
+  border: 2px dashed var(--warning);
+  border-radius: var(--r-xs);
+  background: color-mix(in srgb, var(--warning) 18%, transparent);
+  pointer-events: none;
 }
 
 /* --- Panel de bloques de texto -------------------------------------------- */
@@ -3284,6 +3365,11 @@ textarea {
 .block-chip--warning {
   background: var(--warning-bg);
   color: var(--warning-fg);
+}
+
+.block-chip--manual {
+  background: var(--brand-tint);
+  color: var(--brand);
 }
 
 .block-card__body {
