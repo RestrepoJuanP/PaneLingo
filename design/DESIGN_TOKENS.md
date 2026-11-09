@@ -119,6 +119,13 @@ Tokens de familia:
 | `--font-comic` | `Archivo, system-ui, sans-serif` |
 | `--font-ja` | `'Zen Kaku Gothic New', system-ui, sans-serif` |
 | `--font-ko` | `'Noto Sans KR', system-ui, sans-serif` |
+| `--font-typeset` | `'Comic Neue', system-ui, sans-serif` |
+| `--font-sfx` | `Bangers, system-ui, sans-serif` |
+
+Comic Neue se usa para el texto colocado en globos y en cursiva para cuadros
+narrativos (HU-87). Bangers queda disponible para onomatopeyas en la etapa de
+maquetación. Ambas se distribuyen localmente bajo SIL OFL 1.1; los avisos están
+en `static/fonts/OFL.txt` y `static/fonts/OFL-Bangers.txt`.
 
 ## Tipografía — escala (un valor por token)
 
@@ -332,7 +339,10 @@ Todo el contenido ilustrativo de la interfaz es original del equipo.
 - **No hay personajes ni figuras.** Las composiciones son rectángulos con degradado. No representan personas, criaturas ni escenas.
 - **No se reproduce obra de terceros.** Ni imagen, ni viñeta, ni texto procedente de un cómic, manga o webtoon publicado.
 - **El lettering está escrito para PaneLingo.** Los tres textos de la ilustración son originales: el globo "Espera. Esta frase no es así.", la caja de narración "Cada viñeta hereda el contexto de la anterior." y la onomatopeya "TZONK". El globo evoca el trabajo de traducir —la duda ante una línea— y la caja de narración describe lo que hace el producto. "TZONK" es una acuñación propia, no una onomatopeya convencional ni una expresión tomada de una obra concreta.
-- **Los únicos recursos externos son dos tipografías**, Plus Jakarta Sans y Archivo, servidas desde Google Fonts bajo licencia abierta.
+- **Los recursos tipográficos externos tienen licencia abierta.** Plus Jakarta
+  Sans y Archivo se sirven desde Google Fonts; Comic Neue y Bangers se
+  distribuyen localmente con sus avisos SIL OFL 1.1 para la vista previa y la
+  maquetación de páginas.
 - **Las únicas imágenes que muestra la aplicación son las que sube el propio usuario**: las páginas de sus álbumes, servidas desde `media/` con control de acceso por propietario.
 
 Las capturas de `design/screenshots/` y el mockup `PaneLingo.dc.html` son material de referencia interno del proyecto y no se distribuyen con la aplicación.

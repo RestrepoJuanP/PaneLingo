@@ -9,6 +9,10 @@
    ========================================================================== */
 
 :root {
+  /* --- Tipografías de maquetación (HU-87, ADR-003) ------------------------ */
+  --font-typeset: "Comic Neue", system-ui, sans-serif;
+  --font-sfx: Bangers, system-ui, sans-serif;
+
   /* --- Color: marca y acento ---------------------------------------------- */
   --brand: #4c3fd9;
   --brand-hover: #3f34bb;

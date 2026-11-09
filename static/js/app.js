@@ -803,6 +803,37 @@
 
   var AUTOSAVE_DELAY_MS = 2000;
 
+  function updatePagePreview(preview) {
+    var region = document.querySelector(
+      '[data-preview-region="' + preview.region_pk + '"]',
+    );
+    if (!region) {
+      return;
+    }
+    region.hidden = preview.status === "skipped";
+    region.classList.toggle(
+      "page-overlay__region--translated",
+      preview.status === "translated",
+    );
+    region.classList.toggle(
+      "page-overlay__region--untranslated",
+      preview.status === "untranslated",
+    );
+    region.classList.toggle("is-overflowing", !preview.fits);
+    region.style.setProperty("--preview-font-ratio", preview.font_ratio);
+
+    var lines = region.querySelector(".page-overlay__lines");
+    lines.textContent = "";
+    preview.lines.forEach(function (text) {
+      var line = document.createElement("span");
+      line.textContent = text;
+      lines.appendChild(line);
+    });
+    region.querySelector("[data-preview-untranslated]").hidden =
+      preview.status !== "untranslated";
+    region.querySelector("[data-preview-overflow]").hidden = preview.fits;
+  }
+
   function bindAutosave(workspace) {
     var forms = workspace.querySelectorAll("[data-autosave]");
     var states = [];
@@ -872,6 +903,9 @@
           state.field.defaultValue = sentText;
           state.dirty = state.change !== sentChange || state.field.value !== sentText;
           showState(state, result.payload.message, "saved");
+          if (result.payload.preview) {
+            updatePagePreview(result.payload.preview);
+          }
           if (state.dirty) {
             schedule(state);
           }
@@ -1395,6 +1429,51 @@
     }
   }
 
+  function bindPagePreview(group) {
+    var figure = document.querySelector("[data-zoom-target]");
+    var overlay = figure && figure.querySelector("[data-page-overlay]");
+    var buttons = group.querySelectorAll("[data-preview-mode]");
+    if (!figure || !overlay || buttons.length !== 2) {
+      return;
+    }
+
+    function apply(mode, focus) {
+      var translated = mode === "translated";
+      overlay.hidden = !translated;
+      figure.classList.toggle("is-translated-preview", translated);
+      Array.prototype.forEach.call(buttons, function (button) {
+        var selected = button.dataset.previewMode === mode;
+        button.setAttribute("aria-pressed", String(selected));
+        if (selected && focus) {
+          button.focus();
+        }
+      });
+      writePreference("panelingo.preview", mode);
+    }
+
+    group.addEventListener("click", function (event) {
+      var button = event.target.closest("[data-preview-mode]");
+      if (button) {
+        apply(button.dataset.previewMode, false);
+      }
+    });
+    group.addEventListener("keydown", function (event) {
+      if (!/^(ArrowLeft|ArrowRight|Home|End)$/.test(event.key)) {
+        return;
+      }
+      event.preventDefault();
+      var translated = event.key === "ArrowRight" || event.key === "End";
+      apply(translated ? "translated" : "original", true);
+    });
+    group.hidden = false;
+    apply(
+      readPreference("panelingo.preview") === "translated"
+        ? "translated"
+        : "original",
+      false,
+    );
+  }
+
   function bindCanvasZoom(controls) {
     var figure = document.querySelector("[data-zoom-target]");
     if (!figure) {
@@ -1720,6 +1799,10 @@
     Array.prototype.forEach.call(
       document.querySelectorAll("[data-regions-toggle]"),
       bindRegionsToggle,
+    );
+    Array.prototype.forEach.call(
+      document.querySelectorAll("[data-preview-toggle]"),
+      bindPagePreview,
     );
     Array.prototype.forEach.call(
       document.querySelectorAll("[data-manual-region-toggle]"),

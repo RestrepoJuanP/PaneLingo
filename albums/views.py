@@ -65,6 +65,7 @@ from albums.translation_review import (
     edit_translation,
     unapprove_translation,
 )
+from albums.typesetting import preview_for_region
 
 # Longitud máxima del texto de búsqueda; el título admite 120 caracteres.
 SEARCH_MAX_LENGTH = 120
@@ -85,16 +86,16 @@ def autosave_conflicts(request, saved_at):
     return request.POST.get("version", "") != timestamp_version(saved_at)
 
 
-def autosave_success(saved_at):
+def autosave_success(saved_at, **extra):
     """Responde al navegador con la nueva versión y la hora guardada."""
     saved_time = timezone.localtime(saved_at).strftime("%H:%M")
-    return JsonResponse(
-        {
-            "status": "saved",
-            "message": f"Guardado · {saved_time}",
-            "version": timestamp_version(saved_at),
-        }
-    )
+    payload = {
+        "status": "saved",
+        "message": f"Guardado · {saved_time}",
+        "version": timestamp_version(saved_at),
+    }
+    payload.update(extra)
+    return JsonResponse(payload)
 
 
 def autosave_conflict(saved_at, saved_text):
@@ -857,7 +858,11 @@ class PageDetailView(OwnedPageMixin, DetailView):
         )
         context["review_filter"] = chosen == REVIEW_FILTER
         context["unapproved_filter"] = chosen == UNAPPROVED_FILTER
-        context["visible_regions"] = filter_regions(regions, chosen)
+        visible_regions = filter_regions(regions, chosen)
+        context["visible_regions"] = visible_regions
+        context["preview_regions"] = [
+            preview_for_region(region) for region in visible_regions
+        ]
         context.setdefault("manual_region_form", ManualRegionForm(page=page))
         context.update(page_neighbours(page))
         context.update(translation_summary(page, regions))
@@ -1260,7 +1265,10 @@ def region_translation_edit(request, pk):
     else:
         edit_translation(region, request.POST.get("text", ""))
         if wants_json:
-            return autosave_success(region.translated_at)
+            return autosave_success(
+                region.translated_at,
+                preview=preview_for_region(region),
+            )
         if region.translation:
             messages.success(request, f"Se guardó la traducción de la región {number}.")
         else:
@@ -1427,7 +1435,10 @@ def region_correct(request, pk):
     else:
         correct_region(region, request.POST.get("text", ""))
         if wants_json:
-            return autosave_success(region.corrected_at)
+            return autosave_success(
+                region.corrected_at,
+                preview=preview_for_region(region),
+            )
         if region.has_nothing_to_translate:
             messages.success(
                 request, f"La región {number} quedó sin texto que traducir."
