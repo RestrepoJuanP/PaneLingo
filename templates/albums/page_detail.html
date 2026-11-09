@@ -566,7 +566,7 @@ de pantalla anuncia número, tipo, estado y texto.
           de texto por las que se detecten ahora. Si el procesamiento falla,
           se conservan las actuales.
           {% if corrected_count %}
-            <strong>Se perderán {{ corrected_count }} {{ corrected_count|pluralize:"corrección,correcciones" }} que hiciste a mano.</strong>
+            <strong>Se {{ corrected_count|pluralize:"perderá,perderán" }} {{ corrected_count }} {{ corrected_count|pluralize:"corrección,correcciones" }} que hiciste a mano.</strong>
           {% endif %}
           {% if translated_count %}
             <strong>También se borrarán {{ translated_count }} {{ translated_count|pluralize:"traducción,traducciones" }}.</strong>

@@ -103,7 +103,7 @@ class AlbumCoverTests(AlbumEditTestCase):
         self.assertFalse(os.path.exists(old_path))
 
     def test_fake_image_is_rejected(self):
-        """BUG-074 — Una imagen falsa muestra el motivo compartido de rechazo."""
+        """CP-49.2 / BUG-074 — Una imagen falsa muestra el motivo correcto."""
         self.sign_in()
         self.client.post(
             self.album.get_edit_url(),

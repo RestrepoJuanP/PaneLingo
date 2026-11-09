@@ -405,7 +405,7 @@ class ApprovedReviewAccountingTests(ProcessingTestCase):
         self.region.save(update_fields=["translation", "translation_status"])
 
     def test_library_detail_and_sidebar_exclude_the_approved_region(self):
-        """BUG-072 — Los resúmenes dejan de inflar el trabajo pendiente."""
+        """CP-26.1 / BUG-072 — Los resúmenes no inflan el trabajo pendiente."""
         progress = AlbumProgress.of(
             with_progress(Album.objects.filter(pk=self.album.pk)).get()
         )
@@ -424,7 +424,7 @@ class ApprovedReviewAccountingTests(ProcessingTestCase):
         self.assertEqual(review_stat["value"], 0)
 
     def test_workspace_hides_the_review_warning_and_filter_result(self):
-        """BUG-072 — La página no contradice la aprobación guardada."""
+        """CP-19.2 / BUG-072 — La página no contradice la aprobación."""
         workspace = self.client.get(self.page.get_absolute_url())
         filtered = self.client.get(
             self.page.get_absolute_url(),

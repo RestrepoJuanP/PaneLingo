@@ -14,7 +14,7 @@ class ErrorPageTests(TestCase):
     """BUG-071 — Los errores 404 y 500 usan la interfaz en español."""
 
     def test_not_found_page_is_branded_and_offers_a_way_back(self):
-        """BUG-071 — El 404 está en español y enlaza con Mis álbumes."""
+        """CP-11.4 / BUG-071 — El 404 está en español y permite volver."""
         response = self.client.get("/esta-direccion-no-existe/")
 
         self.assertEqual(response.status_code, 404)
@@ -29,7 +29,7 @@ class ErrorPageTests(TestCase):
         self.assertNotContains(response, "Not Found", status_code=404)
 
     def test_internal_error_page_is_safe_and_does_not_need_context(self):
-        """BUG-071 — El 500 está en español y no muestra la excepción."""
+        """CP-12.6 / BUG-071 — El 500 está en español y oculta la excepción."""
         user = User.objects.create_user(
             email="mira@estudio.test",
             password="TraduccionSegura42",
