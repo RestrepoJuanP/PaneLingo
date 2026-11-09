@@ -1463,6 +1463,172 @@
   }
 
   /* ---------------------------------------------------------------------------
+     Añadir una región a mano (HU-85).
+
+     El formulario de coordenadas funciona sin esta mejora. Con JavaScript,
+     el mismo formulario se rellena al dibujar sobre la imagen y el servidor
+     sigue siendo quien valida la caja y ejecuta el OCR.
+     ------------------------------------------------------------------------ */
+
+  function bindManualRegion(button) {
+    var panel = document.getElementById(button.getAttribute("aria-controls"));
+    var figure = document.querySelector("[data-zoom-target]");
+    var image = figure && figure.querySelector(".region-canvas__img");
+    var draft = figure && figure.querySelector("[data-manual-region-draft]");
+    var form = panel && panel.querySelector("[data-manual-region-form]");
+    var cancel = panel && panel.querySelector("[data-manual-region-cancel]");
+    var status = panel && panel.querySelector("[data-manual-region-status]");
+    if (!panel || !figure || !image || !draft || !form || !cancel || !status) {
+      return;
+    }
+
+    var fields = {
+      x: form.querySelector('[name="x"]'),
+      y: form.querySelector('[name="y"]'),
+      width: form.querySelector('[name="width"]'),
+      height: form.querySelector('[name="height"]'),
+    };
+    var active = false;
+    var drawing = false;
+    var pointerId = null;
+    var start = null;
+    var minimum = parseInt(fields.width.getAttribute("min"), 10) || 1;
+
+    function dimensions() {
+      return {
+        width: image.naturalWidth || parseInt(image.getAttribute("width"), 10),
+        height: image.naturalHeight || parseInt(image.getAttribute("height"), 10),
+      };
+    }
+
+    function imagePoint(event) {
+      var rect = image.getBoundingClientRect();
+      var size = dimensions();
+      var clientX = Math.min(rect.right, Math.max(rect.left, event.clientX));
+      var clientY = Math.min(rect.bottom, Math.max(rect.top, event.clientY));
+      return {
+        x: Math.round(((clientX - rect.left) / rect.width) * size.width),
+        y: Math.round(((clientY - rect.top) / rect.height) * size.height),
+      };
+    }
+
+    function isInsideImage(event) {
+      var rect = image.getBoundingClientRect();
+      return (
+        event.clientX >= rect.left &&
+        event.clientX <= rect.right &&
+        event.clientY >= rect.top &&
+        event.clientY <= rect.bottom
+      );
+    }
+
+    function rectangle(first, last) {
+      return {
+        x: Math.min(first.x, last.x),
+        y: Math.min(first.y, last.y),
+        width: Math.abs(last.x - first.x),
+        height: Math.abs(last.y - first.y),
+      };
+    }
+
+    function showDraft(box) {
+      var size = dimensions();
+      draft.style.left = (box.x / size.width) * 100 + "%";
+      draft.style.top = (box.y / size.height) * 100 + "%";
+      draft.style.width = (box.width / size.width) * 100 + "%";
+      draft.style.height = (box.height / size.height) * 100 + "%";
+      draft.hidden = false;
+    }
+
+    function stopDrawing() {
+      drawing = false;
+      pointerId = null;
+      start = null;
+      draft.hidden = true;
+    }
+
+    function setOpen(open) {
+      active = open;
+      panel.hidden = !open;
+      button.setAttribute("aria-expanded", String(open));
+      button.setAttribute("aria-pressed", String(open));
+      figure.classList.toggle("is-drawing-region", open);
+      stopDrawing();
+      if (open) {
+        status.textContent =
+          "Modo de dibujo activo. Arrastra sobre la página o usa el formulario.";
+        fields.x.focus();
+      } else {
+        status.textContent = "";
+        button.focus();
+      }
+    }
+
+    button.addEventListener("click", function () {
+      setOpen(panel.hidden);
+    });
+    cancel.addEventListener("click", function () {
+      setOpen(false);
+    });
+    document.addEventListener("keydown", function (event) {
+      if (active && event.key === "Escape") {
+        event.preventDefault();
+        setOpen(false);
+      }
+    });
+
+    figure.addEventListener("pointerdown", function (event) {
+      if (!active || event.button !== 0 || !isInsideImage(event)) {
+        return;
+      }
+      event.preventDefault();
+      drawing = true;
+      pointerId = event.pointerId;
+      start = imagePoint(event);
+      figure.setPointerCapture(pointerId);
+      showDraft({ x: start.x, y: start.y, width: 0, height: 0 });
+    });
+
+    figure.addEventListener("pointermove", function (event) {
+      if (!drawing || event.pointerId !== pointerId) {
+        return;
+      }
+      showDraft(rectangle(start, imagePoint(event)));
+    });
+
+    figure.addEventListener("pointerup", function (event) {
+      if (!drawing || event.pointerId !== pointerId) {
+        return;
+      }
+      var wasInside = isInsideImage(event);
+      var box = rectangle(start, imagePoint(event));
+      stopDrawing();
+      if (!wasInside) {
+        status.textContent = "Dibujo cancelado fuera de la imagen.";
+        return;
+      }
+      if (box.width < minimum || box.height < minimum) {
+        status.textContent = "La región es demasiado pequeña.";
+        return;
+      }
+      fields.x.value = box.x;
+      fields.y.value = box.y;
+      fields.width.value = box.width;
+      fields.height.value = box.height;
+      status.textContent = "Leyendo el texto de la región…";
+      form.requestSubmit();
+    });
+
+    figure.addEventListener("pointercancel", stopDrawing);
+    if (!panel.hidden) {
+      active = true;
+      button.setAttribute("aria-expanded", "true");
+      button.setAttribute("aria-pressed", "true");
+      figure.classList.add("is-drawing-region");
+    }
+  }
+
+  /* ---------------------------------------------------------------------------
      Aprobar traducciones (HU-19).
 
      Ctrl+Enter (o Cmd+Enter) en el campo de una traducción pulsa "Aprobar",
@@ -1554,6 +1720,10 @@
     Array.prototype.forEach.call(
       document.querySelectorAll("[data-regions-toggle]"),
       bindRegionsToggle,
+    );
+    Array.prototype.forEach.call(
+      document.querySelectorAll("[data-manual-region-toggle]"),
+      bindManualRegion,
     );
   }
 

@@ -35,6 +35,25 @@ def languages_in_order(preferred_codes):
 # Longitud máxima del título, la misma que declara el modelo.
 TITLE_MAX_LENGTH = 120
 
+# Tamaño mínimo acordado en CA-85.3, expresado en píxeles de la imagen.
+MIN_MANUAL_REGION_SIZE = 16
+
+
+def manual_region_field(label, minimum, minimum_message):
+    """Construye un entero accesible para las coordenadas de HU-85."""
+    return forms.IntegerField(
+        label=label,
+        min_value=minimum,
+        widget=forms.NumberInput(
+            attrs={"class": "input", "inputmode": "numeric", "min": minimum}
+        ),
+        error_messages={
+            "required": "Escribe este valor en píxeles.",
+            "invalid": "Escribe un número entero.",
+            "min_value": minimum_message,
+        },
+    )
+
 
 def clean_album_title(raw_title):
     """Normaliza y valida el título de un álbum (HU-06).
@@ -234,3 +253,48 @@ class AlbumRenameForm(AccessibleFormMixin, forms.ModelForm):
     def clean_title(self):
         """Valida el título con las mismas reglas que la creación."""
         return clean_album_title(self.cleaned_data.get("title"))
+
+
+class ManualRegionForm(AccessibleFormMixin, forms.Form):
+    """Coordenadas de una región añadida por el traductor (HU-85)."""
+
+    x = manual_region_field(
+        "Posición horizontal (x)", 0, "El valor no puede ser negativo."
+    )
+    y = manual_region_field(
+        "Posición vertical (y)", 0, "El valor no puede ser negativo."
+    )
+    width = manual_region_field(
+        "Ancho",
+        MIN_MANUAL_REGION_SIZE,
+        f"La región debe medir al menos {MIN_MANUAL_REGION_SIZE} píxeles.",
+    )
+    height = manual_region_field(
+        "Alto",
+        MIN_MANUAL_REGION_SIZE,
+        f"La región debe medir al menos {MIN_MANUAL_REGION_SIZE} píxeles.",
+    )
+
+    def __init__(self, *args, page, **kwargs):
+        """Guarda la página para validar que la caja quede dentro de ella."""
+        self.page = page
+        super().__init__(*args, **kwargs)
+        self.fields["x"].widget.attrs["max"] = max(page.width - 1, 0)
+        self.fields["y"].widget.attrs["max"] = max(page.height - 1, 0)
+        self.fields["width"].widget.attrs["max"] = page.width
+        self.fields["height"].widget.attrs["max"] = page.height
+
+    def clean(self):
+        """Rechaza una caja que salga de los límites de la imagen."""
+        cleaned_data = super().clean()
+        required = ("x", "y", "width", "height")
+        if any(name not in cleaned_data for name in required):
+            return cleaned_data
+        right = cleaned_data["x"] + cleaned_data["width"]
+        bottom = cleaned_data["y"] + cleaned_data["height"]
+        if right > self.page.width or bottom > self.page.height:
+            raise forms.ValidationError(
+                "La región debe quedar completamente dentro de la imagen.",
+                code="outside_image",
+            )
+        return cleaned_data

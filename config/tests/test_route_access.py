@@ -55,6 +55,7 @@ PRIVATE_ROUTES = [
 ACTION_ROUTES = [
     "accounts:logout",
     "albums:page_translate",
+    "albums:region_add",
     "albums:region_correct",
     "albums:region_retranslate",
     "albums:region_translation_edit",
@@ -78,6 +79,7 @@ ROUTE_ARGS = {
     "albums:album_cover": {"pk": 1},
     "albums:page_delete": {"pk": 1},
     "albums:region_correct": {"pk": 1},
+    "albums:region_add": {"pk": 1},
     "albums:page_translate": {"pk": 1},
     "albums:region_retranslate": {"pk": 1},
     "albums:region_translation_edit": {"pk": 1},
