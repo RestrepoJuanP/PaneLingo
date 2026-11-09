@@ -76,23 +76,30 @@ class AlbumForm(AccessibleFormMixin, forms.ModelForm):
     zona de carga de páginas corresponde a HU-09.
     """
 
+    # FileField evita que el ImageField automático de Django intercepte el
+    # archivo con su mensaje genérico antes de validate_page_image(). El
+    # contenido real sigue verificándose con Pillow en clean_cover_image().
+    cover_image = forms.FileField(
+        required=False,
+        label="Portada del álbum (opcional)",
+        widget=forms.FileInput(
+            attrs={
+                "class": "sr-only",
+                "accept": "image/png,image/jpeg,image/webp",
+                "data-cover-input": True,
+            }
+        ),
+    )
+
     class Meta:
         model = Album
         fields = ["title", "source_language", "target_language", "cover_image"]
         labels = {
             "title": "Título del álbum",
-            "cover_image": "Portada del álbum (opcional)",
             "source_language": "Idioma de origen",
             "target_language": "Idioma de destino",
         }
         widgets = {
-            "cover_image": forms.FileInput(
-                attrs={
-                    "class": "sr-only",
-                    "accept": "image/png,image/jpeg,image/webp",
-                    "data-cover-input": True,
-                }
-            ),
             "title": forms.TextInput(
                 attrs={
                     "class": "input",
