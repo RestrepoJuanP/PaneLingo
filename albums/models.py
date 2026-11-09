@@ -582,6 +582,11 @@ class TextRegion(models.Model):
         default=False,
         help_text=_("La dibujó el traductor porque el OCR no la detectó."),
     )
+    skip_translation = models.BooleanField(
+        _("no traducir"),
+        default=False,
+        help_text=_("Conserva el texto original y excluye la región de la traducción."),
+    )
     corrected_text = models.TextField(
         _("texto corregido"),
         blank=True,
@@ -661,14 +666,26 @@ class TextRegion(models.Model):
         """Devuelve la dirección para volver a traducir solo esta región."""
         return reverse("albums:region_retranslate", kwargs={"pk": self.pk})
 
+    def get_delete_url(self):
+        """Devuelve la dirección para eliminar esta región (HU-86)."""
+        return reverse("albums:region_delete", kwargs={"pk": self.pk})
+
+    def get_skip_translation_url(self):
+        """Devuelve la dirección para conservar el texto original (HU-86)."""
+        return reverse("albums:region_skip_translation", kwargs={"pk": self.pk})
+
+    def get_enable_translation_url(self):
+        """Devuelve la dirección para volver a traducir la región (HU-86)."""
+        return reverse("albums:region_enable_translation", kwargs={"pk": self.pk})
+
     @property
     def needs_translation(self):
         """Indica si la región tiene texto que traducir (ADR-002, T5).
 
-        Las regiones que el usuario vació a propósito (CA-15.5) y las que el
-        OCR dejó sin texto no se traducen ni cuentan como pendientes.
+        Las marcadas "No traducir", las que el usuario vació a propósito
+        (CA-15.5) y las que el OCR dejó sin texto no cuentan como pendientes.
         """
-        return bool(self.final_text.strip())
+        return not self.skip_translation and bool(self.final_text.strip())
 
     @property
     def is_translation_approved(self):
@@ -678,7 +695,11 @@ class TextRegion(models.Model):
     @property
     def requires_review(self):
         """Indica si la región aún requiere revisión por parte del traductor."""
-        return self.needs_review and not self.is_translation_approved
+        return (
+            not self.skip_translation
+            and self.needs_review
+            and not self.is_translation_approved
+        )
 
     @property
     def translation_variant(self):

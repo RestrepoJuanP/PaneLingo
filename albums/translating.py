@@ -100,7 +100,11 @@ def apply_translations(page, regions, translations):
     changed = []
     for item in translations:
         region = by_number.get(item.number)
-        if region is None or region.is_translation_approved:
+        if (
+            region is None
+            or region.is_translation_approved
+            or not region.needs_translation
+        ):
             continue
         region.machine_translation = item.translation
         region.translation = item.translation

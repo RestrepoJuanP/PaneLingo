@@ -130,7 +130,10 @@ def save_manual_region(page, new_region):
                 region.save(update_fields=["reading_order"])
 
         if locked_page.status == ComicPage.Status.APPROVED:
-            has_review_work = locked_page.regions.filter(needs_review=True).exists()
+            has_review_work = locked_page.regions.filter(
+                needs_review=True,
+                skip_translation=False,
+            ).exists()
             locked_page.status = (
                 ComicPage.Status.NEEDS_REVIEW
                 if has_review_work

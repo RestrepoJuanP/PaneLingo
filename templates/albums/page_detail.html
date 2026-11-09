@@ -425,31 +425,54 @@ de pantalla anuncia número, tipo, estado y texto.
             <ol class="block-list">
               {% for region in visible_regions %}
                 <li
-                  class="block-card{% if region.requires_review %} block-card--review{% endif %}"
+                  class="block-card{% if region.requires_review %} block-card--review{% endif %}{% if region.skip_translation %} block-card--skipped{% endif %}"
                   id="region-{{ region.reading_order }}"
                   data-region-item="{{ region.reading_order }}"
                 >
-                  <a class="block-card__head" href="#region-box-{{ region.reading_order }}" data-region="{{ region.reading_order }}">
-                    <span class="block-card__number" aria-hidden="true">{{ region.reading_order }}</span>
-                    <span class="block-card__type">{{ region.get_kind_display }}</span>
-                    {% if region.is_manual %}
-                      <span class="block-chip block-chip--manual">Añadida a mano</span>
-                    {% endif %}
-                    <span class="block-card__spacer"></span>
-                    {% if region.confidence_percent is not None %}
-                      <span class="block-chip {% if region.confidence_percent >= 70 %}block-chip--success{% else %}block-chip--warning{% endif %}" title="Confianza del OCR">
-                        {{ region.confidence_percent }} % {% if region.confidence_percent >= 70 %}alta{% else %}baja{% endif %}
-                      </span>
-                    {% endif %}
-                    {% if region.requires_review %}
-                      <span class="block-chip block-chip--warning">Revisar</span>
-                    {% elif region.is_corrected %}
-                      <span class="block-chip block-chip--success">Corregida</span>
-                    {% else %}
-                      <span class="block-chip">Lista</span>
-                    {% endif %}
-                    <span class="sr-only">, región {{ region.reading_order }}</span>
-                  </a>
+                  <div class="block-card__head">
+                    <a class="block-card__region-link" href="#region-box-{{ region.reading_order }}" data-region="{{ region.reading_order }}">
+                      <span class="block-card__number" aria-hidden="true">{{ region.reading_order }}</span>
+                      <span class="block-card__type">{{ region.get_kind_display }}</span>
+                      {% if region.is_manual %}
+                        <span class="block-chip block-chip--manual">Añadida a mano</span>
+                      {% endif %}
+                      {% if region.skip_translation %}
+                        <span class="block-chip">No traducir</span>
+                      {% elif region.confidence_percent is not None %}
+                        <span class="block-chip {% if region.confidence_percent >= 70 %}block-chip--success{% else %}block-chip--warning{% endif %}" title="Confianza del OCR">
+                          {{ region.confidence_percent }} % {% if region.confidence_percent >= 70 %}alta{% else %}baja{% endif %}
+                        </span>
+                      {% endif %}
+                      {% if not region.skip_translation %}
+                        {% if region.requires_review %}
+                          <span class="block-chip block-chip--warning">Revisar</span>
+                        {% elif region.is_corrected %}
+                          <span class="block-chip block-chip--success">Corregida</span>
+                        {% else %}
+                          <span class="block-chip">Lista</span>
+                        {% endif %}
+                      {% endif %}
+                      <span class="sr-only">, región {{ region.reading_order }}</span>
+                    </a>
+                    <div class="block-card__manage" aria-label="Acciones de la región {{ region.reading_order }}">
+                      {% if region.skip_translation %}
+                        <form method="post" action="{{ region.get_enable_translation_url }}">
+                          {% csrf_token %}
+                          <button type="submit" class="block-btn">Traducir esta región</button>
+                        </form>
+                      {% else %}
+                        <form method="post" action="{{ region.get_skip_translation_url }}">
+                          {% csrf_token %}
+                          <button type="submit" class="block-btn">No traducir</button>
+                        </form>
+                      {% endif %}
+                      <button
+                        type="button"
+                        class="block-btn block-btn--danger"
+                        data-modal-open="eliminar-region-{{ region.pk }}"
+                      >Eliminar región</button>
+                    </div>
+                  </div>
 
                   {% comment %}
                   Corrección del texto (HU-15): como en el mockup, el texto de
@@ -503,7 +526,12 @@ de pantalla anuncia número, tipo, estado y texto.
                     </div>
                   </form>
 
-                  {% if region.needs_translation %}
+                  {% if region.skip_translation %}
+                    <p class="block-card__skip-note">
+                      El texto original se conservará: esta zona no se traducirá ni se
+                      limpiará en la página final.
+                    </p>
+                  {% elif region.needs_translation %}
                     {% comment %}
                     Traducción de la región: se revisa y se edita aquí mismo
                     (HU-17 y HU-18, fusionadas por ADR-002, T3), como el
@@ -593,6 +621,7 @@ de pantalla anuncia número, tipo, estado y texto.
                       {% endif %}
                     </form>
                   {% endif %}
+
                 </li>
               {% endfor %}
             </ol>
@@ -610,6 +639,37 @@ de pantalla anuncia número, tipo, estado y texto.
         </div>
       </section>
     </div>
+
+    {% for region in visible_regions %}
+      <div
+        class="modal"
+        id="eliminar-region-{{ region.pk }}"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="eliminar-region-{{ region.pk }}-title"
+        hidden
+      >
+        <div class="modal__dialog modal__dialog--sm">
+          <h2 class="modal__title" id="eliminar-region-{{ region.pk }}-title">
+            ¿Eliminar la región {{ region.reading_order }}?
+          </h2>
+          <p class="modal__body">
+            Se eliminarán su texto, corrección y traducción. Podrás deshacerlo
+            desde el aviso mientras la página no cambie.
+          </p>
+          <form method="post" action="{{ region.get_delete_url }}">
+            {% csrf_token %}
+            <div class="modal__foot">
+              <button type="button" class="btn btn--secondary" data-modal-close>Cancelar</button>
+              <button type="submit" class="btn btn--danger-solid" data-submit-busy>
+                <span class="btn__spinner" hidden aria-hidden="true"></span>
+                <span data-submit-label data-busy-label="Eliminando…">Eliminar región</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    {% endfor %}
   </div>
 
   {% if regions %}

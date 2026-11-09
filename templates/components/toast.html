@@ -16,6 +16,14 @@ El contenedor de .toasts lleva aria-live; aquí no se repite.
       </form>
     {% endif %}
   {% endwith %}
+  {% with undo_pk=message.extra_tags|undo_region_pk %}
+    {% if undo_pk %}
+      <form method="post" action="{% url 'albums:region_restore' undo_pk %}" class="toast__action">
+        {% csrf_token %}
+        <button type="submit" class="toast__undo">Deshacer</button>
+      </form>
+    {% endif %}
+  {% endwith %}
   <button type="button" class="toast__close" data-toast-close aria-label="Cerrar mensaje">
     ✕
   </button>

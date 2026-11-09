@@ -32,7 +32,10 @@ def refresh_page_review_status(page):
     """Pone la página en "Necesita revisión" o "Procesada" según sus regiones."""
     if page.status not in REVIEWABLE_STATUSES:
         return
-    pending = page.regions.filter(needs_review=True).exists()
+    pending = page.regions.filter(
+        needs_review=True,
+        skip_translation=False,
+    ).exists()
     status = ComicPage.Status.NEEDS_REVIEW if pending else ComicPage.Status.PROCESSED
     if page.status != status:
         page.status = status
