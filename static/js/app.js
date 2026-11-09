@@ -745,7 +745,162 @@
   }
 
   /* ---------------------------------------------------------------------------
-     Correcciones sin guardar (HU-15, CA-15.4).
+     Autoguardado de correcciones y traducciones (HU-23).
+
+     Tras dos segundos sin escribir, o al salir del campo, guarda mediante
+     los formularios Django existentes. La versión enviada evita que una
+     pestaña silenciosamente pise lo que otra acaba de guardar.
+     ------------------------------------------------------------------------ */
+
+  var AUTOSAVE_DELAY_MS = 2000;
+
+  function bindAutosave(workspace) {
+    var forms = workspace.querySelectorAll("[data-autosave]");
+    var states = [];
+    if (!forms.length || !window.fetch) {
+      return;
+    }
+
+    function showState(state, message, name) {
+      state.status.textContent = message;
+      state.status.dataset.state = name;
+    }
+
+    function schedule(state) {
+      window.clearTimeout(state.timer);
+      if (state.conflict) {
+        return;
+      }
+      state.timer = window.setTimeout(function () {
+        save(state);
+      }, AUTOSAVE_DELAY_MS);
+    }
+
+    function save(state) {
+      if (!state.dirty || state.saving || state.conflict) {
+        return;
+      }
+      window.clearTimeout(state.timer);
+      state.saving = true;
+      state.failed = false;
+      state.retry.hidden = true;
+      showState(state, "Guardando…", "saving");
+
+      var sentText = state.field.value;
+      var sentChange = state.change;
+      var data = new FormData(state.form);
+      data.set("text", sentText);
+      data.set("version", state.version);
+      state.controller = new AbortController();
+
+      window
+        .fetch(state.form.action, {
+          method: "POST",
+          body: data,
+          credentials: "same-origin",
+          headers: {
+            Accept: "application/json",
+            "X-Autosave": "1",
+          },
+          signal: state.controller.signal,
+        })
+        .then(function (response) {
+          return response.json().then(function (payload) {
+            return { ok: response.ok, status: response.status, payload: payload };
+          });
+        })
+        .then(function (result) {
+          if (result.status === 409 && result.payload.status === "conflict") {
+            state.conflict = true;
+            showState(state, result.payload.message, "conflict");
+            return;
+          }
+          if (!result.ok) {
+            throw new Error("autosave_failed");
+          }
+          state.version = result.payload.version;
+          state.form.dataset.autosaveVersion = state.version;
+          state.field.defaultValue = sentText;
+          state.dirty = state.change !== sentChange || state.field.value !== sentText;
+          showState(state, result.payload.message, "saved");
+          if (state.dirty) {
+            schedule(state);
+          }
+        })
+        .catch(function (error) {
+          if (error.name === "AbortError") {
+            return;
+          }
+          state.failed = true;
+          state.dirty = true;
+          state.retry.hidden = false;
+          showState(state, "No se pudo guardar.", "error");
+        })
+        .finally(function () {
+          state.saving = false;
+          state.controller = null;
+        });
+    }
+
+    Array.prototype.forEach.call(forms, function (form) {
+      var field = form.querySelector('textarea[name="text"]');
+      var status = form.querySelector("[data-autosave-status]");
+      var retry = form.querySelector("[data-autosave-retry]");
+      if (!field || !status || !retry) {
+        return;
+      }
+      var state = {
+        form: form,
+        field: field,
+        status: status,
+        retry: retry,
+        version: form.dataset.autosaveVersion || "",
+        timer: null,
+        controller: null,
+        change: 0,
+        dirty: false,
+        saving: false,
+        failed: false,
+        conflict: false,
+      };
+      states.push(state);
+
+      field.addEventListener("input", function () {
+        state.change += 1;
+        state.dirty = true;
+        state.failed = false;
+        state.retry.hidden = true;
+        showState(state, "Cambios pendientes", "pending");
+        schedule(state);
+      });
+      field.addEventListener("blur", function () {
+        if (state.dirty && !state.conflict) {
+          save(state);
+        }
+      });
+      retry.addEventListener("click", function () {
+        state.failed = false;
+        save(state);
+      });
+      form.addEventListener("submit", function () {
+        window.clearTimeout(state.timer);
+        if (state.controller) {
+          state.controller.abort();
+        }
+      });
+    });
+
+    window.addEventListener("online", function () {
+      states.forEach(function (state) {
+        if (state.failed && state.dirty && !state.conflict) {
+          save(state);
+        }
+      });
+    });
+  }
+
+  /* ---------------------------------------------------------------------------
+     Correcciones sin guardar (HU-15, CA-15.4; HU-23, CA-23.3).
 
      Si hay un texto corregido que no se ha guardado y el usuario intenta
      salir de la página (enlace, flechas de navegación, recarga o cierre de
@@ -1322,6 +1477,10 @@
     Array.prototype.forEach.call(
       document.querySelectorAll("[data-region-workspace]"),
       bindRegionSelection,
+    );
+    Array.prototype.forEach.call(
+      document.querySelectorAll("[data-region-workspace]"),
+      bindAutosave,
     );
     Array.prototype.forEach.call(
       document.querySelectorAll("[data-region-workspace]"),

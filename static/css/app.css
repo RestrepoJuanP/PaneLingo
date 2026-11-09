@@ -3346,6 +3346,38 @@ textarea {
   line-height: 1.5;
 }
 
+/* Estado discreto del autoguardado de correcciones y traducciones (HU-23). */
+.autosave {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-top: var(--sp-2);
+  color: var(--muted);
+  font-size: var(--fs-label-sm);
+}
+
+.autosave__status[data-state="saving"] {
+  color: var(--ink-600);
+}
+
+.autosave__status[data-state="error"],
+.autosave__status[data-state="conflict"] {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.autosave__retry {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--brand);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 .block-card__actions {
   display: flex;
   flex-wrap: wrap;
