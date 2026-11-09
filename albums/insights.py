@@ -177,6 +177,60 @@ class AlbumProgress:
         return derive_status(self.page_total, self.page_work, self.page_approved)
 
 
+@dataclass(frozen=True)
+class ResumeLocation:
+    """Página y región desde las que se continúa un álbum (HU-24)."""
+
+    page: ComicPage
+    region: TextRegion | None = None
+
+    @property
+    def url(self):
+        """Dirección de la página, anclada a la región cuando existe."""
+        address = self.page.get_absolute_url()
+        if self.region is None:
+            return address
+        return f"{address}#region-{self.region.reading_order}"
+
+
+def region_activity(region):
+    """Fecha de la última intervención manual guardada en una región."""
+    dates = []
+    if region.is_corrected and region.corrected_at:
+        dates.append(region.corrected_at)
+    if region.translation_status in (
+        TextRegion.TranslationStatus.EDITED,
+        TextRegion.TranslationStatus.APPROVED,
+    ):
+        if region.translated_at:
+            dates.append(region.translated_at)
+        if region.approved_at:
+            dates.append(region.approved_at)
+    return max(dates) if dates else None
+
+
+def album_resume_location(album):
+    """Último punto trabajado o primera página pendiente del álbum (HU-24)."""
+    pages = list(album.pages.all())
+    worked_regions = []
+    for page in pages:
+        for region in page.regions.all():
+            activity = region_activity(region)
+            if activity:
+                worked_regions.append(
+                    (activity, page.page_number, region.reading_order, region)
+                )
+    if worked_regions:
+        region = max(worked_regions, key=lambda item: item[:3])[3]
+        return ResumeLocation(region.page, region)
+
+    first_pending = next(
+        (page for page in pages if page.status != ComicPage.Status.APPROVED),
+        None,
+    )
+    return ResumeLocation(first_pending) if first_pending else None
+
+
 def library_for(user, archived=False):
     """Álbumes del usuario con su progreso, más recientes primero.
 
@@ -184,9 +238,9 @@ def library_for(user, archived=False):
     (HU-69, CA-69.2).
     """
     return with_progress(
-        Album.objects.filter(
-            owner=user, archived_at__isnull=not archived
-        ).select_related("source_language", "target_language")
+        Album.objects.filter(owner=user, archived_at__isnull=not archived)
+        .select_related("source_language", "target_language")
+        .prefetch_related("pages__regions")
     ).order_by("-updated_at")
 
 

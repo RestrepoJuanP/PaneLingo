@@ -3652,6 +3652,28 @@ textarea {
   margin-top: var(--sp-4);
 }
 
+.album-card__continue {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: var(--sp-4);
+  padding: var(--pad-btn);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  color: var(--ink-800);
+  font-size: var(--fs-ui);
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.album-card__continue:hover {
+  border-color: var(--border-hover);
+  color: var(--ink-800);
+  text-decoration: none;
+}
+
 /* Barra de progreso doble: listas (marca) y por revisar (ámbar). */
 .split-progress {
   display: flex;
