@@ -391,3 +391,46 @@ class SidebarTests(ProcessingTestCase):
         response = self.client.get(reverse("accounts:login"))
 
         self.assertNotIn("sidebar", response.context)
+
+
+class ApprovedReviewAccountingTests(ProcessingTestCase):
+    """BUG-072 — Una traducción aprobada ya no cuenta por revisar."""
+
+    def setUp(self):
+        """Crea una región dudosa cuya traducción ya fue aprobada."""
+        super().setUp()
+        self.region = add_region(self.page, 1, needs_review=True)
+        self.region.translation = "Texto aprobado"
+        self.region.translation_status = TextRegion.TranslationStatus.APPROVED
+        self.region.save(update_fields=["translation", "translation_status"])
+
+    def test_library_detail_and_sidebar_exclude_the_approved_region(self):
+        """BUG-072 — Los resúmenes dejan de inflar el trabajo pendiente."""
+        progress = AlbumProgress.of(
+            with_progress(Album.objects.filter(pk=self.album.pk)).get()
+        )
+        page = pages_with_progress(self.album).get(pk=self.page.pk)
+        library = self.client.get(reverse("albums:list"))
+
+        review_stat = next(
+            stat
+            for stat in library.context["stats"]
+            if stat["label"] == "Regiones por revisar"
+        )
+        self.assertEqual(progress.region_review, 0)
+        self.assertEqual(page.region_review, 0)
+        self.assertEqual(page_card(page)["percent"], 100)
+        self.assertEqual(library.context["sidebar"]["review_total"], 0)
+        self.assertEqual(review_stat["value"], 0)
+
+    def test_workspace_hides_the_review_warning_and_filter_result(self):
+        """BUG-072 — La página no contradice la aprobación guardada."""
+        workspace = self.client.get(self.page.get_absolute_url())
+        filtered = self.client.get(
+            self.page.get_absolute_url(),
+            {"filtro": "revisar"},
+        )
+
+        self.assertEqual(workspace.context["review_count"], 0)
+        self.assertNotContains(workspace, "necesita revisión")
+        self.assertEqual(filtered.context["visible_regions"], [])

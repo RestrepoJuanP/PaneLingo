@@ -83,7 +83,14 @@ def with_progress(albums):
         region_total=Count("pages__regions", distinct=True),
         region_review=Count(
             "pages__regions",
-            filter=Q(pages__regions__needs_review=True),
+            filter=(
+                Q(pages__regions__needs_review=True)
+                & ~Q(
+                    pages__regions__translation_status=(
+                        TextRegion.TranslationStatus.APPROVED
+                    )
+                )
+            ),
             distinct=True,
         ),
         region_corrected=Count(
@@ -267,7 +274,15 @@ def pages_with_progress(album):
     """Páginas del álbum con el recuento de regiones listas y por revisar."""
     return album.pages.annotate(
         region_total=Count("regions"),
-        region_review=Count("regions", filter=Q(regions__needs_review=True)),
+        region_review=Count(
+            "regions",
+            filter=(
+                Q(regions__needs_review=True)
+                & ~Q(
+                    regions__translation_status=(TextRegion.TranslationStatus.APPROVED)
+                )
+            ),
+        ),
     ).order_by("page_number")
 
 
@@ -393,8 +408,12 @@ def monthly_quota(user):
 
 def review_total(user):
     """Regiones del usuario que necesitan revisión."""
-    return TextRegion.objects.filter(
-        page__album__owner=user,
-        page__album__archived_at__isnull=True,
-        needs_review=True,
-    ).count()
+    return (
+        TextRegion.objects.filter(
+            page__album__owner=user,
+            page__album__archived_at__isnull=True,
+            needs_review=True,
+        )
+        .exclude(translation_status=TextRegion.TranslationStatus.APPROVED)
+        .count()
+    )

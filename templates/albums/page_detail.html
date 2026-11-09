@@ -214,14 +214,14 @@ de pantalla anuncia número, tipo, estado y texto.
           />
           {% for region in visible_regions %}
             <a
-              class="region-box region-box--{{ region.kind }}{% if region.needs_review %} region-box--review{% endif %}"
+              class="region-box region-box--{{ region.kind }}{% if region.requires_review %} region-box--review{% endif %}"
               id="region-box-{{ region.reading_order }}"
               href="#region-{{ region.reading_order }}"
               style="{{ region.overlay_style }}"
               data-region="{{ region.reading_order }}"
-              aria-label="Región {{ region.reading_order }}: {{ region.get_kind_display|lower }}{% if region.needs_review %}, necesita revisión{% endif %}. {% if region.has_nothing_to_translate %}Sin texto que traducir{% elif region.final_text %}Texto: {{ region.final_text }}{% else %}Sin texto reconocido{% endif %}"
+              aria-label="Región {{ region.reading_order }}: {{ region.get_kind_display|lower }}{% if region.requires_review %}, necesita revisión{% endif %}. {% if region.has_nothing_to_translate %}Sin texto que traducir{% elif region.final_text %}Texto: {{ region.final_text }}{% else %}Sin texto reconocido{% endif %}"
             >
-              <span class="region-box__number" aria-hidden="true">{{ region.reading_order }}{% if region.needs_review %} !{% endif %}</span>
+              <span class="region-box__number" aria-hidden="true">{{ region.reading_order }}{% if region.requires_review %} !{% endif %}</span>
             </a>
           {% endfor %}
         </figure>
@@ -367,7 +367,7 @@ de pantalla anuncia número, tipo, estado y texto.
             <ol class="block-list">
               {% for region in visible_regions %}
                 <li
-                  class="block-card{% if region.needs_review %} block-card--review{% endif %}"
+                  class="block-card{% if region.requires_review %} block-card--review{% endif %}"
                   id="region-{{ region.reading_order }}"
                   data-region-item="{{ region.reading_order }}"
                 >
@@ -380,7 +380,7 @@ de pantalla anuncia número, tipo, estado y texto.
                         {{ region.confidence_percent }} % {% if region.confidence_percent >= 70 %}alta{% else %}baja{% endif %}
                       </span>
                     {% endif %}
-                    {% if region.needs_review %}
+                    {% if region.requires_review %}
                       <span class="block-chip block-chip--warning">Revisar</span>
                     {% elif region.is_corrected %}
                       <span class="block-chip block-chip--success">Corregida</span>
