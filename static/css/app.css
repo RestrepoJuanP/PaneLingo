@@ -4148,6 +4148,67 @@ button.ws-group__option {
   font-family: inherit;
 }
 
+/* Errores 404 y 500: shell autónomo, sin depender de sesión ni navegación. */
+.error-page {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  gap: var(--sp-10);
+  padding: var(--pad-page);
+  background: var(--bg);
+}
+
+.error-page__brand {
+  display: inline-flex;
+  align-items: center;
+  align-self: end;
+  gap: var(--sp-3);
+  color: var(--ink-900);
+  font-size: var(--fs-wordmark);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.error-page__brand:hover {
+  color: var(--brand);
+  text-decoration: none;
+}
+
+.error-card {
+  width: min(100%, var(--w-modal));
+  align-self: start;
+  padding: var(--sp-12);
+  border: 1px solid var(--border);
+  border-radius: var(--r-3xl);
+  background: var(--surface);
+  text-align: center;
+}
+
+.error-card__code {
+  margin: 0 0 var(--sp-4);
+  color: var(--brand);
+  font-family: var(--font-comic);
+  font-size: var(--fs-subsection);
+  font-weight: 700;
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+
+.error-card__title {
+  margin: 0;
+  color: var(--ink-900);
+  font-size: var(--fs-hero);
+  line-height: var(--lh-heading);
+  letter-spacing: var(--ls-heading);
+}
+
+.error-card__text {
+  margin: var(--sp-6) auto var(--sp-10);
+  color: var(--muted);
+  font-size: var(--fs-body);
+  line-height: var(--lh-relaxed);
+}
+
 button.ws-group__option {
   background: none;
 }

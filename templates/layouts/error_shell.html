@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block body %}
+  <main class="error-page" id="contenido">
+    <a class="error-page__brand" href="{% url 'albums:list' %}" aria-label="Ir a Mis álbumes">
+      {% include "components/logo_mark.html" with tone="brand" size=28 %}
+      <span>PaneLingo</span>
+    </a>
+
+    <section class="error-card" aria-labelledby="error-title">
+      <p class="error-card__code">{% block error_code %}{% endblock %}</p>
+      <h1 class="error-card__title" id="error-title">
+        {% block error_title %}{% endblock %}
+      </h1>
+      <p class="error-card__text">
+        {% block error_message %}{% endblock %}
+      </p>
+      <a class="btn btn--primary" href="{% url 'albums:list' %}">
+        Volver a Mis álbumes
+      </a>
+    </section>
+  </main>
+{% endblock %}
