@@ -1,0 +1,55 @@
+{% extends "layouts/app_shell.html" %}
+
+{% comment %}
+Confirmar la eliminación de un álbum — HU-20, álbum propio.
+Es la alternativa del modal cuando JavaScript no está disponible. Un GET
+solo muestra esta pantalla; únicamente el formulario POST elimina.
+{% endcomment %}
+
+{% block title %}Eliminar {{ album.title }} · PaneLingo{% endblock %}
+
+{% block breadcrumb %}
+  <a class="breadcrumb__link" href="{% url 'albums:list' %}">Mis álbumes</a>
+  <span class="breadcrumb__sep" aria-hidden="true">/</span>
+  <a class="breadcrumb__link" href="{{ album.get_absolute_url }}">{{ album.title }}</a>
+  <span class="breadcrumb__sep" aria-hidden="true">/</span>
+  <span class="breadcrumb__current">Eliminar álbum</span>
+{% endblock %}
+
+{% block content %}
+  {% with page_total=album.pages.count %}
+    <div class="page-head">
+      <div>
+        <h1 class="page-title">¿Eliminar «{{ album.title }}»?</h1>
+        <p class="page-subtitle">
+          {% if page_total == 1 %}
+            Se eliminará también 1 página cargada. Esta acción no se puede deshacer.
+          {% elif page_total %}
+            Se eliminarán también las {{ page_total }} páginas cargadas. Esta acción no se puede deshacer.
+          {% else %}
+            El álbum no tiene páginas cargadas. Esta acción no se puede deshacer.
+          {% endif %}
+        </p>
+      </div>
+    </div>
+
+    <div class="card album-form">
+      <p class="modal__body">
+        Se eliminarán el álbum, sus páginas, sus regiones y todas las traducciones asociadas.
+      </p>
+
+      <form method="post" action="{{ album.get_delete_url }}">
+        {% csrf_token %}
+        <div class="album-form__actions">
+          <a class="btn btn--secondary" href="{{ album.get_absolute_url }}">
+            Cancelar
+          </a>
+          <button type="submit" class="btn btn--danger-solid" data-submit-busy>
+            <span class="btn__spinner" hidden aria-hidden="true"></span>
+            <span data-submit-label data-busy-label="Eliminando…">Eliminar definitivamente</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  {% endwith %}
+{% endblock %}

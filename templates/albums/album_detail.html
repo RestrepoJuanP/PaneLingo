@@ -6,7 +6,7 @@ Detalle de álbum — HU-08, HU-22, HU-25, HU-26.
 Referencia visual: design/PaneLingo.dc.html (album) y
 design/screenshots/album-detail.png. Estado derivado, acciones, tarjeta de
 progreso, filtros de página y miniaturas con estado y barra. "Revisión y
-exportación" y "Eliminar" se ven deshabilitados: no tienen HU todavía.
+exportación" sigue deshabilitada; eliminar el álbum pertenece a HU-20.
 {% endcomment %}
 
 {% block title %}{{ album.title }} · PaneLingo{% endblock %}
@@ -79,19 +79,14 @@ exportación" y "Eliminar" se ven deshabilitados: no tienen HU todavía.
             <button type="submit" class="btn btn--secondary">Archivar</button>
           </form>
         {% endif %}
-        {% comment %}
-        Eliminar álbum no tiene HU, CA ni CP. Se maqueta con el estilo
-        destructivo del mockup pero deshabilitado, con la razón a la vista,
-        para no prometer una acción que no existe.
-        {% endcomment %}
-        <span
+        <a
           class="btn btn--danger"
-          aria-disabled="true"
-          title="Disponible en un sprint posterior"
-        >Eliminar</span>
+          href="{{ album.get_delete_url }}"
+          data-modal-open="eliminar-album"
+        >Eliminar</a>
       </div>
       <p class="album-detail__note">
-        Eliminar álbumes llega en un sprint posterior, igual que la revisión y exportación.
+        La revisión y exportación llega en un sprint posterior.
       </p>
     </div>
 
@@ -191,6 +186,44 @@ exportación" y "Eliminar" se ven deshabilitados: no tienen HU todavía.
           <button type="submit" class="btn btn--danger-solid" data-submit-busy>
             <span class="btn__spinner" hidden aria-hidden="true"></span>
             <span data-submit-label data-busy-label="Eliminando…">Eliminar página</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {% comment %}
+  Confirmación de eliminación del álbum (HU-20). El enlace que lo abre sigue
+  apuntando a la página de confirmación para funcionar sin JavaScript.
+  {% endcomment %}
+  <div
+    class="modal"
+    id="eliminar-album"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="eliminar-album-title"
+    hidden
+  >
+    <div class="modal__dialog modal__dialog--sm">
+      <h2 class="modal__title" id="eliminar-album-title">¿Eliminar «{{ album.title }}»?</h2>
+      <p class="modal__body">
+        {% if page_total == 1 %}
+          Se eliminará también 1 página cargada. Esta acción no se puede deshacer.
+        {% elif page_total %}
+          Se eliminarán también las {{ page_total }} páginas cargadas. Esta acción no se puede deshacer.
+        {% else %}
+          El álbum no tiene páginas cargadas. Esta acción no se puede deshacer.
+        {% endif %}
+      </p>
+      <form method="post" action="{{ album.get_delete_url }}">
+        {% csrf_token %}
+        <div class="modal__foot">
+          <button type="button" class="btn btn--secondary" data-modal-close>
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn--danger-solid" data-submit-busy>
+            <span class="btn__spinner" hidden aria-hidden="true"></span>
+            <span data-submit-label data-busy-label="Eliminando…">Eliminar definitivamente</span>
           </button>
         </div>
       </form>

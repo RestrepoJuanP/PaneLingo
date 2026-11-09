@@ -518,6 +518,27 @@ class AlbumUpdateView(OwnedAlbumMixin, UpdateView):
         return response
 
 
+class AlbumDeleteView(OwnedAlbumMixin, DeleteView):
+    """Eliminación confirmada de un álbum propio (HU-20).
+
+    Un GET muestra la confirmación sin escribir nada y sirve de alternativa
+    al modal cuando JavaScript no está disponible. Solo el POST elimina. El
+    queryset heredado filtra por propietario, así que un álbum ajeno responde
+    404 tanto al consultar como al intentar eliminar.
+    """
+
+    template_name = "albums/album_confirm_delete.html"
+    context_object_name = "album"
+    success_url = reverse_lazy("albums:list")
+
+    def form_valid(self, form):
+        """Elimina el álbum y confirma la acción con su título original."""
+        title = self.object.title
+        response = super().form_valid(form)
+        messages.success(self.request, f"Se eliminó el álbum «{title}».")
+        return response
+
+
 class PageDeleteView(PrivateViewMixin, DeleteView):
     """Eliminación de una página de un álbum propio (HU-10).
 

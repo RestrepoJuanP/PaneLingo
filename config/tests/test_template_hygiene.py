@@ -109,6 +109,7 @@ class TemplateHygieneTests(TestCase):
             "biblioteca": reverse("albums:list"),
             "crear álbum": reverse("albums:create"),
             "detalle de álbum": self.album.get_absolute_url(),
+            "eliminar álbum": self.album.get_delete_url(),
             "editar álbum": self.album.get_edit_url(),
             "renombrar álbum": self.album.get_rename_url(),
             "cargar páginas": self.album.get_upload_url(),
