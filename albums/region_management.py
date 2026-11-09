@@ -24,6 +24,7 @@ REGION_VALUE_FIELDS = (
     "needs_review",
     "is_manual",
     "skip_translation",
+    "cleaning_status",
     "corrected_text",
     "is_corrected",
     "machine_translation",
@@ -91,6 +92,9 @@ def renumber_regions(page):
 
 def delete_region(request, region):
     """Elimina, renumera y guarda una instantánea restaurable en sesión."""
+    from albums.cleaning import restore_region_cleaning
+
+    restore_region_cleaning(region)
     with transaction.atomic():
         page = ComicPage.objects.select_for_update().get(pk=region.page_id)
         locked_region = TextRegion.objects.select_for_update().get(pk=region.pk)
@@ -162,6 +166,9 @@ def restore_deleted_region(request, deleted_pk, user):
             return page, None
         restored = insert_restored_region(page, snapshot)
         refresh_page_approval(page)
+    from albums.cleaning import clean_region_incrementally
+
+    clean_region_incrementally(restored)
     request.session.pop(DELETED_REGION_SESSION_KEY, None)
     return page, restored
 
@@ -186,3 +193,6 @@ def set_translation_skipped(region, is_skipped):
             ]
         )
         refresh_page_approval(region.page)
+    from albums.cleaning import clean_region_incrementally
+
+    clean_region_incrementally(region)

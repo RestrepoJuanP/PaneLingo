@@ -250,6 +250,15 @@ def page_thumbnail_path(instance, filename):
     )
 
 
+def page_cleaned_path(instance, filename):
+    """Devuelve la ruta privada de la imagen sin texto de una página."""
+    return (
+        f"albums/user_{instance.album.owner_id}"
+        f"/album_{instance.album_id}"
+        f"/clean/{uuid.uuid4().hex}.png"
+    )
+
+
 class ComicPage(models.Model):
     """Página de un álbum: la imagen completa de una plancha del cómic.
 
@@ -283,6 +292,13 @@ class ComicPage(models.Model):
         TRANSLATING = "translating", _("Traduciendo")
         FAILED = "failed", _("Error de traducción")
 
+    class CleaningState(models.TextChoices):
+        """Estado de la tarea que elimina el texto original (HU-88)."""
+
+        IDLE = "idle", _("En reposo")
+        CLEANING = "cleaning", _("Limpiando")
+        FAILED = "failed", _("Error de limpieza")
+
     album = models.ForeignKey(
         Album,
         on_delete=models.CASCADE,
@@ -296,6 +312,12 @@ class ComicPage(models.Model):
         upload_to=page_thumbnail_path,
         blank=True,
         help_text=_("Versión reducida para la rejilla del álbum. Se genera al cargar."),
+    )
+    cleaned_image = models.ImageField(
+        _("imagen limpia"),
+        upload_to=page_cleaned_path,
+        blank=True,
+        help_text=_("Copia privada sin el texto original de las regiones."),
     )
     status = models.CharField(
         _("estado"),
@@ -337,6 +359,23 @@ class ComicPage(models.Model):
         max_length=255,
         blank=True,
         help_text=_("Motivo del último fallo, para mostrarlo junto a Reintentar."),
+    )
+    cleaning_state = models.CharField(
+        _("estado de la limpieza"),
+        max_length=20,
+        choices=CleaningState.choices,
+        default=CleaningState.IDLE,
+    )
+    cleaning_started_at = models.DateTimeField(
+        _("inicio de la limpieza"),
+        null=True,
+        blank=True,
+        help_text=_("Permite detectar una limpieza que quedó colgada."),
+    )
+    cleaning_error = models.CharField(
+        _("error de la última limpieza"),
+        max_length=255,
+        blank=True,
     )
     created_at = models.DateTimeField(_("creada"), auto_now_add=True)
     updated_at = models.DateTimeField(_("actualizada"), auto_now=True)
@@ -418,6 +457,10 @@ class ComicPage(models.Model):
         """Devuelve la dirección para añadir una región manual (HU-85)."""
         return reverse("albums:region_add", kwargs={"pk": self.pk})
 
+    def get_clean_url(self):
+        """Devuelve la dirección para limpiar el texto original (HU-88)."""
+        return reverse("albums:page_clean", kwargs={"pk": self.pk})
+
     # Las imágenes se piden por estas direcciones protegidas y nunca por
     # MEDIA_URL: así una página ajena responde 404 aunque se conozca su
     # dirección (HU-11, CA-11.4, deuda DT-02).
@@ -429,6 +472,10 @@ class ComicPage(models.Model):
     def get_thumbnail_url(self):
         """Devuelve la dirección protegida de la miniatura."""
         return reverse("albums:page_thumbnail", kwargs={"pk": self.pk})
+
+    def get_cleaned_image_url(self):
+        """Devuelve la dirección protegida de la imagen limpia."""
+        return reverse("albums:page_cleaned_image", kwargs={"pk": self.pk})
 
     @property
     def display_image_url(self):
@@ -500,6 +547,35 @@ class ComicPage(models.Model):
         return self.translation_state == self.TranslationState.FAILED
 
     @property
+    def is_cleaning(self):
+        """Indica si la limpieza está activa y no se dio por perdida."""
+        return (
+            self.cleaning_state == self.CleaningState.CLEANING
+            and not self.is_cleaning_stale
+        )
+
+    @property
+    def is_cleaning_stale(self):
+        """Indica si el trabajador dejó una limpieza bloqueada demasiado tiempo."""
+        if (
+            self.cleaning_state != self.CleaningState.CLEANING
+            or not self.cleaning_started_at
+        ):
+            return False
+        limit = timedelta(seconds=settings.PROCESSING_STALE_AFTER)
+        return timezone.now() - self.cleaning_started_at > limit
+
+    @property
+    def cleaning_failed(self):
+        """Indica si el último intento de limpieza falló."""
+        return self.cleaning_state == self.CleaningState.FAILED
+
+    @property
+    def has_cleaned_image(self):
+        """Indica si existe una capa limpia lista para previsualizar."""
+        return bool(self.cleaned_image)
+
+    @property
     def has_low_resolution(self):
         """Indica si la página lleva advertencia de baja resolución.
 
@@ -538,6 +614,15 @@ class TextRegion(models.Model):
         GENERATED = "generated", _("Generada")
         EDITED = "edited", _("Editada")
         APPROVED = "approved", _("Aprobada")
+
+    class CleaningStatus(models.TextChoices):
+        """Resultado de borrar el texto original de esta región (HU-88)."""
+
+        PENDING = "pending", _("Sin limpiar")
+        FILLED = "filled", _("Limpia")
+        MANUAL = "manual", _("Limpieza manual")
+        KEPT = "kept", _("Conservada")
+        AI = "ai", _("Limpia con IA")
 
     # Variante del chip de estado de la traducción, como en el mockup.
     TRANSLATION_VARIANTS = {
@@ -586,6 +671,12 @@ class TextRegion(models.Model):
         _("no traducir"),
         default=False,
         help_text=_("Conserva el texto original y excluye la región de la traducción."),
+    )
+    cleaning_status = models.CharField(
+        _("estado de la limpieza"),
+        max_length=20,
+        choices=CleaningStatus.choices,
+        default=CleaningStatus.PENDING,
     )
     corrected_text = models.TextField(
         _("texto corregido"),
@@ -677,6 +768,10 @@ class TextRegion(models.Model):
     def get_enable_translation_url(self):
         """Devuelve la dirección para volver a traducir la región (HU-86)."""
         return reverse("albums:region_enable_translation", kwargs={"pk": self.pk})
+
+    def get_restore_cleaning_url(self):
+        """Devuelve la dirección para restaurar la zona original (HU-88)."""
+        return reverse("albums:region_restore_cleaning", kwargs={"pk": self.pk})
 
     @property
     def needs_translation(self):

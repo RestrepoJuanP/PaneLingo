@@ -6,6 +6,7 @@ tasks.py de cada aplicación instalada.
 
 from huey.contrib.djhuey import db_task
 
+from albums.cleaning import run_page_cleaning
 from albums.exporting import run_album_export
 from albums.processing import run_detection
 from albums.translating import run_translation
@@ -21,6 +22,12 @@ def process_page_task(page_id):
 def translate_page_task(page_id, region_id=None):
     """Traduce una página, o una de sus regiones, con IA (HU-16)."""
     run_translation(page_id, region_id)
+
+
+@db_task()
+def clean_page_task(page_id):
+    """Elimina el texto original de las regiones de una página (HU-88)."""
+    run_page_cleaning(page_id)
 
 
 @db_task()

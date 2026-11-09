@@ -145,5 +145,9 @@ def save_manual_region(page, new_region):
 
 def add_manual_region(page, x, y, width, height):
     """Detecta, guarda y devuelve una región añadida manualmente."""
+    from albums.cleaning import clean_region_incrementally
+
     region = detect_manual_region(page, x, y, width, height)
-    return save_manual_region(page, region)
+    saved = save_manual_region(page, region)
+    clean_region_incrementally(saved)
+    return saved

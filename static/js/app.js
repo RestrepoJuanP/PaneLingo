@@ -518,7 +518,7 @@
           return response.json();
         })
         .then(function (state) {
-          if (state.is_processing || state.is_translating) {
+          if (state.is_processing || state.is_translating || state.is_cleaning) {
             schedule(PROCESSING_POLL_MS);
             return;
           }
@@ -1432,15 +1432,31 @@
   function bindPagePreview(group) {
     var figure = document.querySelector("[data-zoom-target]");
     var overlay = figure && figure.querySelector("[data-page-overlay]");
+    var image = figure && figure.querySelector("[data-page-image]");
     var buttons = group.querySelectorAll("[data-preview-mode]");
-    if (!figure || !overlay || buttons.length !== 2) {
+    if (!figure || !overlay || !image || buttons.length < 2) {
       return;
     }
 
     function apply(mode, focus) {
       var translated = mode === "translated";
+      var cleaned = mode === "cleaned";
+      var cleanedSource = image.dataset.cleanedSrc;
+      if (cleaned && !cleanedSource) {
+        mode = "original";
+        cleaned = false;
+      }
       overlay.hidden = !translated;
       figure.classList.toggle("is-translated-preview", translated);
+      figure.classList.toggle("is-clean-preview", cleaned);
+      figure.classList.toggle(
+        "uses-cleaned-image",
+        Boolean(cleanedSource) && (cleaned || translated),
+      );
+      image.src =
+        cleanedSource && (cleaned || translated)
+          ? cleanedSource
+          : image.dataset.originalSrc;
       Array.prototype.forEach.call(buttons, function (button) {
         var selected = button.dataset.previewMode === mode;
         button.setAttribute("aria-pressed", String(selected));
@@ -1462,16 +1478,27 @@
         return;
       }
       event.preventDefault();
-      var translated = event.key === "ArrowRight" || event.key === "End";
-      apply(translated ? "translated" : "original", true);
+      var current = Array.prototype.findIndex.call(buttons, function (button) {
+        return button.getAttribute("aria-pressed") === "true";
+      });
+      var next = current;
+      if (event.key === "Home") {
+        next = 0;
+      } else if (event.key === "End") {
+        next = buttons.length - 1;
+      } else if (event.key === "ArrowLeft") {
+        next = Math.max(0, current - 1);
+      } else {
+        next = Math.min(buttons.length - 1, current + 1);
+      }
+      apply(buttons[next].dataset.previewMode, true);
     });
     group.hidden = false;
-    apply(
-      readPreference("panelingo.preview") === "translated"
-        ? "translated"
-        : "original",
-      false,
-    );
+    var preferred = readPreference("panelingo.preview");
+    var supported = Array.prototype.some.call(buttons, function (button) {
+      return button.dataset.previewMode === preferred;
+    });
+    apply(supported ? preferred : "original", false);
   }
 
   function bindCanvasZoom(controls) {

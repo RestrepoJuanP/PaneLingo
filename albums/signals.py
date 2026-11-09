@@ -58,6 +58,7 @@ def delete_page_files(sender, instance, **kwargs):
     """
     delete_stored_file(instance.image)
     delete_stored_file(instance.thumbnail)
+    delete_stored_file(instance.cleaned_image)
 
 
 @receiver(post_delete, sender=Album)
