@@ -108,15 +108,17 @@ class AlbumDetailContentTests(AlbumDetailTestCase):
         self.assertNotIn("Open workspace", content)
         self.assertNotIn("Review &amp; export", content)
 
-    def test_delete_is_shown_disabled(self):
-        """Eliminar se maqueta deshabilitado, no funcional."""
+    def test_delete_opens_the_confirmation(self):
+        """CP-20.1 — Eliminar abre el modal y conserva una URL alternativa."""
         self.sign_in()
 
         response = self.client.get(self.album.get_absolute_url())
         content = response.content.decode()
 
-        self.assertIn('aria-disabled="true"', content)
-        self.assertIn("Eliminar álbumes llega en un sprint posterior", content)
+        self.assertContains(response, f'href="{self.album.get_delete_url()}"')
+        self.assertContains(response, 'data-modal-open="eliminar-album"')
+        self.assertIn('id="eliminar-album"', content)
+        self.assertNotIn("Eliminar álbumes llega en un sprint posterior", content)
 
     def test_there_is_a_link_back_to_the_library(self):
         """El detalle ofrece la vuelta a la biblioteca."""

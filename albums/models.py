@@ -144,6 +144,10 @@ class Album(models.Model):
         """Devuelve la dirección para cargar páginas en este álbum."""
         return reverse("albums:upload", kwargs={"pk": self.pk})
 
+    def get_delete_url(self):
+        """Devuelve la dirección para eliminar este álbum (HU-20)."""
+        return reverse("albums:delete", kwargs={"pk": self.pk})
+
     @property
     def is_archived(self):
         """Indica si el álbum está archivado (HU-69)."""

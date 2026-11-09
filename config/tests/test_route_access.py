@@ -31,6 +31,7 @@ PUBLIC_ROUTES = [
 PRIVATE_ROUTES = [
     "albums:list",
     "albums:create",
+    "albums:delete",
     "albums:detail",
     "albums:edit",
     "albums:rename",
@@ -65,6 +66,7 @@ ACTION_ROUTES = [
 # no tienen que ser válidos: basta con que permitan construir la dirección.
 ROUTE_ARGS = {
     "albums:detail": {"pk": 1},
+    "albums:delete": {"pk": 1},
     "albums:edit": {"pk": 1},
     "albums:rename": {"pk": 1},
     "albums:album_cover": {"pk": 1},

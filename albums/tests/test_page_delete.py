@@ -328,9 +328,8 @@ class CascadeFileCleanupTests(PageDeleteTestCase):
     def test_deleting_the_album_removes_its_page_files(self):
         """Borrar un álbum entero no deja archivos de sus páginas.
 
-        Eliminar álbumes está deshabilitado en la interfaz del Sprint 1, pero
-        el borrado a nivel de modelo ya limpia el disco. Cuando llegue esa
-        historia no hará falta añadir nada.
+        La limpieza a nivel de modelo nació antes que HU-20 y ahora protege
+        también la eliminación iniciada desde la interfaz.
         """
         self.assertEqual(len(self.stored_files()), 6)
 

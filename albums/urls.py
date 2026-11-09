@@ -5,6 +5,7 @@ from django.urls import path
 from albums.views import (
     AlbumCoverView,
     AlbumCreateView,
+    AlbumDeleteView,
     AlbumDetailView,
     AlbumListView,
     AlbumRenameView,
@@ -33,6 +34,11 @@ urlpatterns = [
     path("albumes/nuevo/", AlbumCreateView.as_view(), name="create"),
     path("albumes/cargar/", UploadChooseView.as_view(), name="upload_choose"),
     path("albumes/<int:pk>/", AlbumDetailView.as_view(), name="detail"),
+    path(
+        "albumes/<int:pk>/eliminar/",
+        AlbumDeleteView.as_view(),
+        name="delete",
+    ),
     path("albumes/<int:pk>/cargar/", PageUploadView.as_view(), name="upload"),
     path("paginas/<int:pk>/", PageDetailView.as_view(), name="page_detail"),
     path(
