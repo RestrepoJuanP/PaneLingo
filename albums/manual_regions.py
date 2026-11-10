@@ -122,6 +122,7 @@ def save_manual_region(page, new_region):
             reading_order=F("reading_order") + TEMPORARY_ORDER_OFFSET
         )
         new_region.page = locked_page
+        locked_page.clear_typeset_approval()
         for position, region in enumerate(ordered, start=1):
             region.reading_order = position
             if region.pk is None:

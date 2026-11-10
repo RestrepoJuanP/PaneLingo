@@ -3211,21 +3211,29 @@ textarea {
   pointer-events: none;
 }
 
+/*
+ * Superposición traducida (HU-87, HU-89). Todas las medidas llegan del
+ * servidor (albums/typesetting.py, layout_for_region) como % del ancho de la
+ * página, para que la vista previa, el editor y el PNG exportado coincidan
+ * (ADR-003, decisión 4). Aquí no se calcula ninguna medida propia.
+ */
 .page-overlay__region {
   position: absolute;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.6cqw;
+  padding: calc(var(--preview-padding-ratio, 0.6) * 1cqw);
   overflow: hidden;
   border: 1px solid transparent;
   border-radius: var(--r-xs);
   background: var(--surface);
-  color: var(--ink-900);
-  font-family: var(--font-typeset);
+  color: var(--preview-text-color, var(--ink-900));
+  font-family: var(--preview-font-family, var(--font-typeset));
   font-size: calc(var(--preview-font-ratio) * 1cqw);
-  line-height: 1.1;
-  text-align: center;
+  font-style: var(--preview-font-style, normal);
+  font-weight: var(--preview-font-weight, 400);
+  line-height: calc(var(--preview-line-ratio, 1.1) * 1cqw);
+  text-align: var(--preview-text-align, center);
 }
 
 .region-canvas.is-clean-preview .region-box {
@@ -3238,7 +3246,7 @@ textarea {
 }
 
 .page-overlay__region--narration {
-  font-style: italic;
+  font-style: var(--preview-font-style, italic);
 }
 
 .page-overlay__region--untranslated {
@@ -3254,16 +3262,27 @@ textarea {
 
 .page-overlay__lines {
   display: flex;
-  max-width: 100%;
+  width: 100%;
   max-height: 100%;
   flex-direction: column;
-  align-items: center;
+  align-items: var(--preview-line-align, center);
   justify-content: center;
 }
 
+.page-overlay__region[data-text-align="left"] {
+  --preview-line-align: flex-start;
+}
+
+.page-overlay__region[data-text-align="right"] {
+  --preview-line-align: flex-end;
+}
+
+/* Cada línea ocupa exactamente line_height, también si está vacía, como en
+   el PNG que dibuja render_page. */
 .page-overlay__lines > span {
-  max-width: 100%;
-  white-space: nowrap;
+  flex: none;
+  height: calc(var(--preview-line-ratio, 1.1) * 1cqw);
+  white-space: pre;
 }
 
 .page-overlay__notice {

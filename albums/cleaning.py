@@ -27,6 +27,7 @@ def start_cleaning(page):
 
     if page.is_cleaning or not page.was_processed or not page.regions.exists():
         return False
+    page.clear_typeset_approval()
     page.cleaning_state = ComicPage.CleaningState.CLEANING
     page.cleaning_started_at = timezone.now()
     page.cleaning_error = ""
@@ -99,11 +100,22 @@ def uniform_background(image, box):
     return dominant
 
 
+def restore_original_area(original, target, region):
+    """Vuelve a pegar en target la zona original de la región (ADR-003, P6).
+
+    Es la única implementación: la usan la limpieza para las regiones "No
+    traducir" y al restaurar una región, y render_page para las regiones
+    sin traducción aprobada.
+    """
+    box = expanded_box(region, original.size)
+    target.paste(original.crop(box), box[:2])
+
+
 def apply_region_cleaning(original, cleaned, region):
     """Limpia una región sobre la copia y devuelve su nuevo estado."""
     box = expanded_box(region, original.size)
     if region.skip_translation:
-        cleaned.paste(original.crop(box), box[:2])
+        restore_original_area(original, cleaned, region)
         return TextRegion.CleaningStatus.KEPT
     background = uniform_background(original, box)
     if background is None:
@@ -129,6 +141,7 @@ def replace_cleaned_image(page, image, statuses=None):
         save=False,
     )
     with transaction.atomic():
+        page.clear_typeset_approval()
         page.cleaning_state = ComicPage.CleaningState.IDLE
         page.cleaning_started_at = None
         page.cleaning_error = ""
@@ -233,8 +246,7 @@ def restore_region_cleaning(region):
         region.save(update_fields=["cleaning_status"])
         return
     original, cleaned = load_original_and_cleaned(page)
-    box = expanded_box(region, original.size)
-    cleaned.paste(original.crop(box), box[:2])
+    restore_original_area(original, cleaned, region)
     replace_cleaned_image(
         page,
         cleaned,

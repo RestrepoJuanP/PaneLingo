@@ -72,7 +72,14 @@ from albums.translation_review import (
     edit_translation,
     unapprove_translation,
 )
-from albums.typesetting import preview_for_region
+from albums.typesetting import (
+    approve_typesetting,
+    layout_for_region,
+    preview_for_region,
+    reset_layout,
+    save_layout,
+    validate_layout,
+)
 
 # Longitud máxima del texto de búsqueda; el título admite 120 caracteres.
 SEARCH_MAX_LENGTH = 120
@@ -1326,6 +1333,7 @@ def region_translation_edit(request, pk):
             return autosave_success(
                 region.translated_at,
                 preview=preview_for_region(region),
+                layout=layout_for_region(region),
             )
         if region.translation:
             messages.success(request, f"Se guardó la traducción de la región {number}.")
@@ -1341,6 +1349,90 @@ def owned_region_or_404(request, pk):
         pk=pk,
         page__album__owner=request.user,
     )
+
+
+def layout_saved(region):
+    """Respuesta JSON con la maquetación recalculada por el servidor."""
+    return autosave_success(
+        region.layout_updated_at,
+        preview=preview_for_region(region),
+        **layout_for_region(region),
+    )
+
+
+def layout_conflict(region):
+    """Conflicto de HU-23 aplicado a la maquetación: no se sobrescribe nada."""
+    return JsonResponse(
+        {
+            "status": "conflict",
+            "message": (
+                "La maquetación de esta región cambió en otra pestaña. "
+                "Tus cambios no se guardaron."
+            ),
+            "version": timestamp_version(region.layout_updated_at),
+            "layout": layout_for_region(region),
+        },
+        status=409,
+    )
+
+
+@require_POST
+@private_view
+def region_layout(request, pk):
+    """Guarda un cambio de maquetación de una región (HU-89, CA-89.3 y 89.4).
+
+    Responde JSON: 200 con la maquetación recalculada con layout_for_region,
+    400 con los errores de cada campo, 409 si otra pestaña guardó antes
+    (mismo control de versión que HU-23) y 404 si la región es ajena.
+    """
+    region = owned_region_or_404(request, pk)
+    if autosave_conflicts(request, region.layout_updated_at):
+        return layout_conflict(region)
+    cleaned, errors = validate_layout(region, request.POST)
+    if errors:
+        return JsonResponse({"status": "invalid", "errors": errors}, status=400)
+    save_layout(region, cleaned)
+    return layout_saved(region)
+
+
+@require_POST
+@private_view
+def region_layout_reset(request, pk):
+    """Vuelve a la caja del OCR y al estilo por defecto (HU-89, CA-89.6)."""
+    region = owned_region_or_404(request, pk)
+    if autosave_conflicts(request, region.layout_updated_at):
+        return layout_conflict(region)
+    reset_layout(region)
+    return layout_saved(region)
+
+
+@require_POST
+@private_view
+def page_typeset_approve(request, pk):
+    """Aprueba la maquetación de la página (HU-89, CA-89.7, ADR-003 P7).
+
+    Con X-Autosave responde JSON (409 con el motivo si no se puede); sin
+    él, vuelve a la página con un mensaje, para funcionar sin JavaScript.
+    """
+    page = owned_page_or_404(request, pk)
+    result = approve_typesetting(page)
+    if is_autosave(request):
+        status = 200 if result.is_approved else 409
+        return JsonResponse(
+            {
+                "status": "approved" if result.is_approved else "blocked",
+                "message": result.message,
+                "warnings": result.warnings,
+            },
+            status=status,
+        )
+    if result.is_approved:
+        messages.success(request, result.message)
+        for warning in result.warnings:
+            messages.warning(request, warning)
+    else:
+        messages.error(request, result.message)
+    return redirect(page.get_absolute_url())
 
 
 def review_address(page, number, filter_value=""):

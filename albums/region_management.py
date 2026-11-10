@@ -30,11 +30,20 @@ REGION_VALUE_FIELDS = (
     "machine_translation",
     "translation",
     "translation_status",
+    "layout_x",
+    "layout_y",
+    "layout_width",
+    "layout_height",
+    "font_family",
+    "font_size",
+    "text_align",
+    "text_color",
 )
 REGION_DATE_FIELDS = (
     "corrected_at",
     "translated_at",
     "approved_at",
+    "layout_updated_at",
     "created_at",
 )
 
@@ -102,6 +111,7 @@ def delete_region(request, region):
         locked_region.delete()
         renumber_regions(page)
         refresh_page_approval(page)
+        page.clear_typeset_approval()
 
     snapshot["page_signature"] = page_signature(page)
     request.session[DELETED_REGION_SESSION_KEY] = snapshot
@@ -166,6 +176,7 @@ def restore_deleted_region(request, deleted_pk, user):
             return page, None
         restored = insert_restored_region(page, snapshot)
         refresh_page_approval(page)
+        page.clear_typeset_approval()
     from albums.cleaning import clean_region_incrementally
 
     clean_region_incrementally(restored)
@@ -193,6 +204,7 @@ def set_translation_skipped(region, is_skipped):
             ]
         )
         refresh_page_approval(region.page)
+        region.page.clear_typeset_approval()
     from albums.cleaning import clean_region_incrementally
 
     clean_region_incrementally(region)

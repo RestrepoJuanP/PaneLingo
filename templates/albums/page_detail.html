@@ -303,8 +303,9 @@ de pantalla anuncia número, tipo, estado y texto.
               {% if preview.status != "skipped" %}
                 <div
                   class="page-overlay__region page-overlay__region--{{ preview.status }} page-overlay__region--{{ preview.kind }}{% if not preview.fits %} is-overflowing{% endif %}"
-                  style="{{ preview.overlay_style }} --preview-font-ratio: {{ preview.font_ratio_css }};"
+                  style="{{ preview.style }}"
                   data-preview-region="{{ preview.region_pk }}"
+                  data-text-align="{{ preview.layout.text_align }}"
                 >
                   <span class="page-overlay__lines">
                     {% for line in preview.lines %}<span>{{ line }}</span>{% endfor %}
