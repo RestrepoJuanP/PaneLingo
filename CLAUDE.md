@@ -140,6 +140,12 @@ Los elementos del mockup ligados a funcionalidad fuera de alcance (barras de pro
 ## Alcance: qué NO hacer
 **Sprint 2:** la detección de regiones de texto (HU-12) y el OCR (HU-13) entran en alcance, con las decisiones de [`docs/adr/ADR-001-proveedor-ocr-y-tareas-asincronas.md`](docs/adr/ADR-001-proveedor-ocr-y-tareas-asincronas.md): proveedor detrás de un adaptador (`albums/ocr/`), proveedor simulado en todas las pruebas y tareas en segundo plano con Huey. El resto de esta sección sigue vigente para lo que no tenga HU del sprint en curso.
 
+**EP-08 Edición de imagen (Sprint 3):** la reinserción del texto traducido en la imagen, que el Alcance del MVP dejaba fuera, entra con RF-15. Además de HU-85 a HU-88, ya en `main`, entran HU-89 (#89, maquetar la traducción sobre la imagen), HU-90 (#90, exportar las páginas traducidas como PNG en un ZIP) y HU-91 (#91, limpiar con IA el texto que está sobre el dibujo, *Could* y precedida de un *spike*). Las decisiones están en [`docs/adr/ADR-003-edicion-de-imagen.md`](docs/adr/ADR-003-edicion-de-imagen.md) y estas son reglas permanentes:
+- **Un único algoritmo de maquetación**, en `albums/typesetting.py`, usado por la vista previa, el editor y la exportación. Prohibido duplicarlo en JavaScript: el navegador pinta las líneas, el tamaño y la caja que devuelve el servidor.
+- **Solo fuentes con licencia SIL OFL**, guardadas en `static/fonts/` junto a su licencia y compartidas por `@font-face` y Pillow.
+- **Coordenadas siempre en píxeles de la imagen original.** El navegador solo las escala para el zoom; el servidor nunca guarda coordenadas de pantalla.
+- **Trabajo pesado en Huey** (limpiar una página, limpiar con IA, generar los PNG de un álbum), con estado y "Reintentar". Todo proveedor externo va detrás de un adaptador y las pruebas usan siempre un proveedor simulado, sin red ni claves.
+
 En el Sprint 1: no implementes OCR, detección de burbujas, traducción con IA, workspace de traducción dividido, exportación, colaboración en equipo, envío real de correo en producción, pagos, panel administrativo ni eliminación de álbumes. Si una pantalla del mockup pertenece a esas funcionalidades, no la construyas en el Sprint 1.
 
 ## Reglas de trabajo contigo
