@@ -1,0 +1,282 @@
+{% comment %}
+Pestaña "Maquetación" del espacio de trabajo (HU-89). Boceto aprobado en el
+Módulo 2; el mockup no tiene esta pantalla.
+
+El servidor es la única fuente de verdad (ADR-003, decisión 4): cada caja
+llega con las líneas, el tamaño, el interlineado, el relleno y el estilo que
+calcula albums/typesetting.py (layout_for_region). static/js/typesetting.js
+solo pinta lo que devuelven las rutas region_layout, region_layout_reset y
+region_translation_edit; nunca calcula líneas ni tamaños.
+
+Las fuentes, los límites de tamaño, el tamaño mínimo de caja y el formato
+del color también los emite el servidor, en atributos data- y en los
+controles del panel (patrón de BUG-043): el JavaScript no los escribe.
+
+Sin JavaScript se ve la maquetación tal como se exportará, el panel con los
+requisitos de P7 y "Aprobar página", que es un formulario normal. El panel
+de propiedades, "Deshacer" y la lista de textos solo existen con JavaScript.
+{% endcomment %}
+<div
+  class="ts"
+  data-typesetting-editor
+  data-image-width="{{ page.width }}"
+  data-image-height="{{ page.height }}"
+  data-min-box="{{ editor.min_box_size }}"
+>
+  <div class="ws-toolbar ts-bar">
+    <div class="autosave ts-bar__status" aria-live="polite">
+      <span class="autosave__status" data-ts-status>Sin cambios en esta visita</span>
+      <button type="button" class="autosave__retry" data-ts-retry hidden>Reintentar</button>
+    </div>
+
+    <button type="button" class="ws-btn" data-ts-undo data-ts-js-only hidden disabled>
+      Deshacer<span class="ts-bar__count" data-ts-undo-count></span>
+    </button>
+
+    <details class="ts-shortcuts">
+      <summary class="ws-btn">Atajos de teclado</summary>
+      <ul class="ts-shortcuts__list" id="ts-shortcuts">
+        <li><kbd>Tab</kbd> o clic: seleccionar un texto</li>
+        <li><kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd>: mover 1 px</li>
+        <li><kbd>Mayús</kbd> + flechas: mover 10 px</li>
+        <li><kbd>Alt</kbd> + flechas: cambiar el tamaño de la caja</li>
+        <li><kbd>Enter</kbd> o doble clic: editar el texto</li>
+        <li><kbd>Ctrl</kbd> + <kbd>Enter</kbd>: guardar el texto · <kbd>Escape</kbd>: cancelar</li>
+        <li><kbd>Ctrl</kbd> + <kbd>Z</kbd> sobre la página: deshacer</li>
+      </ul>
+    </details>
+
+    <span class="ws-toolbar__spacer"></span>
+
+    <form method="post" action="{{ page.get_typeset_approve_url }}" class="ts-approve" data-ts-approve-form>
+      {% csrf_token %}
+      <button
+        type="submit"
+        class="ws-cta"
+        data-ts-approve
+        aria-describedby="ts-approve-reason"
+        {% if typeset_status.is_typeset or typeset_status.blocker %}disabled{% endif %}
+      >{% if typeset_status.is_typeset %}Página maquetada{% else %}Aprobar página{% endif %}</button>
+      <p class="ts-approve__reason" id="ts-approve-reason" data-ts-approve-reason {% if not typeset_status.blocker %}hidden{% endif %}>{{ typeset_status.blocker }}</p>
+    </form>
+  </div>
+
+  <div class="ts-warnings" role="status" aria-live="polite" data-ts-warnings></div>
+
+  <div class="ws-split">
+    <section class="ws-canvas ts-canvas-area" aria-label="Maquetación de la página" data-ts-canvas-area>
+      <a class="ts-jump" href="#ts-panel" data-ts-jump hidden>
+        Propiedades de la región <span data-ts-jump-number></span> <span aria-hidden="true">↓</span>
+      </a>
+      <figure class="region-canvas uses-cleaned-image ts-canvas" data-zoom-target data-ts-canvas>
+        <img
+          class="region-canvas__img"
+          src="{{ page.get_cleaned_image_url }}"
+          alt="Página {{ page.page_number }} maquetada: imagen limpia con las traducciones encima"
+          width="{{ page.width }}"
+          height="{{ page.height }}"
+          draggable="false"
+        />
+        <div class="ts-layer" data-ts-layer>
+          {% for item in typeset_items %}
+            <div
+              class="page-overlay__region ts-box{% if item.preview.export_notice %} ts-box--pending{% endif %}{% if not item.preview.fits %} is-overflowing{% endif %}"
+              style="{{ item.preview.style }}"
+              role="button"
+              tabindex="0"
+              aria-pressed="false"
+              aria-label="Región {{ item.region.reading_order }}, texto: {{ item.preview.lines|join:' ' }}"
+              aria-describedby="ts-box-help"
+              data-ts-box
+              data-text-align="{{ item.layout.text_align }}"
+              data-number="{{ item.region.reading_order }}"
+              data-kind="{{ item.region.get_kind_display }}"
+              data-layout-url="{{ item.region.get_layout_url }}"
+              data-reset-url="{{ item.region.get_layout_reset_url }}"
+              data-translation-url="{{ item.region.get_translation_url }}"
+              data-layout-version="{{ item.layout_version }}"
+              data-translation-version="{{ item.translation_version }}"
+              data-translation="{{ item.region.translation }}"
+              data-x="{{ item.layout.x }}"
+              data-y="{{ item.layout.y }}"
+              data-width="{{ item.layout.width }}"
+              data-height="{{ item.layout.height }}"
+              data-font-choice="{{ item.layout.font_choice }}"
+              data-font-size="{{ item.layout.font_size }}"
+              data-auto-size="{% if item.layout.is_auto_size %}true{% else %}false{% endif %}"
+              data-text-color="{{ item.layout.text_color }}"
+            >
+              <span class="page-overlay__lines" data-ts-lines>{% for line in item.preview.lines %}<span>{{ line }}</span>{% endfor %}</span>
+              <span class="page-overlay__notice" data-ts-notice {% if not item.preview.export_notice %}hidden{% endif %}>{{ item.preview.export_notice }}</span>
+              <span class="page-overlay__notice ts-box__overflow" data-ts-overflow {% if item.preview.fits %}hidden{% endif %}>El texto no cabe</span>
+              <span class="ts-handle ts-handle--nw" data-ts-handle="nw" aria-hidden="true" hidden></span>
+              <span class="ts-handle ts-handle--ne" data-ts-handle="ne" aria-hidden="true" hidden></span>
+              <span class="ts-handle ts-handle--sw" data-ts-handle="sw" aria-hidden="true" hidden></span>
+              <span class="ts-handle ts-handle--se" data-ts-handle="se" aria-hidden="true" hidden></span>
+            </div>
+          {% endfor %}
+        </div>
+      </figure>
+      <p class="sr-only" id="ts-box-help">
+        Flechas para mover, Mayús más flechas para mover 10 píxeles, Alt más
+        flechas para cambiar el tamaño, Enter para editar el texto.
+      </p>
+    </section>
+
+    <section class="ws-panel ts-panel" id="ts-panel" tabindex="-1" aria-labelledby="ts-panel-title">
+      <div class="ws-panel__head">
+        <div class="ws-panel__title-row">
+          <h2 class="ws-panel__title" id="ts-panel-title">Propiedades</h2>
+        </div>
+      </div>
+
+      <div class="ts-panel__body">
+        <div class="ts-summary">
+          <div class="ts-summary__head">
+            <h3 class="ts-summary__title">Maquetación de la página</h3>
+            <span data-ts-chip>
+              {% if typeset_status.is_typeset %}
+                {% include "components/badge.html" with label="Maquetada" variant="success" %}
+              {% else %}
+                {% include "components/badge.html" with label="Sin aprobar" variant="neutral" %}
+              {% endif %}
+            </span>
+          </div>
+          <ul class="ts-requirements" data-ts-requirements>
+            {% for requirement in typeset_status.requirements %}
+              <li class="ts-requirements__item ts-requirements__item--{{ requirement.state }}">{{ requirement.text }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        <p class="ts-nojs" data-ts-nojs>Para mover y cambiar el estilo de los textos hace falta JavaScript.</p>
+
+        <div class="ts-editor-panel" data-ts-js-only hidden>
+          <div class="empty-state ts-empty" data-ts-empty>
+            <p class="empty-state__body">
+              Selecciona un texto de la página con un clic o con Tab para
+              cambiar su fuente, tamaño, alineación y color.
+            </p>
+          </div>
+
+          <form class="ts-props" data-ts-props hidden novalidate>
+            <div class="ts-props__head">
+              <h3 class="ts-props__title" data-ts-props-title></h3>
+            </div>
+
+            <div class="ts-props__text">
+              <p class="field__label" id="ts-text-label">Texto</p>
+              <p class="ts-props__quote" aria-labelledby="ts-text-label" data-ts-text></p>
+              <button type="button" class="btn btn--secondary" data-ts-edit-text>Editar texto</button>
+            </div>
+
+            <fieldset class="pill-field">
+              <legend class="field__label">Fuente</legend>
+              <div class="pill-group">
+                <span class="pill-option">
+                  <input class="pill-input" type="radio" name="font_family" id="ts-font-default" value="" />
+                  <label class="pill" for="ts-font-default">Por defecto</label>
+                </span>
+                {% for font in editor.fonts %}
+                  <span class="pill-option">
+                    <input class="pill-input" type="radio" name="font_family" id="ts-font-{{ font.value }}" value="{{ font.value }}" />
+                    <label class="pill" for="ts-font-{{ font.value }}">{{ font.label }}</label>
+                  </span>
+                {% endfor %}
+              </div>
+            </fieldset>
+
+            <fieldset class="pill-field">
+              <legend class="field__label">Tamaño</legend>
+              <div class="pill-group">
+                <span class="pill-option">
+                  <input class="pill-input" type="radio" name="size_mode" id="ts-size-auto" value="auto" />
+                  <label class="pill" for="ts-size-auto">Automático</label>
+                </span>
+                <span class="pill-option">
+                  <input class="pill-input" type="radio" name="size_mode" id="ts-size-fixed" value="fixed" />
+                  <label class="pill" for="ts-size-fixed">Fijo</label>
+                </span>
+              </div>
+              <div class="ts-props__size">
+                <label class="field__label" for="ts-font-size">Tamaño fijo en píxeles</label>
+                <input
+                  class="input ts-props__number"
+                  type="number"
+                  id="ts-font-size"
+                  name="font_size"
+                  min="{{ editor.min_font_size }}"
+                  max="{{ editor.max_fixed_font_size }}"
+                  step="1"
+                  inputmode="numeric"
+                  aria-describedby="ts-font-size-hint"
+                  data-ts-font-size
+                />
+                <p class="field__hint" id="ts-font-size-hint">
+                  Entre {{ editor.min_font_size }} y {{ editor.max_fixed_font_size }} px. Solo con «Fijo».
+                </p>
+              </div>
+            </fieldset>
+
+            <fieldset class="pill-field">
+              <legend class="field__label">Alineación</legend>
+              <div class="pill-group">
+                <span class="pill-option">
+                  <input class="pill-input" type="radio" name="text_align" id="ts-align-left" value="left" />
+                  <label class="pill" for="ts-align-left">Izquierda</label>
+                </span>
+                <span class="pill-option">
+                  <input class="pill-input" type="radio" name="text_align" id="ts-align-center" value="center" />
+                  <label class="pill" for="ts-align-center">Centro</label>
+                </span>
+                <span class="pill-option">
+                  <input class="pill-input" type="radio" name="text_align" id="ts-align-right" value="right" />
+                  <label class="pill" for="ts-align-right">Derecha</label>
+                </span>
+              </div>
+            </fieldset>
+
+            <fieldset class="pill-field ts-props__color">
+              <legend class="field__label">Color</legend>
+              <div class="ts-props__color-row">
+                <label class="sr-only" for="ts-color-picker">Elegir color</label>
+                <input class="ts-props__swatch" type="color" id="ts-color-picker" data-ts-color-picker />
+                <label class="sr-only" for="ts-color-hex">Valor hexadecimal</label>
+                <input
+                  class="input ts-props__hex"
+                  type="text"
+                  id="ts-color-hex"
+                  name="text_color"
+                  pattern="{{ editor.color_pattern }}"
+                  maxlength="7"
+                  spellcheck="false"
+                  autocomplete="off"
+                  aria-describedby="ts-color-hint"
+                  data-ts-color-hex
+                />
+              </div>
+              <p class="field__hint" id="ts-color-hint">Formato #RRGGBB.</p>
+            </fieldset>
+
+            <div class="ts-props__reset">
+              <button type="button" class="btn btn--secondary" data-ts-reset aria-describedby="ts-reset-hint">Restablecer</button>
+              <p class="field__hint" id="ts-reset-hint">Vuelve a la caja del OCR y al estilo por defecto.</p>
+            </div>
+          </form>
+
+          <h3 class="ts-list__title" id="ts-list-title">Textos de la página</h3>
+          <ul class="ts-list" aria-labelledby="ts-list-title">
+            {% for item in typeset_items %}
+              <li>
+                <button type="button" class="ts-list__item" data-ts-pick="{{ item.region.reading_order }}">
+                  <span class="ts-list__number">{{ item.region.reading_order }}</span>
+                  <span class="ts-list__text" data-ts-pick-text>{{ item.preview.lines|join:" " }}</span>
+                </button>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>

@@ -215,6 +215,7 @@ def layout_for_region(region, text=None):
         "width": width,
         "height": height,
         "font_family": font_key,
+        "font_choice": region.font_family,
         "font_size": font_size,
         "is_auto_size": not region.font_size,
         "lines": lines,
@@ -272,6 +273,15 @@ def skipped_preview(region):
     }
 
 
+def export_notice(region):
+    """Aviso de la caja cuando el PNG conservará el texto original (P6)."""
+    if not region.needs_translation or is_drawn(region):
+        return ""
+    if region.is_translation_approved:
+        return "Sin traducir: se exportará con el texto original."
+    return "Sin aprobar: se exportará con el texto original."
+
+
 def preview_for_region(region):
     """Construye los datos de una región para la vista previa (HU-87).
 
@@ -282,6 +292,7 @@ def preview_for_region(region):
     layout = layout_for_region(region)
     font_ratio = page_ratio(region.page, layout["font_size"])
     return {
+        "export_notice": export_notice(region),
         "region_pk": region.pk,
         "status": "translated" if region.translation else "untranslated",
         "lines": layout["lines"],
@@ -501,6 +512,71 @@ def approval_blocker(page):
             return "Falta 1 traducción por aprobar."
         return f"Faltan {pending} traducciones por aprobar."
     return ""
+
+
+def typeset_requirements(page):
+    """Requisitos de P7 en texto, para el panel y las respuestas JSON."""
+    regions = [region for region in page.regions.all() if region.needs_translation]
+    approved = sum(region.is_translation_approved for region in regions)
+    requirements = [
+        (
+            {"state": "met", "text": "Imagen limpia"}
+            if page.has_cleaned_image
+            else {"state": "missing", "text": "Falta limpiar la página"}
+        ),
+        {
+            "state": "met" if approved == len(regions) else "missing",
+            "text": f"{approved} de {len(regions)} traducciones aprobadas",
+        },
+    ]
+    requirements.extend(
+        {"state": "warning", "text": warning}
+        for warning in manual_cleaning_warning(page)
+    )
+    return requirements
+
+
+def typeset_status(page):
+    """Estado de la maquetación de la página, calculado en el servidor."""
+    page.refresh_from_db(fields=["status", "typeset_approved_at", "cleaned_image"])
+    return {
+        "is_typeset": page.is_typeset,
+        "blocker": "" if page.is_typeset else approval_blocker(page),
+        "requirements": typeset_requirements(page),
+    }
+
+
+def typesetting_unavailable_reason(page, regions):
+    """Motivo por el que la pestaña Maquetación está deshabilitada, o vacío."""
+    if not regions:
+        return "Esta página no tiene regiones de texto."
+    if not page.has_cleaned_image:
+        return "Limpia la página para maquetarla."
+    return ""
+
+
+def editor_settings():
+    """Fuentes y límites que el editor lee de atributos data- (BUG-043).
+
+    Se leen del módulo en cada llamada para que nada quede escrito a mano
+    en el JavaScript ni en la plantilla.
+    """
+    return {
+        "fonts": [
+            {
+                "value": value,
+                "label": label,
+                "css_family": FONTS[value].css_family,
+                "css_weight": FONTS[value].css_weight,
+                "css_style": FONTS[value].css_style,
+            }
+            for value, label in TextRegion.FontFamily.choices
+        ],
+        "min_font_size": MIN_FONT_SIZE,
+        "max_fixed_font_size": MAX_FIXED_FONT_SIZE,
+        "min_box_size": MIN_BOX_SIZE,
+        "color_pattern": HEX_COLOR_PATTERN.pattern.strip("^$"),
+    }
 
 
 def approve_typesetting(page):

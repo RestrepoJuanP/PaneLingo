@@ -74,10 +74,13 @@ from albums.translation_review import (
 )
 from albums.typesetting import (
     approve_typesetting,
+    editor_settings,
     layout_for_region,
     preview_for_region,
     reset_layout,
     save_layout,
+    typeset_status,
+    typesetting_unavailable_reason,
     validate_layout,
 )
 
@@ -875,9 +878,11 @@ class PageDetailView(OwnedPageMixin, DetailView):
         context["unapproved_filter"] = chosen == UNAPPROVED_FILTER
         visible_regions = filter_regions(regions, chosen)
         context["visible_regions"] = visible_regions
-        context["preview_regions"] = [
-            preview_for_region(region) for region in visible_regions
-        ]
+        context.update(typesetting_step_context(self.request, page, regions))
+        if not context["is_typesetting_step"]:
+            context["preview_regions"] = [
+                preview_for_region(region) for region in visible_regions
+            ]
         context["manual_cleaning_count"] = sum(
             region.cleaning_status == TextRegion.CleaningStatus.MANUAL
             for region in regions
@@ -886,6 +891,51 @@ class PageDetailView(OwnedPageMixin, DetailView):
         context.update(page_neighbours(page))
         context.update(translation_summary(page, regions))
         return context
+
+
+TYPESETTING_STEP = "maquetacion"
+
+
+def typesetting_items(regions):
+    """Cajas del editor: regiones con texto que traducir (HU-89, CA-89.1)."""
+    items = []
+    for region in regions:
+        if not region.needs_translation:
+            continue
+        preview = preview_for_region(region)
+        items.append(
+            {
+                "region": region,
+                "preview": preview,
+                "layout": preview["layout"],
+                "layout_version": timestamp_version(region.layout_updated_at),
+                "translation_version": timestamp_version(region.translated_at),
+            }
+        )
+    return items
+
+
+def typesetting_step_context(request, page, regions):
+    """Pestañas del espacio de trabajo y datos del editor (HU-89).
+
+    Las pestañas son enlaces con ?paso=: el servidor pinta solo el panel
+    elegido, la elección sobrevive a recargar y funciona sin JavaScript.
+    Si se pide Maquetación y no está disponible, se vuelve a Detección y
+    se muestra el motivo.
+    """
+    unavailable = typesetting_unavailable_reason(page, regions)
+    is_step = request.GET.get("paso") == TYPESETTING_STEP and not unavailable
+    context = {
+        "is_typesetting_step": is_step,
+        "typesetting_unavailable": unavailable,
+        "typesetting_step": TYPESETTING_STEP,
+        "step_query": f"?paso={TYPESETTING_STEP}" if is_step else "",
+    }
+    if is_step:
+        context["typeset_items"] = typesetting_items(regions)
+        context["typeset_status"] = typeset_status(page)
+        context["editor"] = editor_settings()
+    return context
 
 
 def render_page_workspace(request, page, manual_region_form, status):
@@ -1334,6 +1384,7 @@ def region_translation_edit(request, pk):
                 region.translated_at,
                 preview=preview_for_region(region),
                 layout=layout_for_region(region),
+                page=typeset_status(page),
             )
         if region.translation:
             messages.success(request, f"Se guardó la traducción de la región {number}.")
@@ -1356,6 +1407,7 @@ def layout_saved(region):
     return autosave_success(
         region.layout_updated_at,
         preview=preview_for_region(region),
+        page=typeset_status(region.page),
         **layout_for_region(region),
     )
 
@@ -1371,6 +1423,7 @@ def layout_conflict(region):
             ),
             "version": timestamp_version(region.layout_updated_at),
             "layout": layout_for_region(region),
+            "preview": preview_for_region(region),
         },
         status=409,
     )
@@ -1423,6 +1476,7 @@ def page_typeset_approve(request, pk):
                 "status": "approved" if result.is_approved else "blocked",
                 "message": result.message,
                 "warnings": result.warnings,
+                "page": typeset_status(page),
             },
             status=status,
         )
@@ -1432,7 +1486,7 @@ def page_typeset_approve(request, pk):
             messages.warning(request, warning)
     else:
         messages.error(request, result.message)
-    return redirect(page.get_absolute_url())
+    return redirect(f"{page.get_absolute_url()}?paso={TYPESETTING_STEP}")
 
 
 def review_address(page, number, filter_value=""):

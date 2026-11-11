@@ -445,10 +445,9 @@ class TypesetApprovalTests(TypesettingTestCase):
     def test_without_javascript_it_redirects_with_a_message(self):
         """CP-89.7 — Como formulario normal vuelve a la página con un mensaje."""
         response = self.post_approve(self.page, as_json=False)
-        self.assertRedirects(
-            response, self.page.get_absolute_url(), fetch_redirect_response=False
-        )
-        response = self.client.get(self.page.get_absolute_url())
+        target = f"{self.page.get_absolute_url()}?paso=maquetacion"
+        self.assertRedirects(response, target, fetch_redirect_response=False)
+        response = self.client.get(target)
         self.assertContains(response, "Página maquetada.")
 
     def test_a_later_change_removes_the_typeset_state(self):

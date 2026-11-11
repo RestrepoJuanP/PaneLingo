@@ -4767,3 +4767,506 @@ button.card-menu__item:hover {
   text-decoration: underline;
   cursor: pointer;
 }
+
+/* =============================================================================
+   Pasos del espacio de trabajo y editor de maquetación (HU-89)
+   Boceto aprobado en el Módulo 2: el mockup no tiene esta pantalla. Reutiliza
+   el carril .tabs, la barra .ws-toolbar, .ws-split, las pills de radio y el
+   indicador .autosave. Las medidas del texto llegan del servidor como
+   variables CSS (layout_for_region): aquí no se calcula ninguna.
+   ========================================================================== */
+
+.ws-steps {
+  padding: var(--sp-4) clamp(12px, 2vw, 26px) 0;
+}
+
+.ws-steps__tabs {
+  max-width: 420px;
+}
+
+.ws-steps__disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.ws-steps__disabled:hover {
+  color: var(--tab-inactive-fg);
+}
+
+.ws-steps__reason {
+  margin-top: var(--sp-2);
+  color: var(--muted);
+  font-size: var(--fs-label-sm);
+}
+
+.ts-bar {
+  flex-wrap: wrap;
+  row-gap: var(--sp-3);
+}
+
+.ts-bar__status {
+  margin-top: 0;
+}
+
+.ts-bar .ws-btn[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.ts-bar__count:not(:empty)::before {
+  content: " · ";
+}
+
+.ts-shortcuts {
+  position: relative;
+}
+
+.ts-shortcuts > summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.ts-shortcuts > summary::-webkit-details-marker {
+  display: none;
+}
+
+.ts-shortcuts__list {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + var(--sp-2));
+  left: 0;
+  display: grid;
+  gap: var(--sp-2);
+  width: max-content;
+  max-width: min(360px, 80vw);
+  margin: 0;
+  padding: var(--sp-5);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  background: var(--surface);
+  box-shadow: var(--shadow-card-hover);
+  color: var(--ink-800);
+  font-size: var(--fs-label-sm);
+  list-style: none;
+}
+
+.ts-shortcuts kbd {
+  padding: 0 var(--sp-1);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-xs);
+  background: var(--surface-subtle);
+  font: inherit;
+  font-weight: 700;
+}
+
+.ts-approve {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--sp-1);
+}
+
+.ts-approve__reason {
+  max-width: 280px;
+  color: var(--muted);
+  font-size: var(--fs-label-sm);
+  text-align: right;
+}
+
+.ts-warnings:not(:empty) {
+  display: grid;
+  gap: var(--sp-2);
+  padding: var(--sp-3) clamp(12px, 2vw, 26px);
+}
+
+.ts-warning {
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid var(--warning-border);
+  border-radius: var(--r-lg);
+  background: var(--warning-bg);
+  color: var(--warning-fg);
+  font-size: var(--fs-label-sm);
+  font-weight: 600;
+}
+
+.ts-layer {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+}
+
+.ts-box {
+  cursor: move;
+  touch-action: none;
+  user-select: none;
+  border: 1px dashed transparent;
+  transition: border-color var(--t-fast) ease;
+}
+
+.ts-box:hover,
+.ts-box:focus-visible {
+  border-color: var(--border-hover);
+}
+
+.ts-box:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+/* Seleccionada: el marco va por fuera (outline) para no restar espacio al
+   texto, que debe coincidir con el PNG (CA-89.8). */
+.ts-box[aria-pressed="true"] {
+  z-index: 2;
+  overflow: visible;
+  border-color: transparent;
+  outline: 2px solid var(--brand);
+  outline-offset: 0;
+}
+
+/* Sin traducción aprobada: el PNG conservará el texto original (P6). */
+.ts-box--pending {
+  border-color: var(--border-hover);
+}
+
+.ts-box.is-dragging {
+  opacity: 0.85;
+}
+
+.ts-box__overflow {
+  right: auto;
+  left: 0;
+}
+
+.ts-handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--surface);
+  border-radius: var(--r-xs);
+  background: var(--brand);
+}
+
+.ts-handle--nw {
+  top: -6px;
+  left: -6px;
+  cursor: nwse-resize;
+}
+
+.ts-handle--ne {
+  top: -6px;
+  right: -6px;
+  cursor: nesw-resize;
+}
+
+.ts-handle--sw {
+  bottom: -6px;
+  left: -6px;
+  cursor: nesw-resize;
+}
+
+.ts-handle--se {
+  right: -6px;
+  bottom: -6px;
+  cursor: nwse-resize;
+}
+
+@media (pointer: coarse) {
+  .ts-handle {
+    width: 24px;
+    height: 24px;
+  }
+
+  .ts-handle--nw,
+  .ts-handle--ne {
+    top: -13px;
+  }
+
+  .ts-handle--sw,
+  .ts-handle--se {
+    bottom: -13px;
+  }
+
+  .ts-handle--nw,
+  .ts-handle--sw {
+    left: -13px;
+  }
+
+  .ts-handle--ne,
+  .ts-handle--se {
+    right: -13px;
+  }
+}
+
+/* Edición del texto en el sitio: misma caja y estilo que el texto pintado. */
+.ts-edit {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: inherit;
+  border: 2px solid var(--brand);
+  border-radius: var(--r-xs);
+  background: var(--surface);
+  color: var(--ink-900);
+  font: inherit;
+  line-height: inherit;
+  text-align: inherit;
+  resize: none;
+  user-select: text;
+}
+
+.ts-edit__hint {
+  position: absolute;
+  z-index: 3;
+  top: calc(100% + var(--sp-1));
+  left: 0;
+  padding: var(--sp-1) var(--sp-2);
+  border-radius: var(--r-xs);
+  background: var(--ink-900);
+  color: var(--surface);
+  font-family: var(--font-ui);
+  font-size: var(--fs-micro);
+  font-style: normal;
+  font-weight: 600;
+  line-height: var(--lh-snug);
+  white-space: nowrap;
+}
+
+.ts-jump {
+  display: none;
+}
+
+.ts-panel__body {
+  display: grid;
+  gap: var(--sp-8);
+  padding: var(--sp-6) var(--sp-7) var(--sp-9);
+}
+
+.ts-summary__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+
+.ts-summary__title,
+.ts-props__title,
+.ts-list__title {
+  font-size: var(--fs-ui);
+  font-weight: 700;
+  color: var(--ink-900);
+}
+
+/* Cada requisito se dice con texto; el símbolo solo acompaña. */
+.ts-requirements {
+  display: grid;
+  gap: var(--sp-2);
+  margin: 0;
+  padding: 0;
+  font-size: var(--fs-label-sm);
+  list-style: none;
+}
+
+.ts-requirements__item {
+  display: flex;
+  gap: var(--sp-2);
+  color: var(--ink-800);
+}
+
+.ts-requirements__item::before {
+  flex: none;
+  font-weight: 700;
+}
+
+.ts-requirements__item--met::before {
+  content: "✓";
+  color: var(--success-fg);
+}
+
+.ts-requirements__item--missing::before {
+  content: "✕";
+  color: var(--danger);
+}
+
+.ts-requirements__item--warning::before {
+  content: "!";
+  color: var(--warning-fg);
+}
+
+.ts-nojs {
+  color: var(--muted);
+  font-size: var(--fs-label-sm);
+}
+
+.ts-editor-panel {
+  display: grid;
+  gap: var(--sp-8);
+}
+
+.ts-empty {
+  padding: var(--sp-8) var(--sp-6);
+  border-radius: var(--r-2xl);
+}
+
+.ts-empty .empty-state__body {
+  margin-bottom: 0;
+}
+
+.ts-props {
+  display: grid;
+  gap: var(--sp-2);
+}
+
+.ts-props__head {
+  margin-bottom: var(--sp-3);
+}
+
+.ts-props__text {
+  display: grid;
+  justify-items: start;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-6);
+}
+
+.ts-props__quote {
+  color: var(--ink-800);
+  font-size: var(--fs-sm);
+  white-space: pre-line;
+}
+
+.ts-props__size {
+  display: grid;
+  gap: var(--sp-1);
+  margin-top: var(--sp-4);
+}
+
+.ts-props__number {
+  max-width: 120px;
+}
+
+.ts-props__color-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.ts-props__swatch {
+  width: 44px;
+  height: 40px;
+  padding: var(--sp-1);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.ts-props__swatch:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.ts-props__hex {
+  max-width: 130px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-props__reset {
+  display: grid;
+  justify-items: start;
+  gap: var(--sp-1);
+}
+
+.ts-list {
+  display: grid;
+  gap: var(--sp-2);
+  margin: calc(var(--sp-4) * -1) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ts-list__item {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  width: 100%;
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  color: var(--ink-800);
+  font: inherit;
+  font-size: var(--fs-label-sm);
+  text-align: left;
+  cursor: pointer;
+}
+
+.ts-list__item:hover {
+  border-color: var(--border-hover);
+}
+
+.ts-list__item[aria-current="true"] {
+  border-color: var(--brand);
+  background: var(--brand-tint-2);
+}
+
+.ts-list__item:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.ts-list__number {
+  flex: none;
+  font-weight: 700;
+}
+
+.ts-list__text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .ws-steps__tabs {
+    max-width: none;
+  }
+
+  .ts-bar .ts-approve {
+    flex-basis: 100%;
+    align-items: stretch;
+  }
+
+  .ts-bar .ts-approve .ws-cta {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .ts-approve__reason {
+    max-width: none;
+    text-align: left;
+  }
+
+  .ts-jump:not([hidden]) {
+    display: inline-flex;
+    align-self: flex-start;
+    gap: var(--sp-1);
+    color: var(--brand);
+    font-size: var(--fs-label-sm);
+    font-weight: 700;
+  }
+
+  .ts-canvas-area {
+    padding-bottom: calc(var(--sp-12) * 2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-box,
+  .tabs__tab {
+    transition: none;
+  }
+}
