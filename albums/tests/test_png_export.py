@@ -146,6 +146,29 @@ class ArchiveContentTests(PngExportTestCase):
         self.assertTrue(export.file.name.endswith(".zip"))
 
 
+class PreparingPngExportTests(PngExportTestCase):
+    """CP-90.2 — La espera del PNG reutiliza la de HU-27."""
+
+    @mock.patch("albums.tasks.export_album_task")
+    def test_png_export_waits_as_preparing_and_is_queued_once(self, task):
+        """CP-90.2 — La espera del PNG reutiliza la de HU-27."""
+        first_response = self.start_png()
+        second_response = self.start_png()
+
+        export = AlbumExport.objects.get(album=self.album)
+        self.assertEqual(export.format, AlbumExport.Format.PNG_ZIP)
+        self.assertEqual(export.status, AlbumExport.Status.PREPARING)
+        task.assert_called_once_with(export.pk)
+        self.assertRedirects(first_response, self.album.get_export_url())
+        self.assertRedirects(second_response, self.album.get_export_url())
+        status_page = self.client.get(self.album.get_export_url())
+        self.assertContains(status_page, "Preparando exportación…")
+        self.assertContains(status_page, "data-export-status-poll")
+        status = self.client.get(export.get_status_url()).json()
+        self.assertEqual(status["status"], AlbumExport.Status.PREPARING)
+        self.assertFalse(status["is_terminal"])
+
+
 class ImageFidelityTests(PngExportTestCase):
     """CP-90.3 — Resolución, modo de color y fidelidad con el editor."""
 
