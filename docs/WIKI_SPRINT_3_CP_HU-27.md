@@ -2,10 +2,17 @@
 
 ## Decisión de alcance
 
-El MVP exporta **texto estructurado en DOCX**, no imágenes recompuestas. El
-documento sigue el flujo actual del PO: organiza por página y región el texto
-de origen y su traducción aprobada. La reinserción de texto en PNG, fuentes y
-limpieza de burbujas pertenece a una épica posterior de edición de imagen.
+HU-27 exporta **texto estructurado en DOCX**. El documento sigue el flujo
+actual del PO: organiza por página y región el texto de origen y su
+traducción aprobada.
+
+**Segundo formato (HU-90).** La épica EP-08 Edición de imagen (RF-15,
+[ADR-003](adr/ADR-003-edicion-de-imagen.md)) añadió a la misma pantalla un
+segundo formato: **«Páginas traducidas (PNG en un ZIP)»**, con cada página
+limpia y con la traducción maquetada. El usuario elige el formato antes de
+confirmar; el DOCX se genera exactamente igual que antes. Ambos formatos
+comparten la tarea en segundo plano, la instantánea inmutable y el historial.
+Los casos del formato PNG están en [CP de HU-90](WIKI_SPRINT_3_CP_HU-90.md).
 
 La exportación conserva una instantánea del contenido aprobado al confirmar.
 Así, el usuario puede seguir trabajando mientras Huey prepara el archivo sin
@@ -22,7 +29,7 @@ fuera de PaneLingo.
 |---|---|
 | Precondición | Álbum propio con traducciones aprobadas. |
 | Pasos | Abrir **Revisión y exportación** y pulsar **Exportar DOCX**. |
-| Resultado esperado | Se prepara un DOCX que incluye título e idiomas y, para cada región aprobada, página, orden de lectura, tipo, texto de origen y traducción. |
+| Resultado esperado | Se prepara un DOCX que incluye título e idiomas y, para cada región aprobada, página, orden de lectura, tipo, texto de origen y traducción. Desde HU-90 se elige primero el formato; con «Documento de texto (DOCX)» el resultado es el mismo (CP-90.1). |
 | CA relacionado | CA-27.1 |
 | Pruebas automáticas | `ExportDocumentTests` |
 
@@ -62,6 +69,8 @@ fuera de PaneLingo.
 - El DOCX se guarda bajo `media/albums/user_<id>/album_<id>/exports/`, pero
   su dirección no se publica ni se sirve directamente.
 - Al eliminar el álbum, su archivo exportado también se elimina.
-- HU-28 añadirá la respuesta de descarga autenticada y el nombre entregado al
+- HU-28 añadió la respuesta de descarga autenticada y el nombre entregado al
   navegador.
+- El ZIP de PNG de HU-90 se guarda en la misma carpeta privada y sigue las
+  mismas reglas.
 

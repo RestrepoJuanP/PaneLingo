@@ -1,0 +1,117 @@
+==============================================================================
+PaneLingo — Evidencia del Quality Gate
+==============================================================================
+Etapa           : 89
+Paso            : 6 de 7 — Django — pruebas automaticas
+Comando         : python manage.py test
+Herramienta     : Python 3.11.4 / Django 5.2.19
+Fecha y hora    : 2026-11-10T18:55:30-05:00
+Rama            : feature/HU-89-typesetting-editor
+Commit          : 72460ef23d6406acc0cb8d0e37f29aa2a93f12bc
+Arbol de trabajo: limpio
+Directorio      : /c/Users/Juan Pablo Restrepo/OneDrive/Documents/EAFIT/Semestre 11/Proyecto Integrador 2
+==============================================================================
+
+Creating test database for alias 'default'...
+..................................................................................................Fallo inesperado al limpiar la página 1.
+Traceback (most recent call last):
+  File "C:\Users\Juan Pablo Restrepo\OneDrive\Documents\EAFIT\Semestre 11\Proyecto Integrador 2\albums\cleaning.py", line 211, in run_page_cleaning
+    cleaned, statuses = build_cleaned_image(page)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Juan Pablo Restrepo\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1124, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Juan Pablo Restrepo\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1128, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Juan Pablo Restrepo\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1183, in _execute_mock_call
+    raise effect
+OSError: fallo
+.....................................................................Fallo inesperado al exportar el álbum 1.
+Traceback (most recent call last):
+  File "C:\Users\Juan Pablo Restrepo\OneDrive\Documents\EAFIT\Semestre 11\Proyecto Integrador 2\albums\exporting.py", line 140, in run_album_export
+    document_bytes = build_export_document(export.snapshot)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Juan Pablo Restrepo\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1124, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Juan Pablo Restrepo\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1128, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Juan Pablo Restrepo\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1183, in _execute_mock_call
+    raise effect
+RuntimeError: fallo
+............................................................................................................................................................................................................................................................................................................Fallo inesperado al traducir la página 1.
+Traceback (most recent call last):
+  File "C:\Users\Juan Pablo Restrepo\OneDrive\Documents\EAFIT\Semestre 11\Proyecto Integrador 2\albums\translating.py", line 151, in run_translation
+    get_translator().translate(request) if request.numbers_to_translate else []
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Juan Pablo Restrepo\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1124, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Juan Pablo Restrepo\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1128, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Juan Pablo Restrepo\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1183, in _execute_mock_call
+    raise effect
+RuntimeError: fallo
+.........................................................................................Method Not Allowed (GET): /cuentas/salir/
+Method Not Allowed (GET): /paginas/1/traducir/
+Method Not Allowed (GET): /paginas/1/limpiar/
+Method Not Allowed (GET): /paginas/1/regiones/
+Method Not Allowed (GET): /regiones/1/corregir/
+Method Not Allowed (GET): /regiones/1/eliminar/
+Method Not Allowed (GET): /regiones/1/traducir-region/
+Method Not Allowed (GET): /regiones/1/traducir/
+Method Not Allowed (GET): /regiones/1/restaurar/
+Method Not Allowed (GET): /regiones/1/restaurar-limpieza/
+Method Not Allowed (GET): /regiones/1/no-traducir/
+Method Not Allowed (GET): /regiones/1/traduccion/
+Method Not Allowed (GET): /regiones/1/aprobar/
+Method Not Allowed (GET): /regiones/1/retirar-aprobacion/
+Method Not Allowed (GET): /regiones/1/maquetacion/
+Method Not Allowed (GET): /regiones/1/maquetacion/restablecer/
+Method Not Allowed (GET): /paginas/1/aprobar-maquetacion/
+Method Not Allowed (GET): /albumes/1/archivar/
+Method Not Allowed (GET): /albumes/1/desarchivar/
+.Not Found: /albumes/1/eliminar/
+Not Found: /albumes/1/
+Not Found: /albumes/1/editar/
+Not Found: /albumes/1/exportar/
+Not Found: /exportaciones/1/descargar/
+Not Found: /exportaciones/1/estado/
+Not Found: /albumes/1/renombrar/
+Not Found: /albumes/1/portada/
+Not Found: /paginas/1/eliminar/
+Not Found: /paginas/1/
+Not Found: /paginas/1/imagen/
+Not Found: /paginas/1/imagen-limpia/
+Not Found: /paginas/1/procesar/
+Not Found: /paginas/1/estado/
+Not Found: /paginas/1/miniatura/
+Not Found: /albumes/1/cargar/
+.Not Found: /exportaciones/1/descargar/
+.............................Azure Read respondió 401.
+Azure Read respondió 403.
+Azure Read respondió 429.
+Azure Read respondió 500.
+Azure Read respondió 503.
+..No se pudo contactar con Azure Read: <urlopen error sin red>
+...........................Gemini respondió 401.
+Gemini respondió 403.
+Gemini respondió 429.
+Gemini respondió 503.
+Gemini respondió 500.
+..No se pudo contactar con Gemini: <urlopen error sin red>
+...........
+----------------------------------------------------------------------
+Ran 629 tests in 56.206s
+
+OK
+Destroying test database for alias 'default'...
+Found 629 test(s).
+System check identified no issues (0 silenced).
+
+==============================================================================
+Codigo de salida: 0  (CORRECTO)
+==============================================================================

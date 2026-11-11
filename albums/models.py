@@ -52,10 +52,14 @@ def album_cover_path(instance, filename):
 
 
 def album_export_path(instance, filename):
-    """Ruta privada de un DOCX exportado, con nombre generado por el servidor."""
+    """Ruta privada de una exportación, con nombre generado por el servidor.
+
+    La extensión sale del formato: .docx (HU-27) o .zip (HU-90).
+    """
+    extension = ".zip" if instance.format == "png_zip" else ".docx"
     return (
         f"albums/user_{instance.album.owner_id}/album_{instance.album_id}"
-        f"/exports/{uuid.uuid4().hex}.docx"
+        f"/exports/{uuid.uuid4().hex}{extension}"
     )
 
 
@@ -377,6 +381,15 @@ class ComicPage(models.Model):
         max_length=255,
         blank=True,
     )
+    typeset_approved_at = models.DateTimeField(
+        _("maquetación aprobada"),
+        null=True,
+        blank=True,
+        help_text=_(
+            "Fecha en que se aprobó la maquetación (HU-89, ADR-003 P1). Vacía "
+            "si la página no está maquetada o cambió después de aprobarla."
+        ),
+    )
     created_at = models.DateTimeField(_("creada"), auto_now_add=True)
     updated_at = models.DateTimeField(_("actualizada"), auto_now=True)
 
@@ -434,8 +447,32 @@ class ComicPage(models.Model):
 
     @property
     def short_status_display(self):
-        """Devuelve la etiqueta breve del estado, para la rejilla."""
+        """Devuelve la etiqueta breve del estado, para la rejilla.
+
+        Una página aprobada y maquetada muestra "Maquetada" (CA-89.7); el
+        estado sigue siendo APPROVED (ADR-003, P1).
+        """
+        if self.is_typeset:
+            return _("Maquetada")
         return self.SHORT_STATUS_LABELS.get(self.status, self.get_status_display())
+
+    @property
+    def is_typeset(self):
+        """Indica si la página está aprobada y con la maquetación aprobada."""
+        return (
+            self.status == self.Status.APPROVED and self.typeset_approved_at is not None
+        )
+
+    def clear_typeset_approval(self):
+        """Deja la página sin maquetar tras cualquier cambio (ADR-003, P1).
+
+        Escribe con update() filtrado y no con save(): así funciona aunque la
+        instancia en memoria esté desactualizada y no toca otros campos.
+        """
+        ComicPage.objects.filter(pk=self.pk, typeset_approved_at__isnull=False).update(
+            typeset_approved_at=None
+        )
+        self.typeset_approved_at = None
 
     def get_absolute_url(self):
         """Devuelve la dirección de la vista de esta página."""
@@ -517,6 +554,10 @@ class ComicPage(models.Model):
     def get_translate_url(self):
         """Devuelve la dirección para traducir la página con IA (HU-16)."""
         return reverse("albums:page_translate", kwargs={"pk": self.pk})
+
+    def get_typeset_approve_url(self):
+        """Devuelve la dirección para aprobar la maquetación (HU-89)."""
+        return reverse("albums:page_typeset_approve", kwargs={"pk": self.pk})
 
     @property
     def is_translating(self):
@@ -624,6 +665,24 @@ class TextRegion(models.Model):
         KEPT = "kept", _("Conservada")
         AI = "ai", _("Limpia con IA")
 
+    class FontFamily(models.TextChoices):
+        """Fuentes SIL OFL de static/fonts/ (HU-89, ADR-003 P8).
+
+        El valor vacío significa "la fuente por defecto del tipo de región".
+        """
+
+        COMIC_NEUE = "comic-neue", _("Comic Neue")
+        COMIC_NEUE_BOLD = "comic-neue-bold", _("Comic Neue negrita")
+        COMIC_NEUE_ITALIC = "comic-neue-italic", _("Comic Neue cursiva")
+        BANGERS = "bangers", _("Bangers")
+
+    class TextAlign(models.TextChoices):
+        """Alineación horizontal del texto dentro de su caja (HU-89)."""
+
+        LEFT = "left", _("Izquierda")
+        CENTER = "center", _("Centro")
+        RIGHT = "right", _("Derecha")
+
     # Variante del chip de estado de la traducción, como en el mockup.
     TRANSLATION_VARIANTS = {
         "untranslated": "neutral",
@@ -707,6 +766,46 @@ class TextRegion(models.Model):
     )
     translated_at = models.DateTimeField(_("traducida"), null=True, blank=True)
     approved_at = models.DateTimeField(_("aprobada"), null=True, blank=True)
+    # Maquetación (HU-89). Las coordenadas están en píxeles de la imagen
+    # original (ADR-003); nulas = se usa la caja del OCR.
+    layout_x = models.PositiveIntegerField(
+        _("x de la maquetación"), null=True, blank=True
+    )
+    layout_y = models.PositiveIntegerField(
+        _("y de la maquetación"), null=True, blank=True
+    )
+    layout_width = models.PositiveIntegerField(
+        _("ancho de la maquetación"), null=True, blank=True
+    )
+    layout_height = models.PositiveIntegerField(
+        _("alto de la maquetación"), null=True, blank=True
+    )
+    font_family = models.CharField(
+        _("fuente"),
+        max_length=40,
+        choices=FontFamily.choices,
+        blank=True,
+        help_text=_("Vacía: la fuente por defecto del tipo de región."),
+    )
+    font_size = models.PositiveSmallIntegerField(
+        _("tamaño de letra"),
+        null=True,
+        blank=True,
+        help_text=_("En píxeles de la imagen original. Nulo: ajuste automático."),
+    )
+    text_align = models.CharField(
+        _("alineación"),
+        max_length=6,
+        choices=TextAlign.choices,
+        default=TextAlign.CENTER,
+    )
+    text_color = models.CharField(_("color del texto"), max_length=7, default="#000000")
+    layout_updated_at = models.DateTimeField(
+        _("maquetación guardada"),
+        null=True,
+        blank=True,
+        help_text=_("Versión para detectar conflictos entre pestañas (HU-23)."),
+    )
     created_at = models.DateTimeField(_("detectada"), auto_now_add=True)
 
     class Meta:
@@ -773,6 +872,14 @@ class TextRegion(models.Model):
         """Devuelve la dirección para restaurar la zona original (HU-88)."""
         return reverse("albums:region_restore_cleaning", kwargs={"pk": self.pk})
 
+    def get_layout_url(self):
+        """Devuelve la dirección para guardar la maquetación (HU-89)."""
+        return reverse("albums:region_layout", kwargs={"pk": self.pk})
+
+    def get_layout_reset_url(self):
+        """Devuelve la dirección para restablecer la maquetación (HU-89)."""
+        return reverse("albums:region_layout_reset", kwargs={"pk": self.pk})
+
     @property
     def needs_translation(self):
         """Indica si la región tiene texto que traducir (ADR-002, T5).
@@ -815,16 +922,25 @@ class TextRegion(models.Model):
         Se formatea aquí y no en la plantilla porque el idioma de la interfaz
         escribe los decimales con coma, y CSS solo entiende el punto.
         """
-        page_width = self.page.width or 1
-        page_height = self.page.height or 1
-        left = self.x / page_width * 100
-        top = self.y / page_height * 100
-        width = self.width / page_width * 100
-        height = self.height / page_height * 100
-        return (
-            f"left: {left:.3f}%; top: {top:.3f}%; "
-            f"width: {width:.3f}%; height: {height:.3f}%;"
-        )
+        return percent_box_style(self.page, self.x, self.y, self.width, self.height)
+
+
+def percent_box_style(page, x, y, width, height):
+    """Convierte una caja en píxeles de la página en un estilo CSS en %.
+
+    La comparten la caja del OCR y la caja maquetada (HU-89) para que ambas
+    se escalen igual con el zoom (ADR-003).
+    """
+    page_width = page.width or 1
+    page_height = page.height or 1
+    left = x / page_width * 100
+    top = y / page_height * 100
+    box_width = width / page_width * 100
+    box_height = height / page_height * 100
+    return (
+        f"left: {left:.3f}%; top: {top:.3f}%; "
+        f"width: {box_width:.3f}%; height: {box_height:.3f}%;"
+    )
 
 
 class AlbumExport(models.Model):
@@ -838,9 +954,19 @@ class AlbumExport(models.Model):
         FAILED = "failed", _("Error")
 
     class Format(models.TextChoices):
-        """Formatos admitidos por el alcance actual."""
+        """Formatos admitidos: guion DOCX (HU-27) y páginas PNG (HU-90)."""
 
         DOCX = "docx", _("Documento DOCX")
+        PNG_ZIP = "png_zip", _("Páginas traducidas (PNG en un ZIP)")
+
+    # Etiqueta corta del formato para el historial y tipo MIME de la descarga.
+    FORMAT_LABELS = {"docx": "DOCX", "png_zip": "PNG en ZIP"}
+    CONTENT_TYPES = {
+        "docx": (
+            "application/vnd.openxmlformats-officedocument." "wordprocessingml.document"
+        ),
+        "png_zip": "application/zip",
+    }
 
     album = models.ForeignKey(
         Album,
@@ -894,6 +1020,26 @@ class AlbumExport(models.Model):
     def get_status_url(self):
         """Devuelve la dirección privada para consultar el estado."""
         return reverse("albums:export_status", kwargs={"pk": self.pk})
+
+    @property
+    def format_label(self):
+        """Formato en pocas letras, para el historial (HU-90)."""
+        return self.FORMAT_LABELS.get(self.format, self.get_format_display())
+
+    @property
+    def content_type(self):
+        """Tipo MIME con el que se descarga el archivo."""
+        return self.CONTENT_TYPES[self.format]
+
+    @property
+    def is_png(self):
+        """Indica si la exportación son páginas PNG en un ZIP (HU-90)."""
+        return self.format == self.Format.PNG_ZIP
+
+    @property
+    def exported_page_count(self):
+        """Número de páginas de una exportación PNG, según su instantánea."""
+        return len(self.snapshot.get("pages", []))
 
     def get_download_url(self):
         """Devuelve la dirección privada para descargar esta exportación."""

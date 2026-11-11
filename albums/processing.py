@@ -38,6 +38,7 @@ def start_processing(page):
 
     if page.is_processing:
         return False
+    page.clear_typeset_approval()
     page.status = ComicPage.Status.PROCESSING
     page.processing_started_at = timezone.now()
     page.processing_error = ""
@@ -101,6 +102,7 @@ def save_regions(page, regions):
     previous_cleaned_name = page.cleaned_image.name if page.cleaned_image else ""
     cleaned_storage = page.cleaned_image.storage
     with transaction.atomic():
+        page.clear_typeset_approval()
         page.regions.all().delete()
         TextRegion.objects.bulk_create(regions)
         if not has_translatable_regions:

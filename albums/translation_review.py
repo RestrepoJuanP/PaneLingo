@@ -29,8 +29,10 @@ def leave_page_approval(page):
     """Saca la página de "Aprobada" cuando una región deja de estarlo.
 
     Al editar una traducción aprobada hay que volver a aprobarla (CA-18.2),
-    así que la página tampoco puede seguir aprobada (CA-19.4).
+    así que la página tampoco puede seguir aprobada (CA-19.4), ni maquetada
+    (ADR-003, P1).
     """
+    page.clear_typeset_approval()
     if page.status != ComicPage.Status.APPROVED:
         return
     pending = page.regions.filter(
@@ -114,3 +116,4 @@ def edit_translation(region, text):
             ]
         )
         leave_page_approval(region.page)
+        region.page.clear_typeset_approval()

@@ -2,7 +2,7 @@
 
 Plataforma web para la **traducción asistida de cómics, manga y webtoons**. PaneLingo permite a un traductor organizar su trabajo en álbumes, cargar las páginas completas de cada obra y gestionarlas desde un espacio propio y privado.
 
-Proyecto académico desarrollado para **Proyecto Integrador 2**. El alcance del Sprint 1 cubre autenticación de usuarios y gestión de álbumes y páginas. El OCR, la traducción con IA, el workspace de traducción y la exportación quedan fuera de este sprint.
+Proyecto académico desarrollado para **Proyecto Integrador 2**. Hoy PaneLingo cubre el flujo completo de una página: autenticación, álbumes y páginas, detección y OCR del texto, traducción asistida por IA con revisión y aprobación humanas, autoguardado y progreso del trabajo, limpieza del texto original, maquetación de la traducción sobre la imagen y exportación en DOCX o en PNG. Lo que todavía no incluye está en [Fuera del alcance actual](#fuera-del-alcance-actual).
 
 ## Stack
 
@@ -38,6 +38,16 @@ Proyecto académico desarrollado para **Proyecto Integrador 2**. El alcance del 
 | Eliminar página | `/paginas/<id>/eliminar/` | HU-10 |
 
 Más `/design-system/`, la referencia de estilos, que **solo existe en desarrollo**.
+
+### Edición de imagen (EP-08, Sprint 3)
+
+| Pantalla | Ruta | Historia |
+|---|---|---|
+| Espacio de trabajo — pestaña Maquetación | `/paginas/<id>/?paso=maquetacion` | HU-89 |
+| Revisión y exportación — DOCX o páginas traducidas (PNG en un ZIP) | `/albumes/<id>/exportar/` | HU-27, HU-90 |
+| Descargar una exportación (DOCX o ZIP) | `/exportaciones/<id>/descargar/` | HU-28, HU-90 |
+
+La pestaña Maquetación solo se habilita cuando la página tiene imagen limpia y regiones de texto. Cómo probarla en local: [Maquetación y exportación PNG en desarrollo](#maquetación-y-exportación-png-en-desarrollo).
 
 ## Requisitos previos
 
@@ -155,6 +165,34 @@ python manage.py ocr_accuracy_report ruta/al/juego-de-prueba --output informe-oc
 
 El formato de la carpeta está descrito al principio de `albums/management/commands/ocr_accuracy_report.py`.
 
+## Maquetación y exportación PNG en desarrollo
+
+El flujo completo de EP-08 (detectar, traducir, limpiar, maquetar y exportar en PNG) se puede probar sin red ni claves con los proveedores simulados. Decisiones en [ADR-003](docs/adr/ADR-003-edicion-de-imagen.md).
+
+**1. Configura `.env`** con los valores por defecto de `.env.example`:
+
+```bash
+OCR_PROVIDER=fake
+TRANSLATION_PROVIDER=fake
+HUEY_IMMEDIATE=True
+```
+
+`HUEY_IMMEDIATE=True` ejecuta el procesamiento, la traducción, la limpieza y la exportación dentro de la propia petición. Si prefieres el comportamiento asíncrono real, déjalo en `False` y arranca `python manage.py run_huey` en otra terminal.
+
+**2. Prepara una página.** Crea un álbum con idioma de origen japonés y carga una página. El OCR simulado marca dos globos de ejemplo en cualquier imagen; con una imagen de **fondo blanco** la limpieza los rellena sola, y con una ilustración cualquiera quedarán en «Limpieza manual», lo que también sirve para probar el aviso.
+
+**3. Recorre el flujo en la vista de la página:**
+
+1. **Procesar página** → aparecen las dos regiones.
+2. **Traducir página** → el traductor simulado propone el texto de origen con el prefijo del idioma de destino (`[ES] こんにちは`). Como las fuentes de maquetación no tienen glifos japoneses, **edita cada traducción con un texto en español** (por ejemplo, «¡Hola!») y apruébala con **Aprobar**.
+3. **Limpiar página** → se genera la capa limpia; compara las vistas «Original», «Limpia» y «Traducida».
+4. Abre la pestaña **Maquetación** (`?paso=maquetacion`): selecciona un texto con clic o `Tab`, muévelo con el ratón o las flechas (`Mayús` para 10 px, `Alt` para cambiar el tamaño), cambia fuente, tamaño, alineación y color en el panel, prueba `Ctrl+Z` y **Restablecer**, y pulsa **Aprobar página**.
+5. Vuelve al álbum: la página muestra «Maquetada».
+
+**4. Exporta.** En **Revisión y exportación**, elige «Páginas traducidas (PNG en un ZIP)», confirma los avisos y descarga el ZIP. Cada `pagina-NNN.png` debe coincidir con lo que se ve en el editor.
+
+Los procedimientos manuales de CP-89.2, CP-89.3, CP-89.6 y CP-89.8, con la tabla para registrar el resultado, están en [`docs/WIKI_SPRINT_3_CP_HU-89.md`](docs/WIKI_SPRINT_3_CP_HU-89.md).
+
 ## Recuperación de contraseña en desarrollo
 
 PaneLingo no usa un proveedor de correo real: está fuera del alcance del MVP. En desarrollo, `EMAIL_BACKEND` es el backend de consola, así que **el mensaje de recuperación se imprime en la terminal donde corre `runserver`**, no se envía a ninguna parte.
@@ -214,6 +252,8 @@ Para no copiar las salidas a mano, `./scripts/quality_gate.sh <NN>` ejecuta los 
 ./scripts/quality_gate.sh 01
 ```
 
+El sprint se elige con la variable `SPRINT` (1 por defecto); por ejemplo, `SPRINT=3 ./scripts/quality_gate.sh 90b` guarda la evidencia en `docs/evidence/sprint-3/etapa-90b/`.
+
 Ejecuta los siete pasos aunque alguno falle y termina con código distinto de cero si hubo alguno en rojo. No hace commit ni push. La convención de nombres está documentada en [`docs/evidence/sprint-1/README.md`](docs/evidence/sprint-1/README.md).
 
 La configuración vive en `pyproject.toml`: `line-length = 88`, reglas `["E", "F", "N", "B", "I", "C90"]` y complejidad ciclomática máxima de 10. **No desactives reglas globalmente.** Si `E501` marca una línea que Black no puede partir, reescríbela o usa un `noqa` puntual con su comentario justificativo.
@@ -272,24 +312,23 @@ Con el servidor de desarrollo levantado, <http://127.0.0.1:8000/design-system/> 
 
 Requisito no funcional: la aplicación cumple **WCAG 2.1 nivel AA**. Las desviaciones deliberadas respecto al mockup están documentadas en `DESIGN_TOKENS.md`.
 
-## Qué queda fuera del Sprint 1
+## Fuera del alcance actual
 
-Estas funcionalidades **no están implementadas** y no deben esperarse en esta entrega:
+Estas funcionalidades **no están implementadas** y no deben esperarse:
 
 | Fuera de alcance | Motivo |
 |---|---|
-| OCR y detección de burbujas | La detección de regiones llega con HU-12 (Sprint 2); el texto de cada región, con HU-13 |
-| Traducción con IA | Sprint posterior |
-| Workspace de traducción dividido | Sprint posterior |
-| Revisión y exportación | Sprint posterior |
-| Terminología y glosario | Sprint posterior |
+| Terminología y glosario | Sin historia de usuario. La entrada «Terminología» de la barra lateral se muestra deshabilitada |
+| Limpieza con IA del texto que está sobre el dibujo | HU-91 se descartó tras su *spike* ([ADR-003, P4](docs/adr/ADR-003-edicion-de-imagen.md#p4--spike-de-hu-91)). Las regiones que la limpieza no resuelve quedan en «Limpieza manual» y se avisan |
+| Cambiar a mano el tipo globo/narración de una región | Propuesta pendiente del PO ([ADR-003, P10](docs/adr/ADR-003-edicion-de-imagen.md)) |
+| Reordenar o insertar páginas | Sin historia de usuario |
 | Colaboración en equipo y SSO | Fuera del MVP |
 | Pagos, créditos y planes | Fuera del MVP |
 | Pantalla de perfil y preferencias | Fuera del MVP |
-| **Eliminar álbumes** | Sin HU, CA ni CP. El botón se maqueta deshabilitado |
+| Panel administrativo completo | Fuera del MVP. Solo existe el admin de Django |
 | **Envío real de correo** | En desarrollo va a la consola. Ver la sección de recuperación |
-| Filtros por estado en la biblioteca | Dependen de que el estado sea editable, que no lo es |
-| Reordenar o insertar páginas | Sin historia de usuario |
+
+Lo que el Sprint 1 dejó fuera y llegó después con su historia: detección y OCR (HU-12, HU-13), workspace y traducción con IA (HU-14 a HU-19), eliminar álbumes (HU-20), filtros por estado (HU-26), revisión y exportación (HU-27, HU-28) y edición de imagen (HU-85 a HU-90).
 
 Las páginas cargadas quedan en estado **Pendiente de procesamiento** hasta que se pulsa "Procesar página" en su vista (HU-12).
 

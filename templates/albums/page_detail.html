@@ -1,4 +1,5 @@
 {% extends "layouts/app_shell.html" %}
+{% load assets %}
 
 {% comment %}
 Espacio de trabajo de una página — HU-11 a HU-15.
@@ -45,7 +46,7 @@ de pantalla anuncia número, tipo, estado y texto.
         {% if previous_page %}
           <a
             class="ws-group__step"
-            href="{{ previous_page.get_absolute_url }}"
+            href="{{ previous_page.get_absolute_url }}{{ step_query }}"
             rel="prev"
             aria-label="Página anterior: página {{ previous_page.page_number }}"
             data-page-prev
@@ -57,7 +58,7 @@ de pantalla anuncia número, tipo, estado y texto.
         {% if next_page %}
           <a
             class="ws-group__step"
-            href="{{ next_page.get_absolute_url }}"
+            href="{{ next_page.get_absolute_url }}{{ step_query }}"
             rel="next"
             aria-label="Página siguiente: página {{ next_page.page_number }}"
             data-page-next
@@ -67,6 +68,7 @@ de pantalla anuncia número, tipo, estado y texto.
         {% endif %}
       </nav>
 
+      {% if not is_typesetting_step %}
       {% if review_count or has_translations %}
         {% comment %}
         Filtros de regiones: por revisar el texto (CA-14.3) y traducciones sin
@@ -133,6 +135,7 @@ de pantalla anuncia número, tipo, estado y texto.
           data-manual-region-toggle
         >Añadir región</button>
       {% endif %}
+      {% endif %}{# not is_typesetting_step #}
 
       <span class="ws-toolbar__spacer"></span>
 
@@ -234,6 +237,11 @@ de pantalla anuncia número, tipo, estado y texto.
       {% endif %}
     </div>
 
+    {% include "albums/_workspace_steps.html" %}
+
+    {% if is_typesetting_step %}
+      {% include "albums/_typesetting_workspace.html" %}
+    {% else %}
     {% if page.was_processed %}
       <section
         class="manual-region-panel"
@@ -303,8 +311,9 @@ de pantalla anuncia número, tipo, estado y texto.
               {% if preview.status != "skipped" %}
                 <div
                   class="page-overlay__region page-overlay__region--{{ preview.status }} page-overlay__region--{{ preview.kind }}{% if not preview.fits %} is-overflowing{% endif %}"
-                  style="{{ preview.overlay_style }} --preview-font-ratio: {{ preview.font_ratio_css }};"
+                  style="{{ preview.style }}"
                   data-preview-region="{{ preview.region_pk }}"
+                  data-text-align="{{ preview.layout.text_align }}"
                 >
                   <span class="page-overlay__lines">
                     {% for line in preview.lines %}<span>{{ line }}</span>{% endfor %}
@@ -761,6 +770,7 @@ de pantalla anuncia número, tipo, estado y texto.
         </div>
       </div>
     {% endfor %}
+    {% endif %}{# is_typesetting_step #}
   </div>
 
   {% if regions %}
@@ -800,5 +810,11 @@ de pantalla anuncia número, tipo, estado y texto.
         </form>
       </div>
     </div>
+  {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+  {% if is_typesetting_step %}
+    <script src="{% versioned_static 'js/typesetting.js' %}" defer></script>
   {% endif %}
 {% endblock %}

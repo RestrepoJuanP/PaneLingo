@@ -820,7 +820,12 @@
       preview.status === "untranslated",
     );
     region.classList.toggle("is-overflowing", !preview.fits);
-    region.style.setProperty("--preview-font-ratio", preview.font_ratio);
+    // Caja, tipografía y medidas llegan ya calculadas por el servidor
+    // (layout_for_region): aquí solo se aplican, no se recalculan.
+    region.setAttribute("style", preview.style);
+    if (preview.layout) {
+      region.dataset.textAlign = preview.layout.text_align;
+    }
 
     var lines = region.querySelector(".page-overlay__lines");
     lines.textContent = "";

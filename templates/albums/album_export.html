@@ -20,7 +20,8 @@
       <p class="export-head__eyebrow">{{ album.language_pair }}</p>
       <h1 class="page-title">Revisión y exportación</h1>
       <p class="page-subtitle">
-        Genera un documento con las traducciones aprobadas de «{{ album.title }}».
+        Genera un documento con las traducciones aprobadas de «{{ album.title }}»
+        o sus páginas traducidas como imágenes.
       </p>
     </div>
   </div>
@@ -48,6 +49,12 @@
         </div>
       {% endif %}
 
+      {% if png_confirmation_required %}
+        <p class="alert alert--error" role="alert">
+          Revisa los avisos de las páginas traducidas y confirma para continuar.
+        </p>
+      {% endif %}
+
       {% if confirmation_required %}
         <p class="alert alert--error" role="alert">
           Confirma que deseas continuar sin las regiones pendientes.
@@ -57,14 +64,46 @@
       <form method="post" class="export-form">
         {% csrf_token %}
         {% if skipped_count %}<input type="hidden" name="confirm" value="1" />{% endif %}
+        {% if png_warnings %}<input type="hidden" name="confirm_png" value="1" />{% endif %}
 
+        {% comment %}
+        Grupo de radios NATIVO (CA-90.1): las flechas recorren las opciones y
+        el formulario se envía sin JavaScript. Los avisos del PNG (CA-90.4)
+        van dentro de su opción, enlazados con aria-describedby, y el CSS los
+        muestra solo con esa opción elegida.
+        {% endcomment %}
         <fieldset class="export-format">
           <legend class="export-panel__title">Formato</legend>
           <label class="export-option">
-            <input type="radio" name="format" value="docx" checked />
+            <input type="radio" name="format" value="docx" {% if not png_confirmation_required %}checked{% endif %} />
             <span>
-              <strong>Documento DOCX</strong>
+              <strong>Documento de texto (DOCX)</strong>
               <small>Guion estructurado por página y región, editable en Word o LibreOffice.</small>
+            </span>
+          </label>
+          <label class="export-option{% if not can_export_png %} export-option--disabled{% endif %}">
+            <input
+              type="radio"
+              name="format"
+              value="{{ png_format }}"
+              {% if png_confirmation_required %}checked{% endif %}
+              {% if not can_export_png %}disabled{% endif %}
+              aria-describedby="export-png-detail"
+            />
+            <span id="export-png-detail">
+              <strong>Páginas traducidas (PNG en un ZIP)</strong>
+              <small>Cada página con su traducción, a la resolución original.</small>
+              {% if not can_export_png %}
+                <small class="export-option__reason">
+                  Aprueba al menos una traducción en una página limpia para exportar las páginas traducidas.
+                </small>
+              {% elif png_warnings %}
+                <span class="export-option__warnings">
+                  {% for warning in png_warnings %}
+                    <small class="export-option__warning">{{ warning }}</small>
+                  {% endfor %}
+                </span>
+              {% endif %}
             </span>
           </label>
         </fieldset>
@@ -73,7 +112,7 @@
           <button type="submit" class="btn btn--primary" data-submit-busy>
             <span class="btn__spinner" hidden aria-hidden="true"></span>
             <span data-submit-label data-busy-label="Preparando…">
-              {% if skipped_count %}Confirmar y exportar{% else %}Exportar DOCX{% endif %}
+              {% if skipped_count or png_warnings %}Confirmar y exportar{% else %}Exportar{% endif %}
             </span>
           </button>
         {% else %}
@@ -110,9 +149,14 @@
               {% endif %}
             </p>
             <p class="export-status__meta">
-              {{ latest_export.approved_count }}
-              {{ latest_export.approved_count|pluralize:"traducción aprobada,traducciones aprobadas" }}
-              · DOCX
+              {% if latest_export.is_png %}
+                {{ latest_export.exported_page_count }}
+                {{ latest_export.exported_page_count|pluralize:"página,páginas" }}
+              {% else %}
+                {{ latest_export.approved_count }}
+                {{ latest_export.approved_count|pluralize:"traducción aprobada,traducciones aprobadas" }}
+              {% endif %}
+              · {{ latest_export.format_label }}
             </p>
             {% if latest_export.status == "ready" %}
               <p class="export-status__detail">El archivo se preparó correctamente.</p>
@@ -142,9 +186,14 @@
                     {{ export.created_at|date:"d/m/Y · H:i" }}
                   </p>
                   <p class="export-status__meta">
-                    {{ export.approved_count }}
-                    {{ export.approved_count|pluralize:"traducción aprobada,traducciones aprobadas" }}
-                    · DOCX
+                    {% if export.is_png %}
+                      {{ export.exported_page_count }}
+                      {{ export.exported_page_count|pluralize:"página,páginas" }}
+                    {% else %}
+                      {{ export.approved_count }}
+                      {{ export.approved_count|pluralize:"traducción aprobada,traducciones aprobadas" }}
+                    {% endif %}
+                    · {{ export.format_label }}
                   </p>
                 </div>
                 {% if export.status == "ready" %}
