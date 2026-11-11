@@ -1,0 +1,20 @@
+==============================================================================
+PaneLingo — Evidencia del Quality Gate
+==============================================================================
+Etapa           : 00
+Paso            : 2 de 7 — Black — formato
+Comando         : black .
+Herramienta     : black, 25.12.0 (compiled: yes)
+Fecha y hora    : 2026-11-10T18:29:52-05:00
+Rama            : chore/ep08-scope
+Commit          : 9d7263deae1fd3a5f1744e89c8bf6ec93c1cc959
+Arbol de trabajo: limpio
+Directorio      : /c/Users/Juan Pablo Restrepo/OneDrive/Documents/EAFIT/Semestre 11/Proyecto Integrador 2
+==============================================================================
+
+All done! ✨ 🍰 ✨
+120 files left unchanged.
+
+==============================================================================
+Codigo de salida: 0  (CORRECTO)
+==============================================================================
