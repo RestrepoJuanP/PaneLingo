@@ -5,9 +5,9 @@ Etapa           : 90b
 Paso            : 6 de 7 — Django — pruebas automaticas
 Comando         : python manage.py test
 Herramienta     : Python 3.12.10 / Django 5.2.19
-Fecha y hora    : 2026-11-10T21:13:53-05:00
+Fecha y hora    : 2026-11-10T21:24:00-05:00
 Rama            : fix/BUG-096-16bit-grayscale
-Commit          : e00a4d9cc7bb8e60c274a1b6be69d99a05fb0378
+Commit          : 0f2e56a65f1ea140b321e4782ee748e963cd8508
 Arbol de trabajo: limpio
 Directorio      : /c/Users/Juan Pablo Restrepo/OneDrive/Documents/EAFIT/Semestre 11/Proyecto Integrador 2
 ==============================================================================
@@ -84,7 +84,7 @@ Traceback (most recent call last):
   File "C:\Users\Juan Pablo Restrepo\OneDrive\Documents\EAFIT\Semestre 11\Proyecto Integrador 2\.venv\Lib\site-packages\django\core\files\storage\filesystem.py", line 81, in _open
     return File(open(self.path(name), mode))
                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\JUANPA~1\\AppData\\Local\\Temp\\panelingo-processing-media-lko_ym4e\\albums\\user_1\\album_1\\c6bb1b368d6f45e9accd4dc374d923e5.png'
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\JUANPA~1\\AppData\\Local\\Temp\\panelingo-processing-media-_hj0x4xj\\albums\\user_1\\album_1\\768b293a98ce4aeeb3b3107936b938a1.png'
 
 The above exception was the direct cause of the following exception:
 
@@ -163,7 +163,7 @@ Gemini respondió 500.
 ..No se pudo contactar con Gemini: <urlopen error sin red>
 ...........
 ----------------------------------------------------------------------
-Ran 676 tests in 78.479s
+Ran 676 tests in 77.439s
 
 OK
 Destroying test database for alias 'default'...

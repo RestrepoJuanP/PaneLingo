@@ -2,9 +2,9 @@
 
 | Campo | Valor |
 |---|---|
-| Fecha y hora | `2026-11-10T21:13:53-05:00` |
+| Fecha y hora | `2026-11-10T21:24:00-05:00` |
 | Rama | `fix/BUG-096-16bit-grayscale` |
-| Commit | `e00a4d9cc7bb8e60c274a1b6be69d99a05fb0378` |
+| Commit | `0f2e56a65f1ea140b321e4782ee748e963cd8508` |
 | Arbol de trabajo | limpio |
 | Resultado global | **PASA (7/7)** (verde) |
 
