@@ -55,8 +55,8 @@ limpias y traducciones aprobadas; pantalla **Revisión y exportación**
 | Pasos | Elegir «Páginas traducidas (PNG en un ZIP)», confirmar y descargar el resultado. |
 | Resultado esperado | Se muestra «Preparando exportación…» mientras la tarea corre. Al terminar se descarga un ZIP llamado `{álbum}_{idioma}_{fecha}_png.zip` que contiene `pagina-001.png`, `pagina-002.png` y `pagina-004.png`, en ese orden. |
 | CA relacionado | CA-90.2 |
-| Prueba automática | `albums/tests/test_png_export.py::ArchiveContentTests::test_zip_name_type_and_page_order_with_a_gap` |
-| Estado | Cubierto por prueba automática. La espera en segundo plano reutiliza el mecanismo de HU-27 y la verifica `albums/tests/test_export.py::BackgroundExportTests` (CP-27.4), que la prueba con un DOCX; no hay una prueba específica de esa espera con el formato PNG. |
+| Pruebas automáticas | `albums/tests/test_png_export.py::ArchiveContentTests::test_zip_name_type_and_page_order_with_a_gap`, `albums/tests/test_png_export.py::PreparingPngExportTests::test_png_export_waits_as_preparing_and_is_queued_once` (la exportación queda «Preparando», la pantalla lo muestra y un segundo POST no crea otra) |
+| Estado | Cubierto por prueba automática. La espera reutiliza el mecanismo de HU-27 (CP-27.4), ahora verificado también con el formato PNG. |
 
 ### CP-90.3 — Fidelidad de cada imagen — Happy path
 
@@ -113,8 +113,9 @@ limpias y traducciones aprobadas; pantalla **Revisión y exportación**
 | Prueba automática | `albums/tests/test_png_export.py::ForeignAlbumTests::test_foreign_export_and_download_answer_not_found` |
 | Estado | Cubierto por prueba automática |
 
-**Total: 7 CP; 22 pruebas automáticas nuevas** en
-`albums/tests/test_png_export.py`.
+**Total: 7 CP; 23 pruebas automáticas nuevas** en
+`albums/tests/test_png_export.py` (una de ellas añadida en la verificación
+final del Módulo 6).
 
 Pruebas de apoyo sin CP propio: sin traducciones aprobadas en una página
 limpia no hay PNG (`test_png_needs_something_to_draw`), el historial muestra
@@ -129,14 +130,14 @@ BUG-096, [`etapa-90b/`](evidence/sprint-3/etapa-90b/E90b-quality-gate-RESUMEN.md
 
 ## Resultado de la ejecución manual
 
-Todos los CP de HU-90 tienen cobertura automática completa. Esta tabla queda
-para registrar la verificación en el navegador que el equipo haga sobre la
-versión desplegada; hasta entonces no consta ninguna en el repositorio.
+Todos los CP de HU-90 tienen cobertura automática completa. Esta tabla
+registra la verificación en el navegador. La del 11/11/2026 se hizo en local; la
+versión desplegada sigue pendiente.
 
 | CP | Comprobación | Fecha | Responsable | Resultado | Evidencia |
 |---|---|---|---|---|---|
-| CP-90.2 | Descargar el ZIP y abrirlo con el explorador del sistema | | | | |
-| CP-90.3 | Abrir los PNG en un visor y comprobar resolución y modo | | | | |
+| CP-90.2 | Descargar el ZIP y abrirlo con el explorador del sistema | 11/11/2026 | Juan Pablo | Correcto | Lista de comprobación del Módulo 6 ejecutada en local (`runserver`, proveedores simulados). Resultado informado por el responsable; sin capturas versionadas |
+| CP-90.3 | Abrir los PNG en un visor y comprobar resolución y modo | | | Pendiente | La lista del 11/11/2026 comparó el PNG con el editor (CP-89.8), pero no incluía comprobar a mano la resolución ni el modo; los cubre `ImageFidelityTests` |
 
 ## Seguridad y almacenamiento
 

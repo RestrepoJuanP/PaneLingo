@@ -3,8 +3,9 @@
 Fecha de ejecución: **10 de noviembre de 2026** (primera versión: 9 de
 noviembre de 2026, sobre `main` en `99113ef`, con 555 pruebas)
 
-Versión base: rama `docs/ep08-closure`, que contiene EP-08 completa (HU-85 a
-HU-90) y BUG-096, apilada sobre `main` en `8eb3323`
+Versión base: rama `chore/ep08-verification-fixes`, que contiene EP-08
+completa (HU-85 a HU-90), BUG-096 y las correcciones de la verificación
+final, apilada sobre `main` en `8eb3323`
 
 Entorno: Python 3.12.10, Django 5.2 y SQLite de prueba
 
@@ -54,8 +55,8 @@ generan en cada prueba.
 La interacción con ratón y teclado del editor de maquetación (HU-89) ocurre
 en JavaScript, que el cliente de pruebas no ejecuta. Esas partes se
 verifican a mano con el procedimiento descrito en
-[CP de HU-89](WIKI_SPRINT_3_CP_HU-89.md#resultado-de-la-ejecución-manual);
-a la fecha no consta ninguna ejecución manual en el repositorio.
+[CP de HU-89](WIKI_SPRINT_3_CP_HU-89.md#resultado-de-la-ejecución-manual).
+Se ejecutaron el 11/11/2026 en local y todas resultaron correctas.
 
 ## 4. Trazabilidad HU → CA → CP → prueba
 
@@ -209,13 +210,13 @@ manual con tres páginas reales elegidas por Producto.
 | CA | CP | Prueba o grupo automático | Estado |
 |---|---|---|---|
 | CA-89.1 | CP-89.1 | `LayoutAlgorithmTests::test_default_layout_uses_the_ocr_box_and_the_kind_font` e `InitialLayoutTests` (2) | Cubierto |
-| CA-89.2 | CP-89.2 | `EditorMarkupTests::test_each_box_carries_urls_versions_and_an_accessible_name` | Parcial: selección con clic y `Tab`, manual pendiente |
-| CA-89.3 | CP-89.3 | `LayoutStyleTests::test_a_box_outside_the_image_is_rejected` y `test_a_box_touching_the_edges_is_accepted` | Parcial: arrastre y teclado, manual pendiente |
-| CA-89.4 | CP-89.4 | `LayoutStyleTests` (3 pruebas de CP-89.4) | Cubierto |
+| CA-89.2 | CP-89.2 | `EditorMarkupTests::test_each_box_carries_urls_versions_and_an_accessible_name` | Cubierto (automático y manual) |
+| CA-89.3 | CP-89.3 | `LayoutStyleTests::test_a_box_outside_the_image_is_rejected` y `test_a_box_touching_the_edges_is_accepted` | Cubierto (automático y manual) |
+| CA-89.4 | CP-89.4 | `LayoutStyleTests` (3 pruebas de CP-89.4) y `RenderPageTests::test_left_and_right_alignment_are_drawn_where_they_belong` | Cubierto |
 | CA-89.5 | CP-89.5 | `TranslationEditTests::test_editing_updates_the_translation_and_removes_approval` | Cubierto |
-| CA-89.6 | CP-89.6 | `LayoutResetTests::test_reset_restores_the_ocr_box_and_the_default_style` | Parcial: guardado y `Ctrl+Z`, manual pendiente |
+| CA-89.6 | CP-89.6 | `LayoutResetTests::test_reset_restores_the_ocr_box_and_the_default_style` | Cubierto (automático y manual) |
 | CA-89.7 | CP-89.7 | `TypesetApprovalTests` (6) y `EditorMarkupTests` (3) | Cubierto |
-| CA-89.8 | CP-89.8 | `RenderPageTests` (4) e `ImageFidelityTests::test_same_resolution_rgb_and_identical_to_render_page` | Parcial: comparación visual, manual pendiente |
+| CA-89.8 | CP-89.8 | `RenderPageTests` (5) e `ImageFidelityTests::test_same_resolution_rgb_and_identical_to_render_page` | Cubierto (automático y manual) |
 | CA-89.9 | CP-89.9 | `ForeignResourceTests::test_every_endpoint_answers_404_without_changes` | Cubierto |
 
 Archivos: `albums/tests/test_typesetting_editor.py` y
@@ -227,7 +228,7 @@ Archivos: `albums/tests/test_typesetting_editor.py` y
 | CA | CP | Prueba o grupo automático | Estado |
 |---|---|---|---|
 | CA-90.1 | CP-90.1 | `FormatChoiceTests::test_the_dialog_offers_both_formats_as_native_radios` y `test_docx_still_works_the_same` | Cubierto |
-| CA-90.2 | CP-90.2 | `ArchiveContentTests::test_zip_name_type_and_page_order_with_a_gap`; la espera, con `BackgroundExportTests` (HU-27) | Cubierto |
+| CA-90.2 | CP-90.2 | `ArchiveContentTests::test_zip_name_type_and_page_order_with_a_gap` y `PreparingPngExportTests::test_png_export_waits_as_preparing_and_is_queued_once` | Cubierto |
 | CA-90.3 | CP-90.3 | `ImageFidelityTests` (5 pruebas de CP-90.3) | Cubierto |
 | CA-90.4 | CP-90.4 | `UntypesetPagesTests` (3 pruebas de CP-90.4) | Cubierto |
 | CA-90.5 | CP-90.5 | `BlankAndKeptTextTests::test_a_blank_page_is_identical_to_the_original` y `test_a_skipped_region_keeps_its_original_text` | Cubierto |
@@ -244,8 +245,10 @@ Descartada tras el *spike*: sin CP ni pruebas. Ver
 
 ## 5. Pruebas nuevas y cobertura
 
-Desde la primera versión de este reporte la suite pasó de **555 a 676
-pruebas** (+121), sin eliminar ninguna. Cada prueba se asignó a la historia
+Desde la primera versión de este reporte la suite pasó de **555 a 678
+pruebas** (+123), sin eliminar ninguna. Dos de ellas se añadieron en la
+verificación final para cerrar huecos detectados: la espera del PNG (CP-90.2)
+y el dibujo de la alineación izquierda y derecha (CP-89.4 y CP-89.8). Cada prueba se asignó a la historia
 del commit que la introdujo y a un nivel de la sección 3 según lo que
 ejercita: llamadas directas a funciones (modelo y servicio), peticiones con
 el cliente de Django que comprueban estado, archivos o respuestas (vista e
@@ -257,17 +260,17 @@ integración), o marcado HTML y contratos del JavaScript (presentación).
 | HU-86 | `test_region_management.py` | 0 | 8 | 2 | 10 |
 | HU-87 | `test_translated_preview.py`, `test_typesetting.py` | 7 | 1 | 4 | 12 |
 | HU-88 | `test_cleaning.py` | 0 | 9 | 1 | 10 |
-| HU-89 | `test_typesetting_editor.py`, `test_typesetting_workspace.py` | 8 | 24 | 19 | 51 |
-| HU-90 | `test_png_export.py` | 1 | 18 | 3 | 22 |
+| HU-89 | `test_typesetting_editor.py`, `test_typesetting_workspace.py` | 8 | 25 | 19 | 52 |
+| HU-90 | `test_png_export.py` | 1 | 19 | 3 | 23 |
 | BUG-096 | `test_ocr_layout.py` | 3 | 0 | 0 | 3 |
-| **Total** | | **20** | **71** | **30** | **121** |
+| **Total** | | **20** | **73** | **30** | **123** |
 
 **Cobertura.** El proyecto la mide con coverage.py (configuración en
 `pyproject.toml`, mínimo del 90 % que hace fallar la CI). Ejecución local del
 10 de noviembre de 2026 sobre la misma versión, con
 `coverage run manage.py test` y `coverage report`: **97 %** de 3419
-sentencias, con 98 sin cubrir. Los módulos nuevos de EP-08 quedan en
-`albums/typesetting.py` 98 %, `albums/exporting.py` 99 %,
+sentencias, con 96 sin cubrir. Los módulos nuevos de EP-08 quedan en
+`albums/typesetting.py` 99 %, `albums/exporting.py` 99 %,
 `albums/cleaning.py` 95 % y `albums/imaging.py` 100 %. La cifra oficial es la
 del artefacto de cobertura de la CI del PR.
 
@@ -298,15 +301,17 @@ camino nuevo que olvide hacerlo se detecta en cuanto se añade a la lista.
 | 3 | `ruff check .` | Aprobado — sin hallazgos |
 | 4 | `black --check .` | Aprobado — 126 archivos con formato correcto |
 | 5 | `python manage.py check` | Aprobado — cero problemas |
-| 6 | `python manage.py test` | Aprobado — 676 pruebas en 77 segundos |
+| 6 | `python manage.py test` | Aprobado — 678 pruebas |
 | 7 | `pip-audit -r requirements.txt` | Aprobado — sin vulnerabilidades conocidas |
 
 **Resultado: Quality Gate 7/7 en verde** con Python 3.12.10, según la
 evidencia de la etapa
-[`90b`](evidence/sprint-3/etapa-90b/E90b-quality-gate-RESUMEN.md), la última
-con cambios de código. La etapa
-[`99`](evidence/sprint-3/etapa-99/E99-quality-gate-RESUMEN.md) repite el
-Quality Gate sobre la rama de este reporte.
+[`99b`](evidence/sprint-3/etapa-99b/E99b-quality-gate-RESUMEN.md), que incluye
+las dos pruebas añadidas en la verificación final; los tiempos y las salidas
+completas están en esa carpeta. Las etapas
+[`90b`](evidence/sprint-3/etapa-90b/E90b-quality-gate-RESUMEN.md) y
+[`99`](evidence/sprint-3/etapa-99/E99-quality-gate-RESUMEN.md) recogen las
+ejecuciones anteriores, con 676 pruebas.
 
 ## 8. Cómo reproducir
 
@@ -336,8 +341,10 @@ artefacto temporal.
 ## 9. Conclusión
 
 La trazabilidad está completa para los 74 CP funcionales del Sprint 3 y para
-las seis regresiones de cierre. Las 676 pruebas finalizaron correctamente, la
-cobertura local es del 97 % y el Quality Gate quedó 7/7 en verde. Quedan
-pendientes: la ejecución manual de las partes interactivas de CP-89.2,
-CP-89.3, CP-89.6 y CP-89.8, la validación de HU-88 con páginas reales y
-comprobar que la misma suite termine en verde en la CI de cada pull request.
+las seis regresiones de cierre. Las 678 pruebas finalizaron correctamente, la
+cobertura local es del 97 % y el Quality Gate quedó 7/7 en verde. Las
+partes interactivas de CP-89.2, CP-89.3, CP-89.6 y CP-89.8 se verificaron a
+mano el 11/11/2026 con resultado correcto. Quedan pendientes la validación de
+HU-88 con páginas reales, la comprobación manual de CP-90.3 sobre la versión
+desplegada y comprobar que la misma suite termine en verde en la CI de cada
+pull request.

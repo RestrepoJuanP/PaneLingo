@@ -79,7 +79,7 @@ La épica añade al espacio de trabajo el flujo **Detección → Traducción →
 | [HU-86](https://github.com/RestrepoJuanP/PaneLingo/issues/86) | Eliminar falsos positivos con deshacer y marcar «No traducir» | CP-86.1 a CP-86.6 | Entregada |
 | [HU-87](https://github.com/RestrepoJuanP/PaneLingo/issues/87) | Vista previa de la página traducida, con fuentes SIL OFL | CP-87.1 a CP-87.7 | Entregada |
 | [HU-88](https://github.com/RestrepoJuanP/PaneLingo/issues/88) | Limpiar el texto original en una capa aparte | CP-88.1 a CP-88.8 | Entregada |
-| [HU-89](https://github.com/RestrepoJuanP/PaneLingo/issues/89) | Maquetar cada traducción sobre la imagen y aprobar la página como «Maquetada» | CP-89.1 a CP-89.9 | Entregada; partes manuales de CP-89.2, 89.3, 89.6 y 89.8 pendientes de ejecutar |
+| [HU-89](https://github.com/RestrepoJuanP/PaneLingo/issues/89) | Maquetar cada traducción sobre la imagen y aprobar la página como «Maquetada» | CP-89.1 a CP-89.9 | Entregada; partes manuales de CP-89.2, 89.3, 89.6 y 89.8 verificadas el 11/11/2026 |
 | [HU-90](https://github.com/RestrepoJuanP/PaneLingo/issues/90) | Exportar las páginas traducidas como PNG en un ZIP, junto al DOCX | CP-90.1 a CP-90.7 | Entregada |
 | [HU-91](https://github.com/RestrepoJuanP/PaneLingo/issues/91) | Limpiar con IA el texto que está sobre el dibujo (*Could*) | — | **Descartada** tras el *spike* |
 
@@ -87,7 +87,7 @@ La épica añade al espacio de trabajo el flujo **Detección → Traducción →
 
 **Corrección BUG-096.** Las páginas en gris de 16 bits se veían casi blancas porque Pillow recorta esos modos en lugar de escalarlos; HU-90 lo corrigió en la miniatura, la limpieza, el recorte del OCR manual y el dibujo de la página, y BUG-096 en la clasificación globo/narración, donde todas las regiones de esas páginas salían como globo. Las regiones procesadas antes de la corrección siguen así hasta reprocesar la página, lo que borra su trabajo; la propuesta de cambiar el tipo sin reprocesar queda para el PO (ADR-003, P10).
 
-**Pruebas.** 121 pruebas automáticas nuevas (676 en total), cobertura local del 97 % y Quality Gate 7/7. Casos y trazabilidad: [CP de HU-89](https://github.com/RestrepoJuanP/PaneLingo/blob/main/docs/WIKI_SPRINT_3_CP_HU-89.md), [CP de HU-90](https://github.com/RestrepoJuanP/PaneLingo/blob/main/docs/WIKI_SPRINT_3_CP_HU-90.md) y [reporte de pruebas del Sprint 3](https://github.com/RestrepoJuanP/PaneLingo/blob/main/docs/WIKI_SPRINT_3_REPORTE_PRUEBAS.md).
+**Pruebas.** 123 pruebas automáticas nuevas (678 en total), cobertura local del 97 % y Quality Gate 7/7. Casos y trazabilidad: [CP de HU-89](https://github.com/RestrepoJuanP/PaneLingo/blob/main/docs/WIKI_SPRINT_3_CP_HU-89.md), [CP de HU-90](https://github.com/RestrepoJuanP/PaneLingo/blob/main/docs/WIKI_SPRINT_3_CP_HU-90.md) y [reporte de pruebas del Sprint 3](https://github.com/RestrepoJuanP/PaneLingo/blob/main/docs/WIKI_SPRINT_3_REPORTE_PRUEBAS.md).
 
 **Pendiente de decisión del PO:** «Completado» exige páginas maquetadas (P1-bis), nombres del ZIP y carpeta `limpias/` (P3-bis) y cambiar el tipo de una región sin reprocesar (P10).
 ```
@@ -124,7 +124,7 @@ Entregada en el PR de `feature/HU-89-typesetting-editor`.
 
 - Pestaña **Maquetación** en el espacio de trabajo (`?paso=maquetacion`): caja, fuente, tamaño automático o fijo, alineación y color de cada texto, edición del texto sobre la imagen, deshacer (20 pasos), **Restablecer** y **Aprobar página** («Maquetada»).
 - Un único algoritmo de maquetación en `albums/typesetting.py`; el navegador pinta lo que devuelve el servidor (ADR-003).
-- CP-89.1 a CP-89.9 con prueba automática (51 pruebas nuevas). Las partes interactivas de CP-89.2, CP-89.3, CP-89.6 y CP-89.8 se verifican a mano con el procedimiento de `docs/WIKI_SPRINT_3_CP_HU-89.md`, que tiene la tabla de resultados para rellenar.
+- CP-89.1 a CP-89.9 con prueba automática (52 pruebas nuevas, una de ellas de la verificación final). Las partes interactivas de CP-89.2, CP-89.3, CP-89.6 y CP-89.8 se verificaron a mano el 11/11/2026, con resultado correcto; el registro está en `docs/WIKI_SPRINT_3_CP_HU-89.md`.
 - Supuestos de ADR-003 P1, P2, P7 y P8. El boceto del panel de propiedades sigue pendiente de revisión del equipo (DoR).
 ```
 
@@ -139,7 +139,7 @@ Entregada en el PR de `feature/HU-90-png-export`.
 - **Revisión y exportación** ofrece «Documento de texto (DOCX)», que no cambia, y «Páginas traducidas (PNG en un ZIP)».
 - Cada PNG tiene la resolución de la original, sale en `L` o `RGB` sin alfa y es idéntico a lo que muestra el editor (`render_page`).
 - Precisión de CA-90.4 (ADR-003, P9): una página sin maquetar se exporta con su maquetación **guardada**, la que se ve en el editor.
-- CP-90.1 a CP-90.7 con prueba automática (22 pruebas nuevas).
+- CP-90.1 a CP-90.7 con prueba automática (23 pruebas nuevas, una de ellas de la verificación final).
 - Nombres de archivo y carpeta `limpias/` como supuesto, pendientes de confirmar por el PO (ADR-003, P3-bis).
 - Las páginas grises de 16 bits se escalan a 8 bits; la clasificación de regiones se completó en BUG-096.
 ```
