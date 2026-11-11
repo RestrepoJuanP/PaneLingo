@@ -121,6 +121,8 @@ def apply_translations(page, regions, translations):
                 "translated_at",
             ],
         )
+        if changed:
+            page.clear_typeset_approval()
         finish_translation(page)
     return len(changed)
 

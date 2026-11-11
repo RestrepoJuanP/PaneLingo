@@ -1,0 +1,20 @@
+==============================================================================
+PaneLingo — Evidencia del Quality Gate
+==============================================================================
+Etapa           : 99c
+Paso            : 4 de 7 — Black — verificacion de formato
+Comando         : black --check .
+Herramienta     : black, 25.12.0 (compiled: yes)
+Fecha y hora    : 2026-11-11T00:10:00-05:00
+Rama            : chore/ep08-verification-fixes
+Commit          : 373ba9fc96f1798af9109b098878ab164771676a
+Arbol de trabajo: limpio
+Directorio      : /c/Users/Juan Pablo Restrepo/OneDrive/Documents/EAFIT/Semestre 11/Proyecto Integrador 2
+==============================================================================
+
+All done! ✨ 🍰 ✨
+126 files would be left unchanged.
+
+==============================================================================
+Codigo de salida: 0  (CORRECTO)
+==============================================================================

@@ -7,6 +7,7 @@ from django.db import transaction
 from django.db.models import F
 from PIL import Image
 
+from albums.imaging import to_rgb
 from albums.models import ComicPage, TextRegion
 from albums.ocr import get_provider
 from albums.ocr.base import DetectedRegion
@@ -28,7 +29,7 @@ TEMPORARY_ORDER_OFFSET = 1_000_000
 
 def crop_bytes(image, box):
     """Recorta la caja y la amplía sobre blanco si el OCR exige más tamaño."""
-    crop = image.crop((box.x, box.y, box.right, box.bottom)).convert("RGB")
+    crop = to_rgb(image.crop((box.x, box.y, box.right, box.bottom)))
     canvas_width = max(crop.width, OCR_MIN_CROP_SIZE)
     canvas_height = max(crop.height, OCR_MIN_CROP_SIZE)
     canvas = Image.new("RGB", (canvas_width, canvas_height), "white")
@@ -122,6 +123,7 @@ def save_manual_region(page, new_region):
             reading_order=F("reading_order") + TEMPORARY_ORDER_OFFSET
         )
         new_region.page = locked_page
+        locked_page.clear_typeset_approval()
         for position, region in enumerate(ordered, start=1):
             region.reading_order = position
             if region.pk is None:

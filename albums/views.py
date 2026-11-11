@@ -33,6 +33,8 @@ from albums.corrections import correct_region, restore_region
 from albums.exporting import (
     build_export_snapshot,
     export_download_name,
+    png_export_counts,
+    png_export_warnings,
     start_album_export,
 )
 from albums.forms import AlbumForm, AlbumRenameForm, ManualRegionForm
@@ -72,7 +74,17 @@ from albums.translation_review import (
     edit_translation,
     unapprove_translation,
 )
-from albums.typesetting import preview_for_region
+from albums.typesetting import (
+    approve_typesetting,
+    editor_settings,
+    layout_for_region,
+    preview_for_region,
+    reset_layout,
+    save_layout,
+    typeset_status,
+    typesetting_unavailable_reason,
+    validate_layout,
+)
 
 # Longitud máxima del texto de búsqueda; el título admite 120 caracteres.
 SEARCH_MAX_LENGTH = 120
@@ -571,28 +583,67 @@ class AlbumDetailView(OwnedAlbumMixin, DetailView):
         }
 
 
+PNG_UNAVAILABLE_MESSAGE = (
+    "Aprueba al menos una traducción en una página limpia para exportar "
+    "las páginas traducidas."
+)
+
+
 class AlbumExportView(OwnedAlbumMixin, DetailView):
-    """Revisa y prepara un DOCX con traducciones aprobadas (HU-27)."""
+    """Revisa y prepara la exportación del álbum (HU-27 y HU-90).
+
+    Dos formatos en el mismo flujo: el DOCX con las traducciones aprobadas y
+    las páginas traducidas como PNG en un ZIP. Cada uno tiene su propia
+    confirmación de avisos; la rama del DOCX no cambia.
+    """
 
     template_name = "albums/album_export.html"
 
     def get_context_data(self, **kwargs):
-        """Añade recuentos, última exportación e historial del álbum."""
+        """Añade recuentos, avisos del PNG, última exportación e historial."""
         context = super().get_context_data(**kwargs)
         snapshot, skipped_count = build_export_snapshot(self.object)
         exports = list(
             self.object.exports.select_related("album__target_language").all()
         )
+        png_counts = png_export_counts(self.object)
         context["approved_count"] = len(snapshot["regions"])
         context["skipped_count"] = skipped_count
+        context["png_warnings"] = png_export_warnings(png_counts)
+        context["can_export_png"] = png_counts["drawable"] > 0
+        context["png_format"] = AlbumExport.Format.PNG_ZIP
         context["latest_export"] = exports[0] if exports else None
         context["previous_exports"] = exports[1:]
         context["nav_current"] = "review"
         return context
 
+    def start_png_export(self, request):
+        """Confirma los avisos del PNG y encola el ZIP (HU-90, CA-90.4)."""
+        counts = png_export_counts(self.object)
+        if not counts["drawable"]:
+            messages.error(request, PNG_UNAVAILABLE_MESSAGE)
+            return redirect(self.object.get_export_url())
+        if png_export_warnings(counts) and request.POST.get("confirm_png") != "1":
+            context = self.get_context_data(object=self.object)
+            context["png_confirmation_required"] = True
+            return self.render_to_response(context)
+        export, started = start_album_export(self.object, AlbumExport.Format.PNG_ZIP)
+        if export is None:
+            messages.error(request, PNG_UNAVAILABLE_MESSAGE)
+        elif started:
+            messages.success(
+                request,
+                "Preparando exportación. Puedes seguir trabajando mientras termina.",
+            )
+        else:
+            messages.info(request, "Ya hay una exportación en preparación.")
+        return redirect(self.object.get_export_url())
+
     def post(self, request, *args, **kwargs):
         """Confirma la omisión de pendientes y encola la exportación."""
         self.object = self.get_object()
+        if request.POST.get("format") == AlbumExport.Format.PNG_ZIP:
+            return self.start_png_export(request)
         if request.POST.get("format") != AlbumExport.Format.DOCX:
             messages.error(request, "El formato solicitado no está disponible.")
             return redirect(self.object.get_export_url())
@@ -643,7 +694,7 @@ class AlbumExportStatusView(PrivateViewMixin, View):
 
 
 class AlbumExportDownloadView(PrivateViewMixin, View):
-    """Entrega un DOCX terminado únicamente a su propietario (HU-28)."""
+    """Entrega una exportación terminada solo a su propietario (HU-28, HU-90)."""
 
     def handle_no_permission(self):
         """Oculta la existencia del archivo también a visitantes anónimos."""
@@ -667,10 +718,7 @@ class AlbumExportDownloadView(PrivateViewMixin, View):
             handle,
             as_attachment=True,
             filename=export_download_name(export),
-            content_type=(
-                "application/vnd.openxmlformats-officedocument."
-                "wordprocessingml.document"
-            ),
+            content_type=export.content_type,
         )
 
 
@@ -868,9 +916,11 @@ class PageDetailView(OwnedPageMixin, DetailView):
         context["unapproved_filter"] = chosen == UNAPPROVED_FILTER
         visible_regions = filter_regions(regions, chosen)
         context["visible_regions"] = visible_regions
-        context["preview_regions"] = [
-            preview_for_region(region) for region in visible_regions
-        ]
+        context.update(typesetting_step_context(self.request, page, regions))
+        if not context["is_typesetting_step"]:
+            context["preview_regions"] = [
+                preview_for_region(region) for region in visible_regions
+            ]
         context["manual_cleaning_count"] = sum(
             region.cleaning_status == TextRegion.CleaningStatus.MANUAL
             for region in regions
@@ -879,6 +929,51 @@ class PageDetailView(OwnedPageMixin, DetailView):
         context.update(page_neighbours(page))
         context.update(translation_summary(page, regions))
         return context
+
+
+TYPESETTING_STEP = "maquetacion"
+
+
+def typesetting_items(regions):
+    """Cajas del editor: regiones con texto que traducir (HU-89, CA-89.1)."""
+    items = []
+    for region in regions:
+        if not region.needs_translation:
+            continue
+        preview = preview_for_region(region)
+        items.append(
+            {
+                "region": region,
+                "preview": preview,
+                "layout": preview["layout"],
+                "layout_version": timestamp_version(region.layout_updated_at),
+                "translation_version": timestamp_version(region.translated_at),
+            }
+        )
+    return items
+
+
+def typesetting_step_context(request, page, regions):
+    """Pestañas del espacio de trabajo y datos del editor (HU-89).
+
+    Las pestañas son enlaces con ?paso=: el servidor pinta solo el panel
+    elegido, la elección sobrevive a recargar y funciona sin JavaScript.
+    Si se pide Maquetación y no está disponible, se vuelve a Detección y
+    se muestra el motivo.
+    """
+    unavailable = typesetting_unavailable_reason(page, regions)
+    is_step = request.GET.get("paso") == TYPESETTING_STEP and not unavailable
+    context = {
+        "is_typesetting_step": is_step,
+        "typesetting_unavailable": unavailable,
+        "typesetting_step": TYPESETTING_STEP,
+        "step_query": f"?paso={TYPESETTING_STEP}" if is_step else "",
+    }
+    if is_step:
+        context["typeset_items"] = typesetting_items(regions)
+        context["typeset_status"] = typeset_status(page)
+        context["editor"] = editor_settings()
+    return context
 
 
 def render_page_workspace(request, page, manual_region_form, status):
@@ -1326,6 +1421,8 @@ def region_translation_edit(request, pk):
             return autosave_success(
                 region.translated_at,
                 preview=preview_for_region(region),
+                layout=layout_for_region(region),
+                page=typeset_status(page),
             )
         if region.translation:
             messages.success(request, f"Se guardó la traducción de la región {number}.")
@@ -1341,6 +1438,93 @@ def owned_region_or_404(request, pk):
         pk=pk,
         page__album__owner=request.user,
     )
+
+
+def layout_saved(region):
+    """Respuesta JSON con la maquetación recalculada por el servidor."""
+    return autosave_success(
+        region.layout_updated_at,
+        preview=preview_for_region(region),
+        page=typeset_status(region.page),
+        **layout_for_region(region),
+    )
+
+
+def layout_conflict(region):
+    """Conflicto de HU-23 aplicado a la maquetación: no se sobrescribe nada."""
+    return JsonResponse(
+        {
+            "status": "conflict",
+            "message": (
+                "La maquetación de esta región cambió en otra pestaña. "
+                "Tus cambios no se guardaron."
+            ),
+            "version": timestamp_version(region.layout_updated_at),
+            "layout": layout_for_region(region),
+            "preview": preview_for_region(region),
+        },
+        status=409,
+    )
+
+
+@require_POST
+@private_view
+def region_layout(request, pk):
+    """Guarda un cambio de maquetación de una región (HU-89, CA-89.3 y 89.4).
+
+    Responde JSON: 200 con la maquetación recalculada con layout_for_region,
+    400 con los errores de cada campo, 409 si otra pestaña guardó antes
+    (mismo control de versión que HU-23) y 404 si la región es ajena.
+    """
+    region = owned_region_or_404(request, pk)
+    if autosave_conflicts(request, region.layout_updated_at):
+        return layout_conflict(region)
+    cleaned, errors = validate_layout(region, request.POST)
+    if errors:
+        return JsonResponse({"status": "invalid", "errors": errors}, status=400)
+    save_layout(region, cleaned)
+    return layout_saved(region)
+
+
+@require_POST
+@private_view
+def region_layout_reset(request, pk):
+    """Vuelve a la caja del OCR y al estilo por defecto (HU-89, CA-89.6)."""
+    region = owned_region_or_404(request, pk)
+    if autosave_conflicts(request, region.layout_updated_at):
+        return layout_conflict(region)
+    reset_layout(region)
+    return layout_saved(region)
+
+
+@require_POST
+@private_view
+def page_typeset_approve(request, pk):
+    """Aprueba la maquetación de la página (HU-89, CA-89.7, ADR-003 P7).
+
+    Con X-Autosave responde JSON (409 con el motivo si no se puede); sin
+    él, vuelve a la página con un mensaje, para funcionar sin JavaScript.
+    """
+    page = owned_page_or_404(request, pk)
+    result = approve_typesetting(page)
+    if is_autosave(request):
+        status = 200 if result.is_approved else 409
+        return JsonResponse(
+            {
+                "status": "approved" if result.is_approved else "blocked",
+                "message": result.message,
+                "warnings": result.warnings,
+                "page": typeset_status(page),
+            },
+            status=status,
+        )
+    if result.is_approved:
+        messages.success(request, result.message)
+        for warning in result.warnings:
+            messages.warning(request, warning)
+    else:
+        messages.error(request, result.message)
+    return redirect(f"{page.get_absolute_url()}?paso={TYPESETTING_STEP}")
 
 
 def review_address(page, number, filter_value=""):

@@ -1,5 +1,7 @@
 """Pruebas unitarias de las reglas de maquetación de regiones (HU-12, ADR-001)."""
 
+import io
+
 from django.test import SimpleTestCase
 from PIL import Image, ImageDraw
 
@@ -8,6 +10,7 @@ from albums.ocr.layout import (
     clamp_to_page,
     is_balloon,
     is_right_to_left,
+    median_luminance,
     merge_lines_into_regions,
     sort_in_reading_order,
 )
@@ -136,3 +139,63 @@ class RegionKindTests(SimpleTestCase):
     def test_dark_background_is_a_narration_box(self):
         """CP-12.1 — Flujo alternativo: fondo gris o de color: cuadro narrativo."""
         self.assertFalse(is_balloon(self.image, box(220, 20, 160, 100)))
+
+
+def reopened_png(image):
+    """Guarda la imagen como PNG y la vuelve a abrir, como una página cargada."""
+    output = io.BytesIO()
+    image.save(output, format="PNG")
+    reopened = Image.open(io.BytesIO(output.getvalue()))
+    reopened.load()
+    return reopened
+
+
+class SixteenBitRegionKindTests(SimpleTestCase):
+    """CP-12.1 — Un PNG gris de 16 bits se clasifica igual que su versión de 8 bits.
+
+    convert("L") de Pillow recorta los 16 bits a blanco en lugar de
+    escalarlos, y todas las regiones salían como globo.
+    """
+
+    PAGE_SIZE = (400, 200)
+    BALLOON_BOX = box(20, 20, 160, 100)
+    NARRATION_BOX = box(220, 20, 160, 100)
+    WHITE_LEVEL = 255
+    DARK_LEVEL = 100
+    SIXTEEN_BIT_FACTOR = 257
+
+    def page(self, mode, factor):
+        """Página con un fondo blanco a la izquierda y uno gris a la derecha."""
+        image = Image.new(mode, self.PAGE_SIZE, self.WHITE_LEVEL * factor)
+        draw = ImageDraw.Draw(image)
+        draw.rectangle((220, 20, 380, 120), fill=self.DARK_LEVEL * factor)
+        return reopened_png(image)
+
+    def setUp(self):
+        """La misma página en gris de 8 bits y en gris de 16 bits."""
+        self.eight_bit = self.page("L", 1)
+        self.sixteen_bit = self.page("I;16", self.SIXTEEN_BIT_FACTOR)
+
+    def test_sixteen_bit_page_is_opened_as_sixteen_bit(self):
+        """CP-12.1 — La prueba usa de verdad un PNG de 16 bits."""
+        self.assertTrue(self.sixteen_bit.mode.startswith("I;16"))
+
+    def test_same_luminance_as_eight_bit(self):
+        """CP-12.1 — La luminosidad mediana coincide con la de 8 bits."""
+        for region in (self.BALLOON_BOX, self.NARRATION_BOX):
+            with self.subTest(region=region):
+                self.assertEqual(
+                    median_luminance(self.sixteen_bit, region),
+                    median_luminance(self.eight_bit, region),
+                )
+
+    def test_same_kind_as_eight_bit(self):
+        """CP-12.1 — Flujo alternativo: el fondo gris de 16 bits es narración."""
+        self.assertTrue(is_balloon(self.sixteen_bit, self.BALLOON_BOX))
+        self.assertFalse(is_balloon(self.sixteen_bit, self.NARRATION_BOX))
+        for region in (self.BALLOON_BOX, self.NARRATION_BOX):
+            with self.subTest(region=region):
+                self.assertEqual(
+                    is_balloon(self.sixteen_bit, region),
+                    is_balloon(self.eight_bit, region),
+                )

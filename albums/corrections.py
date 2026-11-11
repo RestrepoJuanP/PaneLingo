@@ -63,6 +63,7 @@ def correct_region(region, text):
         )
         refresh_page_review_status(region.page)
         refresh_page_approval(region.page)
+        region.page.clear_typeset_approval()
 
 
 def restore_region(region):
@@ -87,3 +88,4 @@ def restore_region(region):
         )
         refresh_page_review_status(region.page)
         refresh_page_approval(region.page)
+        region.page.clear_typeset_approval()

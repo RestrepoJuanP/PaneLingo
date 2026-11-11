@@ -7,6 +7,7 @@ from django.core.files.base import ContentFile
 from django.db import transaction
 from PIL import Image
 
+from albums.imaging import to_rgb
 from albums.models import ComicPage
 from albums.validators import InvalidPageImageError, validate_page_image
 
@@ -33,8 +34,9 @@ def build_thumbnail(uploaded_file):
     uploaded_file.seek(0)
     with Image.open(uploaded_file) as image:
         # Las páginas de cómic son opacas; convertir a RGB permite guardar en
-        # JPEG, que para una miniatura pesa bastante menos que PNG.
-        thumbnail = image.convert("RGB")
+        # JPEG, que para una miniatura pesa bastante menos que PNG. to_rgb
+        # escala los PNG de 16 bits en lugar de recortarlos (HU-90).
+        thumbnail = to_rgb(image)
         side = settings.THUMBNAIL_MAX_SIDE
         thumbnail.thumbnail((side, side))
         buffer = io.BytesIO()

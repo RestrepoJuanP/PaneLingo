@@ -3,8 +3,15 @@
 ## Decisión de alcance
 
 PaneLingo conserva el historial completo de exportaciones y no las elimina por
-caducidad. Cada descarga entrega el DOCX inmutable que preparó HU-27; nunca lo
-regenera con el estado actual del álbum.
+caducidad. Cada descarga entrega el archivo inmutable que preparó HU-27; nunca
+lo regenera con el estado actual del álbum.
+
+**Segundo formato (HU-90).** Desde HU-90 el historial puede tener dos
+formatos: el DOCX y el ZIP de páginas PNG. La misma vista descarga los dos;
+`export_download_name` elige la extensión según `AlbumExport.format`. El
+nombre del DOCX no cambia y el del ZIP es `{álbum}_{idioma}_{fecha}_png.zip`
+([ADR-003, P3](adr/ADR-003-edicion-de-imagen.md)). El historial muestra el
+formato de cada exportación y el aislamiento del ZIP lo verifica CP-90.7.
 
 ## HU-28 — Descargar resultados exportados
 
@@ -17,7 +24,7 @@ conservar una copia de mi trabajo.
 |---|---|
 | Precondición | Una exportación propia terminó correctamente. |
 | Pasos | Abrir **Revisión y exportación** y pulsar **Descargar**. |
-| Resultado esperado | Se entrega exactamente el DOCX guardado. El nombre incluye el título del álbum, el idioma de destino y la fecha. Las exportaciones anteriores siguen disponibles en el historial. |
+| Resultado esperado | Se entrega exactamente el archivo guardado (DOCX o, desde HU-90, ZIP de PNG). El nombre incluye el título del álbum, el idioma de destino y la fecha; el del ZIP termina en `_png.zip`. Las exportaciones anteriores siguen disponibles en el historial. |
 | CA relacionado | CA-28.1 |
 | Pruebas automáticas | `FinishedExportDownloadTests` |
 

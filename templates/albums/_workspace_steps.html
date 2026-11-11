@@ -1,0 +1,36 @@
+{% comment %}
+Pasos del espacio de trabajo (HU-89): "Detección y traducción" y
+"Maquetación".
+
+Son dos ENLACES con ?paso=, no un tablist ARIA, y es deliberado: el
+servidor pinta solo el panel elegido, la pestaña sobrevive a recargar y se
+puede compartir, y funciona sin JavaScript. Cambiar de paso cambia la vista,
+así que la semántica de navegación (aria-current) es la correcta. Usa el
+carril .tabs de autenticación (tokens --tab-* de DESIGN_TOKENS.md).
+
+Si la maquetación no está disponible, la pestaña es un <span> con
+aria-disabled y el motivo visible justo debajo.
+{% endcomment %}
+{% if regions or page.was_processed %}
+  <nav class="ws-steps" aria-label="Pasos de la página">
+    <div class="tabs ws-steps__tabs">
+      <a
+        class="tabs__tab"
+        href="{{ page.get_absolute_url }}"
+        {% if not is_typesetting_step %}aria-current="page"{% endif %}
+      >Detección y traducción</a>
+      {% if typesetting_unavailable %}
+        <span class="tabs__tab ws-steps__disabled" aria-disabled="true" aria-describedby="ws-steps-reason">Maquetación</span>
+      {% else %}
+        <a
+          class="tabs__tab"
+          href="{{ page.get_absolute_url }}?paso={{ typesetting_step }}"
+          {% if is_typesetting_step %}aria-current="page"{% endif %}
+        >Maquetación</a>
+      {% endif %}
+    </div>
+    {% if typesetting_unavailable %}
+      <p class="ws-steps__reason" id="ws-steps-reason">{{ typesetting_unavailable }}</p>
+    {% endif %}
+  </nav>
+{% endif %}
