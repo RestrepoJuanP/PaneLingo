@@ -39,6 +39,16 @@ Proyecto académico desarrollado para **Proyecto Integrador 2**. El alcance del 
 
 Más `/design-system/`, la referencia de estilos, que **solo existe en desarrollo**.
 
+### Edición de imagen (EP-08, Sprint 3)
+
+| Pantalla | Ruta | Historia |
+|---|---|---|
+| Espacio de trabajo — pestaña Maquetación | `/paginas/<id>/?paso=maquetacion` | HU-89 |
+| Revisión y exportación — DOCX o páginas traducidas (PNG en un ZIP) | `/albumes/<id>/exportar/` | HU-27, HU-90 |
+| Descargar una exportación (DOCX o ZIP) | `/exportaciones/<id>/descargar/` | HU-28, HU-90 |
+
+La pestaña Maquetación solo se habilita cuando la página tiene imagen limpia y regiones de texto. Cómo probarla en local: [Maquetación y exportación PNG en desarrollo](#maquetación-y-exportación-png-en-desarrollo).
+
 ## Requisitos previos
 
 - Python 3.12 o superior
@@ -155,6 +165,34 @@ python manage.py ocr_accuracy_report ruta/al/juego-de-prueba --output informe-oc
 
 El formato de la carpeta está descrito al principio de `albums/management/commands/ocr_accuracy_report.py`.
 
+## Maquetación y exportación PNG en desarrollo
+
+El flujo completo de EP-08 (detectar, traducir, limpiar, maquetar y exportar en PNG) se puede probar sin red ni claves con los proveedores simulados. Decisiones en [ADR-003](docs/adr/ADR-003-edicion-de-imagen.md).
+
+**1. Configura `.env`** con los valores por defecto de `.env.example`:
+
+```bash
+OCR_PROVIDER=fake
+TRANSLATION_PROVIDER=fake
+HUEY_IMMEDIATE=True
+```
+
+`HUEY_IMMEDIATE=True` ejecuta el procesamiento, la traducción, la limpieza y la exportación dentro de la propia petición. Si prefieres el comportamiento asíncrono real, déjalo en `False` y arranca `python manage.py run_huey` en otra terminal.
+
+**2. Prepara una página.** Crea un álbum con idioma de origen japonés y carga una página. El OCR simulado marca dos globos de ejemplo en cualquier imagen; con una imagen de **fondo blanco** la limpieza los rellena sola, y con una ilustración cualquiera quedarán en «Limpieza manual», lo que también sirve para probar el aviso.
+
+**3. Recorre el flujo en la vista de la página:**
+
+1. **Procesar página** → aparecen las dos regiones.
+2. **Traducir página** → el traductor simulado propone el texto de origen con el prefijo del idioma de destino (`[ES] こんにちは`). Como las fuentes de maquetación no tienen glifos japoneses, **edita cada traducción con un texto en español** (por ejemplo, «¡Hola!») y apruébala con **Aprobar**.
+3. **Limpiar página** → se genera la capa limpia; compara las vistas «Original», «Limpia» y «Traducida».
+4. Abre la pestaña **Maquetación** (`?paso=maquetacion`): selecciona un texto con clic o `Tab`, muévelo con el ratón o las flechas (`Mayús` para 10 px, `Alt` para cambiar el tamaño), cambia fuente, tamaño, alineación y color en el panel, prueba `Ctrl+Z` y **Restablecer**, y pulsa **Aprobar página**.
+5. Vuelve al álbum: la página muestra «Maquetada».
+
+**4. Exporta.** En **Revisión y exportación**, elige «Páginas traducidas (PNG en un ZIP)», confirma los avisos y descarga el ZIP. Cada `pagina-NNN.png` debe coincidir con lo que se ve en el editor.
+
+Los procedimientos manuales de CP-89.2, CP-89.3, CP-89.6 y CP-89.8, con la tabla para registrar el resultado, están en [`docs/WIKI_SPRINT_3_CP_HU-89.md`](docs/WIKI_SPRINT_3_CP_HU-89.md).
+
 ## Recuperación de contraseña en desarrollo
 
 PaneLingo no usa un proveedor de correo real: está fuera del alcance del MVP. En desarrollo, `EMAIL_BACKEND` es el backend de consola, así que **el mensaje de recuperación se imprime en la terminal donde corre `runserver`**, no se envía a ninguna parte.
@@ -213,6 +251,8 @@ Para no copiar las salidas a mano, `./scripts/quality_gate.sh <NN>` ejecuta los 
 ```bash
 ./scripts/quality_gate.sh 01
 ```
+
+El sprint se elige con la variable `SPRINT` (1 por defecto); por ejemplo, `SPRINT=3 ./scripts/quality_gate.sh 90b` guarda la evidencia en `docs/evidence/sprint-3/etapa-90b/`.
 
 Ejecuta los siete pasos aunque alguno falle y termina con código distinto de cero si hubo alguno en rojo. No hace commit ni push. La convención de nombres está documentada en [`docs/evidence/sprint-1/README.md`](docs/evidence/sprint-1/README.md).
 
