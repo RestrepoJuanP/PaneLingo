@@ -4029,20 +4029,54 @@ textarea {
 }
 
 .export-format {
+  display: grid;
+  gap: var(--sp-3);
   min-width: 0;
   margin: 0;
   padding: 0;
   border: 0;
 }
 
+/* Tarjeta de opción (CLAUDE.md): en reposo --border sobre --surface y, al
+   elegirse, índigo de marca. */
 .export-option {
   display: flex;
   gap: var(--sp-4);
   padding: var(--sp-5);
-  border: 1px solid var(--brand);
+  border: 1px solid var(--border);
   border-radius: var(--r-lg);
-  background: var(--brand-tint-2);
+  background: var(--surface);
   cursor: pointer;
+}
+
+.export-option:has(input:checked) {
+  border-color: var(--brand);
+  background: var(--brand-tint-2);
+}
+
+.export-option--disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.export-option__warnings {
+  display: grid;
+  gap: var(--sp-2);
+}
+
+.export-option .export-option__warning {
+  padding: var(--sp-3);
+  border: 1px solid var(--warning-border);
+  border-radius: var(--r-md);
+  background: var(--warning-bg);
+  color: var(--warning-fg);
+  font-weight: 600;
+}
+
+/* Los avisos del PNG solo se ven con esa opción elegida (CA-90.4). Sin
+   soporte de :has() se ven siempre, que es el comportamiento seguro. */
+.export-option:has(input:not(:checked)) .export-option__warnings {
+  display: none;
 }
 
 .export-option input {

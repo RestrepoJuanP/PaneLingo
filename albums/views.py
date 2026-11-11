@@ -33,6 +33,8 @@ from albums.corrections import correct_region, restore_region
 from albums.exporting import (
     build_export_snapshot,
     export_download_name,
+    png_export_counts,
+    png_export_warnings,
     start_album_export,
 )
 from albums.forms import AlbumForm, AlbumRenameForm, ManualRegionForm
@@ -581,28 +583,67 @@ class AlbumDetailView(OwnedAlbumMixin, DetailView):
         }
 
 
+PNG_UNAVAILABLE_MESSAGE = (
+    "Aprueba al menos una traducción en una página limpia para exportar "
+    "las páginas traducidas."
+)
+
+
 class AlbumExportView(OwnedAlbumMixin, DetailView):
-    """Revisa y prepara un DOCX con traducciones aprobadas (HU-27)."""
+    """Revisa y prepara la exportación del álbum (HU-27 y HU-90).
+
+    Dos formatos en el mismo flujo: el DOCX con las traducciones aprobadas y
+    las páginas traducidas como PNG en un ZIP. Cada uno tiene su propia
+    confirmación de avisos; la rama del DOCX no cambia.
+    """
 
     template_name = "albums/album_export.html"
 
     def get_context_data(self, **kwargs):
-        """Añade recuentos, última exportación e historial del álbum."""
+        """Añade recuentos, avisos del PNG, última exportación e historial."""
         context = super().get_context_data(**kwargs)
         snapshot, skipped_count = build_export_snapshot(self.object)
         exports = list(
             self.object.exports.select_related("album__target_language").all()
         )
+        png_counts = png_export_counts(self.object)
         context["approved_count"] = len(snapshot["regions"])
         context["skipped_count"] = skipped_count
+        context["png_warnings"] = png_export_warnings(png_counts)
+        context["can_export_png"] = png_counts["drawable"] > 0
+        context["png_format"] = AlbumExport.Format.PNG_ZIP
         context["latest_export"] = exports[0] if exports else None
         context["previous_exports"] = exports[1:]
         context["nav_current"] = "review"
         return context
 
+    def start_png_export(self, request):
+        """Confirma los avisos del PNG y encola el ZIP (HU-90, CA-90.4)."""
+        counts = png_export_counts(self.object)
+        if not counts["drawable"]:
+            messages.error(request, PNG_UNAVAILABLE_MESSAGE)
+            return redirect(self.object.get_export_url())
+        if png_export_warnings(counts) and request.POST.get("confirm_png") != "1":
+            context = self.get_context_data(object=self.object)
+            context["png_confirmation_required"] = True
+            return self.render_to_response(context)
+        export, started = start_album_export(self.object, AlbumExport.Format.PNG_ZIP)
+        if export is None:
+            messages.error(request, PNG_UNAVAILABLE_MESSAGE)
+        elif started:
+            messages.success(
+                request,
+                "Preparando exportación. Puedes seguir trabajando mientras termina.",
+            )
+        else:
+            messages.info(request, "Ya hay una exportación en preparación.")
+        return redirect(self.object.get_export_url())
+
     def post(self, request, *args, **kwargs):
         """Confirma la omisión de pendientes y encola la exportación."""
         self.object = self.get_object()
+        if request.POST.get("format") == AlbumExport.Format.PNG_ZIP:
+            return self.start_png_export(request)
         if request.POST.get("format") != AlbumExport.Format.DOCX:
             messages.error(request, "El formato solicitado no está disponible.")
             return redirect(self.object.get_export_url())
@@ -653,7 +694,7 @@ class AlbumExportStatusView(PrivateViewMixin, View):
 
 
 class AlbumExportDownloadView(PrivateViewMixin, View):
-    """Entrega un DOCX terminado únicamente a su propietario (HU-28)."""
+    """Entrega una exportación terminada solo a su propietario (HU-28, HU-90)."""
 
     def handle_no_permission(self):
         """Oculta la existencia del archivo también a visitantes anónimos."""
@@ -677,10 +718,7 @@ class AlbumExportDownloadView(PrivateViewMixin, View):
             handle,
             as_attachment=True,
             filename=export_download_name(export),
-            content_type=(
-                "application/vnd.openxmlformats-officedocument."
-                "wordprocessingml.document"
-            ),
+            content_type=export.content_type,
         )
 
 

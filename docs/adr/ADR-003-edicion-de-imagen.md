@@ -178,6 +178,40 @@ avisa sin bloquear.
 defecto del tipo de región” (Comic Neue regular para diálogo, cursiva para
 narración).
 
+### P9 — Precisiones de HU-90 (exportar PNG)
+
+Acordadas el 10 de noviembre de 2026 al implementar HU-90:
+
+- **Precisión de CA-90.4 — maquetación guardada, no una automática nueva.**
+  Una página sin maquetar se exporta con la maquetación que tiene guardada,
+  que es la que se ve en el editor (y la automática si nadie la tocó). Una
+  automática “literal” descartaría los ajustes del traductor y rompería
+  CA-89.8. El aviso dice: “1 página no está maquetada: se exportará con la
+  maquetación que se ve en el editor. Las regiones sin traducción aprobada
+  conservarán el texto original.” No cuentan como pendientes las páginas sin
+  regiones que traducir (sin regiones, solo “No traducir” o vacías).
+- **Página traducida sin imagen limpia:** se exporta como la original, sin
+  textos, y se avisa (“1 página no está limpia: se exportará sin traducir.”).
+  Dibujar la traducción sobre el texto original la haría ilegible, y
+  bloquear dejaría sin exportar el resto del álbum. Es la regla de P6
+  aplicada a la página entera. `render_page` no dibuja textos sin capa limpia.
+- **Requisito para exportar en PNG:** al menos una traducción aprobada y no
+  vacía en una página limpia, la misma regla que el DOCX un poco más
+  estricta: sin ella, el ZIP sería una copia de las originales.
+- **Aviso adicional:** las regiones en “Limpieza manual” se avisan, sin
+  bloquear, antes de confirmar.
+- **Modos de color.** `1`, `L`, `LA`, `I;16*`, `I` y `F` salen en `L`; las
+  paletas (`P`, `PA`) salen en `L` si todos los colores que usan son grises
+  (`getcolors(maxcolors=256)`) y en `RGB` si no; el resto, en `RGB`. Nunca hay
+  canal alfa: se descarta igual que en la limpieza y en el editor.
+- **Imágenes de 16 bits.** `convert()` de Pillow recorta los modos de 16 y 32
+  bits en vez de escalarlos: un PNG gris de 16 bits salía casi blanco en la
+  miniatura, la capa limpia, el editor y el PNG. `albums/imaging.py`
+  (`to_rgb`) los escala a 8 bits y lo usan la miniatura, la limpieza, el
+  recorte del OCR manual y el dibujo de la página, para que editor y PNG
+  coincidan. Las capas limpias de páginas de 16 bits creadas antes de este
+  cambio siguen recortadas hasta que se vuelvan a limpiar.
+
 ## Decisiones pendientes de cerrar
 
 ### P1-bis — “Completado” exige páginas maquetadas (propuesta para el PO)

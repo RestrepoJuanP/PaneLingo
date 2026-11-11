@@ -11,6 +11,7 @@ import re
 from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
+from types import SimpleNamespace
 
 from django.conf import settings
 from django.db import transaction
@@ -18,6 +19,7 @@ from django.utils import timezone
 from PIL import Image, ImageDraw, ImageFont
 
 from albums.cleaning import restore_original_area
+from albums.imaging import open_rgb
 from albums.models import ComicPage, TextRegion, percent_box_style
 
 MIN_FONT_SIZE = 8
@@ -616,16 +618,6 @@ def keeps_original(region):
     return region.needs_translation and not is_drawn(region)
 
 
-def open_rgb(image_field):
-    """Abre un ImageField como RGB y cierra el archivo al terminar.
-
-    Igual que la limpieza (HU-88): sin girar por EXIF, para que las
-    coordenadas de las regiones coincidan con las de la capa limpia.
-    """
-    with image_field.open("rb") as image_file, Image.open(image_file) as source:
-        return source.convert("RGB")
-
-
 def line_left(layout, advance, content_width):
     """Posición horizontal de una línea dentro del área de contenido."""
     padding = layout["padding"]
@@ -660,9 +652,8 @@ def text_mask(layout, font_path):
     return mask
 
 
-def draw_region_text(canvas, region):
-    """Pinta la traducción aprobada de la región con su maquetación."""
-    layout = layout_for_region(region, text=region.translation)
+def draw_layout(canvas, layout):
+    """Pinta una maquetación ya calculada (viva o congelada) sobre la página."""
     mask = text_mask(layout, FONTS[layout["font_family"]].path)
     color = hex_to_rgb(layout["text_color"])
     box = (
@@ -680,25 +671,64 @@ def hex_to_rgb(hex_color):
     return tuple(int(value[index : index + 2], 16) for index in (0, 2, 4))
 
 
-def render_page(page):
-    """Compone la página traducida en RGB (HU-89, CA-89.8; HU-90).
+def ocr_box(region):
+    """Caja del OCR de una región, donde está su texto original."""
+    return {
+        "x": region.x,
+        "y": region.y,
+        "width": region.width,
+        "height": region.height,
+    }
+
+
+def page_render_plan(page):
+    """Qué hay que pintar en la página, calculado con layout_for_region.
+
+    Es serializable en JSON: la exportación lo congela en su instantánea
+    (ADR-003, P5) y render_page lo calcula en vivo; las dos usan el mismo
+    render_plan. Guarda los nombres en disco de la imagen original y de la
+    limpia para detectar si cambiaron mientras se exporta.
+
+    Sin imagen limpia no se dibuja ningún texto: encima del texto original
+    quedaría ilegible, así que la página sale como la original (ADR-003,
+    precisión de HU-90).
+    """
+    plan = {
+        "page_id": page.pk,
+        "page_number": page.page_number,
+        "image": page.image.name,
+        "cleaned_image": page.cleaned_image.name if page.has_cleaned_image else "",
+        "restore": [],
+        "draw": [],
+    }
+    if not plan["cleaned_image"]:
+        return plan
+    for region in page.regions.select_related("page").order_by("reading_order"):
+        if keeps_original(region):
+            plan["restore"].append(ocr_box(region))
+        elif is_drawn(region):
+            plan["draw"].append(layout_for_region(region, text=region.translation))
+    return plan
+
+
+def render_plan(plan, storage):
+    """Único código de dibujo de la página traducida, en RGB de 8 bits.
 
     Parte de la imagen limpia (o de la original si no hay), vuelve a pegar
     la zona original de las regiones que conservan su texto (P6) y dibuja
-    las traducciones aprobadas con layout_for_region.
+    cada maquetación. Cierra la original en cuanto deja de necesitarla.
     """
-    regions = list(page.regions.select_related("page").order_by("reading_order"))
-    if not page.has_cleaned_image:
-        canvas = open_rgb(page.image)
-    else:
-        canvas = open_rgb(page.cleaned_image)
-        restored = [region for region in regions if keeps_original(region)]
-        if restored:
-            original = open_rgb(page.image)
-            for region in restored:
-                restore_original_area(original, canvas, region)
-            original.close()
-    for region in regions:
-        if is_drawn(region):
-            draw_region_text(canvas, region)
+    canvas = open_rgb(storage, plan["cleaned_image"] or plan["image"])
+    if plan["restore"]:
+        original = open_rgb(storage, plan["image"])
+        for box in plan["restore"]:
+            restore_original_area(original, canvas, SimpleNamespace(**box))
+        original.close()
+    for layout in plan["draw"]:
+        draw_layout(canvas, layout)
     return canvas
+
+
+def render_page(page):
+    """Compone en vivo la página traducida (HU-89, CA-89.8)."""
+    return render_plan(page_render_plan(page), page.image.storage)
