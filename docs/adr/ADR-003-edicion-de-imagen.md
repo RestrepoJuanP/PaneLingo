@@ -296,6 +296,9 @@ Acordadas el 10 de noviembre de 2026 al implementar HU-90:
   recorte del OCR manual y el dibujo de la página, para que editor y PNG
   coincidan. Las capas limpias de páginas de 16 bits creadas antes de este
   cambio siguen recortadas hasta que se vuelvan a limpiar.
+  La clasificación globo/narración (`albums/ocr/layout.py`) también recortaba
+  y la corrigió BUG-096: las regiones de páginas de 16 bits procesadas antes
+  de esa corrección siguen clasificadas como globo hasta reprocesar la página.
 
 ## Decisiones pendientes de cerrar
 
