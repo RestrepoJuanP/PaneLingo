@@ -1,0 +1,19 @@
+==============================================================================
+PaneLingo — Evidencia del Quality Gate
+==============================================================================
+Etapa           : 99
+Paso            : 5 de 7 — Django — comprobaciones del sistema
+Comando         : python manage.py check
+Herramienta     : Python 3.12.10 / Django 5.2.19
+Fecha y hora    : 2026-11-10T23:12:35-05:00
+Rama            : docs/ep08-closure
+Commit          : 726b13296c37371d5dc751b48415ca94aa91bb0c
+Arbol de trabajo: limpio
+Directorio      : /c/Users/Juan Pablo Restrepo/OneDrive/Documents/EAFIT/Semestre 11/Proyecto Integrador 2
+==============================================================================
+
+System check identified no issues (0 silenced).
+
+==============================================================================
+Codigo de salida: 0  (CORRECTO)
+==============================================================================

@@ -1,0 +1,22 @@
+==============================================================================
+PaneLingo — Evidencia del Quality Gate
+==============================================================================
+Etapa           : 99
+Paso            : 7 de 7 — pip-audit — auditoria de dependencias
+Comando         : pip-audit -r requirements.txt
+Herramienta     : pip-audit 2.10.1
+Fecha y hora    : 2026-11-10T23:12:35-05:00
+Rama            : docs/ep08-closure
+Commit          : 726b13296c37371d5dc751b48415ca94aa91bb0c
+Arbol de trabajo: limpio
+Directorio      : /c/Users/Juan Pablo Restrepo/OneDrive/Documents/EAFIT/Semestre 11/Proyecto Integrador 2
+==============================================================================
+
+WARNING:venv:Actual environment location may have moved due to redirects, links or junctions.
+  Requested location: "C:\Users\JUANPA~1\AppData\Local\Temp\tmpignp8cse\Scripts\python.exe"
+  Actual location:    "C:\Users\Juan Pablo Restrepo\AppData\Local\Temp\tmpignp8cse\Scripts\python.exe"
+No known vulnerabilities found
+
+==============================================================================
+Codigo de salida: 0  (CORRECTO)
+==============================================================================
