@@ -1,0 +1,19 @@
+==============================================================================
+PaneLingo — Evidencia del Quality Gate
+==============================================================================
+Etapa           : 91
+Paso            : 3 de 7 — Ruff — verificacion de analisis estatico
+Comando         : ruff check .
+Herramienta     : ruff 0.17.4
+Fecha y hora    : 2026-11-10T20:04:39-05:00
+Rama            : docs/HU-91-spike-discarded
+Commit          : 1dcdf4f320cf0c4782f57e7f1bc71c161c7f40cf
+Arbol de trabajo: limpio
+Directorio      : /c/Users/Juan Pablo Restrepo/OneDrive/Documents/EAFIT/Semestre 11/Proyecto Integrador 2
+==============================================================================
+
+All checks passed!
+
+==============================================================================
+Codigo de salida: 0  (CORRECTO)
+==============================================================================

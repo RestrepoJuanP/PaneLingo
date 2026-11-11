@@ -1,0 +1,175 @@
+==============================================================================
+PaneLingo — Evidencia del Quality Gate
+==============================================================================
+Etapa           : 91
+Paso            : 6 de 7 — Django — pruebas automaticas
+Comando         : python manage.py test
+Herramienta     : Python 3.11.4 / Django 5.2.19
+Fecha y hora    : 2026-11-10T20:04:39-05:00
+Rama            : docs/HU-91-spike-discarded
+Commit          : 1dcdf4f320cf0c4782f57e7f1bc71c161c7f40cf
+Arbol de trabajo: limpio
+Directorio      : /c/Users/Juan Pablo Restrepo/OneDrive/Documents/EAFIT/Semestre 11/Proyecto Integrador 2
+==============================================================================
+
+Creating test database for alias 'default'...
+..................................................................................................Fallo inesperado al limpiar la página 1.
+Traceback (most recent call last):
+  File "C:\Users\Juan Pablo Restrepo\OneDrive\Documents\EAFIT\Semestre 11\Proyecto Integrador 2\albums\cleaning.py", line 215, in run_page_cleaning
+    cleaned, statuses = build_cleaned_image(page)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Juan Pablo Restrepo\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1124, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Juan Pablo Restrepo\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1128, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Juan Pablo Restrepo\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1183, in _execute_mock_call
+    raise effect
+OSError: fallo
+.....................................................................Fallo inesperado al exportar el álbum 1.
+Traceback (most recent call last):
+  File "C:\Users\Juan Pablo Restrepo\OneDrive\Documents\EAFIT\Semestre 11\Proyecto Integrador 2\albums\exporting.py", line 164, in run_album_export
+    document_bytes = build_export_document(export.snapshot)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Juan Pablo Restrepo\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1124, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Juan Pablo Restrepo\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1128, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Juan Pablo Restrepo\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1183, in _execute_mock_call
+    raise effect
+RuntimeError: fallo
+.............................................................................................................................................................................................Fallo inesperado al exportar el álbum 1.
+Traceback (most recent call last):
+  File "C:\Users\Juan Pablo Restrepo\OneDrive\Documents\EAFIT\Semestre 11\Proyecto Integrador 2\albums\exporting.py", line 162, in run_album_export
+    save_png_archive(export)
+  File "C:\Users\Juan Pablo Restrepo\OneDrive\Documents\EAFIT\Semestre 11\Proyecto Integrador 2\albums\exporting.py", line 331, in save_png_archive
+    write_png_archive(export.snapshot, path, storage)
+  File "C:\Users\Juan Pablo Restrepo\OneDrive\Documents\EAFIT\Semestre 11\Proyecto Integrador 2\albums\exporting.py", line 316, in write_png_archive
+    png_name(plan["page_number"]), page_png_bytes(plan, storage)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Juan Pablo Restrepo\OneDrive\Documents\EAFIT\Semestre 11\Proyecto Integrador 2\albums\exporting.py", line 297, in page_png_bytes
+    check_page_source(plan)
+  File "C:\Users\Juan Pablo Restrepo\OneDrive\Documents\EAFIT\Semestre 11\Proyecto Integrador 2\albums\exporting.py", line 286, in check_page_source
+    raise ExportSourceChangedError(plan["page_id"])
+albums.exporting.ExportSourceChangedError: 1
+.Fallo inesperado al exportar el álbum 1.
+Traceback (most recent call last):
+  File "C:\Users\Juan Pablo Restrepo\OneDrive\Documents\EAFIT\Semestre 11\Proyecto Integrador 2\albums\exporting.py", line 162, in run_album_export
+    save_png_archive(export)
+  File "C:\Users\Juan Pablo Restrepo\OneDrive\Documents\EAFIT\Semestre 11\Proyecto Integrador 2\albums\exporting.py", line 331, in save_png_archive
+    write_png_archive(export.snapshot, path, storage)
+  File "C:\Users\Juan Pablo Restrepo\OneDrive\Documents\EAFIT\Semestre 11\Proyecto Integrador 2\albums\exporting.py", line 316, in write_png_archive
+    png_name(plan["page_number"]), page_png_bytes(plan, storage)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Juan Pablo Restrepo\OneDrive\Documents\EAFIT\Semestre 11\Proyecto Integrador 2\albums\exporting.py", line 300, in page_png_bytes
+    canvas = render_plan(plan, storage)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Juan Pablo Restrepo\OneDrive\Documents\EAFIT\Semestre 11\Proyecto Integrador 2\albums\tests\test_png_export.py", line 310, in failing_render
+    raise RuntimeError("fallo")
+RuntimeError: fallo
+.Fallo inesperado al exportar el álbum 1.
+Traceback (most recent call last):
+  File "C:\Users\Juan Pablo Restrepo\OneDrive\Documents\EAFIT\Semestre 11\Proyecto Integrador 2\albums\exporting.py", line 299, in page_png_bytes
+    mode = output_mode(storage, plan["image"])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Juan Pablo Restrepo\OneDrive\Documents\EAFIT\Semestre 11\Proyecto Integrador 2\albums\exporting.py", line 291, in output_mode
+    with storage.open(name, "rb") as image_file, Image.open(image_file) as source:
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Juan Pablo Restrepo\OneDrive\Documents\EAFIT\Semestre 11\Proyecto Integrador 2\.venv\Lib\site-packages\django\core\files\storage\base.py", line 22, in open
+    return self._open(name, mode)
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Juan Pablo Restrepo\OneDrive\Documents\EAFIT\Semestre 11\Proyecto Integrador 2\.venv\Lib\site-packages\django\core\files\storage\filesystem.py", line 81, in _open
+    return File(open(self.path(name), mode))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\JUANPA~1\\AppData\\Local\\Temp\\panelingo-processing-media-c5plc6yb\\albums\\user_1\\album_1\\c4136e86386a4869a40f7879f690e6c8.png'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Juan Pablo Restrepo\OneDrive\Documents\EAFIT\Semestre 11\Proyecto Integrador 2\albums\exporting.py", line 162, in run_album_export
+    save_png_archive(export)
+  File "C:\Users\Juan Pablo Restrepo\OneDrive\Documents\EAFIT\Semestre 11\Proyecto Integrador 2\albums\exporting.py", line 331, in save_png_archive
+    write_png_archive(export.snapshot, path, storage)
+  File "C:\Users\Juan Pablo Restrepo\OneDrive\Documents\EAFIT\Semestre 11\Proyecto Integrador 2\albums\exporting.py", line 316, in write_png_archive
+    png_name(plan["page_number"]), page_png_bytes(plan, storage)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Juan Pablo Restrepo\OneDrive\Documents\EAFIT\Semestre 11\Proyecto Integrador 2\albums\exporting.py", line 302, in page_png_bytes
+    raise ExportSourceChangedError(plan["page_id"]) from error
+albums.exporting.ExportSourceChangedError: 1
+...................................................................................................................................Fallo inesperado al traducir la página 1.
+Traceback (most recent call last):
+  File "C:\Users\Juan Pablo Restrepo\OneDrive\Documents\EAFIT\Semestre 11\Proyecto Integrador 2\albums\translating.py", line 151, in run_translation
+    get_translator().translate(request) if request.numbers_to_translate else []
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Juan Pablo Restrepo\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1124, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Juan Pablo Restrepo\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1128, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Juan Pablo Restrepo\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1183, in _execute_mock_call
+    raise effect
+RuntimeError: fallo
+...............................................................................................................Method Not Allowed (GET): /cuentas/salir/
+Method Not Allowed (GET): /paginas/1/traducir/
+Method Not Allowed (GET): /paginas/1/limpiar/
+Method Not Allowed (GET): /paginas/1/regiones/
+Method Not Allowed (GET): /regiones/1/corregir/
+Method Not Allowed (GET): /regiones/1/eliminar/
+Method Not Allowed (GET): /regiones/1/traducir-region/
+Method Not Allowed (GET): /regiones/1/traducir/
+Method Not Allowed (GET): /regiones/1/restaurar/
+Method Not Allowed (GET): /regiones/1/restaurar-limpieza/
+Method Not Allowed (GET): /regiones/1/no-traducir/
+Method Not Allowed (GET): /regiones/1/traduccion/
+Method Not Allowed (GET): /regiones/1/aprobar/
+Method Not Allowed (GET): /regiones/1/retirar-aprobacion/
+Method Not Allowed (GET): /regiones/1/maquetacion/
+Method Not Allowed (GET): /regiones/1/maquetacion/restablecer/
+Method Not Allowed (GET): /paginas/1/aprobar-maquetacion/
+Method Not Allowed (GET): /albumes/1/archivar/
+Method Not Allowed (GET): /albumes/1/desarchivar/
+.Not Found: /albumes/1/eliminar/
+Not Found: /albumes/1/
+Not Found: /albumes/1/editar/
+Not Found: /albumes/1/exportar/
+Not Found: /exportaciones/1/descargar/
+Not Found: /exportaciones/1/estado/
+Not Found: /albumes/1/renombrar/
+Not Found: /albumes/1/portada/
+Not Found: /paginas/1/eliminar/
+Not Found: /paginas/1/
+Not Found: /paginas/1/imagen/
+Not Found: /paginas/1/imagen-limpia/
+Not Found: /paginas/1/procesar/
+Not Found: /paginas/1/estado/
+Not Found: /paginas/1/miniatura/
+Not Found: /albumes/1/cargar/
+.Not Found: /exportaciones/1/descargar/
+.............................Azure Read respondió 401.
+Azure Read respondió 403.
+Azure Read respondió 429.
+Azure Read respondió 500.
+Azure Read respondió 503.
+..No se pudo contactar con Azure Read: <urlopen error sin red>
+...........................Gemini respondió 401.
+Gemini respondió 403.
+Gemini respondió 429.
+Gemini respondió 503.
+Gemini respondió 500.
+..No se pudo contactar con Gemini: <urlopen error sin red>
+...........
+----------------------------------------------------------------------
+Ran 673 tests in 79.460s
+
+OK
+Destroying test database for alias 'default'...
+Found 673 test(s).
+System check identified no issues (0 silenced).
+
+==============================================================================
+Codigo de salida: 0  (CORRECTO)
+==============================================================================
