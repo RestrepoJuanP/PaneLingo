@@ -74,7 +74,7 @@ traducciones aprobadas, abierta en la pestaña **Maquetación**.
 | Pasos | En el panel, elegir «Bangers», tamaño fijo 28 px, alineación izquierda y color `#FFFFFF`. Después, volver a «Tamaño automático». |
 | Resultado esperado | El texto se ve con ese estilo sobre la imagen y el servidor lo guarda y lo devuelve recalculado. «Tamaño automático» vuelve al ajuste de `fit_text`. Un valor inválido (fuente fuera del registro, tamaño fuera de 8–200, color sin formato `#RRGGBB`) responde 400 con su campo y no guarda nada. |
 | CA relacionado | CA-89.4 |
-| Pruebas automáticas | `albums/tests/test_typesetting_editor.py::LayoutStyleTests::test_the_panel_style_of_the_scenario_is_applied`, `albums/tests/test_typesetting_editor.py::LayoutStyleTests::test_each_valid_style_is_saved`, `albums/tests/test_typesetting_editor.py::LayoutStyleTests::test_each_invalid_value_is_rejected_and_nothing_changes` |
+| Pruebas automáticas | `albums/tests/test_typesetting_editor.py::LayoutStyleTests::test_the_panel_style_of_the_scenario_is_applied`, `albums/tests/test_typesetting_editor.py::LayoutStyleTests::test_each_valid_style_is_saved`, `albums/tests/test_typesetting_editor.py::LayoutStyleTests::test_each_invalid_value_is_rejected_and_nothing_changes`, `albums/tests/test_typesetting_editor.py::RenderPageTests::test_left_and_right_alignment_are_drawn_where_they_belong` (la alineación izquierda y derecha se dibuja donde corresponde, ±2 px) |
 | Estado | Cubierto por prueba automática |
 
 ### CP-89.5 — Editar el texto sobre la imagen — Happy path
@@ -129,7 +129,7 @@ fija el caso contrario: volver a aprobar sin cambios no la borra.
 | Pasos | Comparar el editor con el PNG que genera la exportación de HU-90. |
 | Resultado esperado | Las líneas, el tamaño y la posición de cada texto en el editor coinciden con el PNG exportado, con una diferencia máxima de 2 px. El PNG tiene la resolución de la original y solo cambian los píxeles de las cajas traducidas. |
 | CA relacionado | CA-89.8 |
-| Pruebas automáticas | `albums/tests/test_typesetting_editor.py::RenderPageTests::test_the_render_keeps_resolution_and_mode`, `::test_pixels_change_inside_each_box_and_nowhere_else`, `::test_the_drawn_text_matches_the_layout_within_two_pixels`, `::test_the_stored_style_is_drawn`; `albums/tests/test_png_export.py::ImageFidelityTests::test_same_resolution_rgb_and_identical_to_render_page` |
+| Pruebas automáticas | `albums/tests/test_typesetting_editor.py::RenderPageTests::test_the_render_keeps_resolution_and_mode`, `::test_pixels_change_inside_each_box_and_nowhere_else`, `::test_the_drawn_text_matches_the_layout_within_two_pixels`, `::test_the_stored_style_is_drawn`, `::test_left_and_right_alignment_are_drawn_where_they_belong`; `albums/tests/test_png_export.py::ImageFidelityTests::test_same_resolution_rgb_and_identical_to_render_page` |
 | Parte manual | **Comparación visual del editor con el PNG.** Procedimiento: (1) maquetar una página con una región en Bangers a tamaño fijo, otra alineada a la izquierda y otra con color; (2) exportar en PNG (HU-90), descargar el ZIP y abrir la página; (3) poner el editor al 100 % de zoom y comparar, región por región, los saltos de línea, el tamaño y la posición con el PNG; (4) anotar cualquier diferencia visible. |
 | Estado | Coincidencia de ±2 px cubierta por prueba automática; comparación visual **manual pendiente de ejecutar** |
 
@@ -144,8 +144,9 @@ fija el caso contrario: volver a aprobar sin cambios no la borra.
 | Prueba automática | `albums/tests/test_typesetting_editor.py::ForeignResourceTests::test_every_endpoint_answers_404_without_changes` |
 | Estado | Cubierto por prueba automática |
 
-**Total: 9 CP; 51 pruebas automáticas nuevas** en
-`albums/tests/test_typesetting_editor.py` (29) y
+**Total: 9 CP; 52 pruebas automáticas nuevas** en
+`albums/tests/test_typesetting_editor.py` (30, una de ellas añadida en la
+verificación final del Módulo 6) y
 `albums/tests/test_typesetting_workspace.py` (22).
 
 Pruebas de apoyo sin CP propio: pestañas y `?paso=` (`StepTabsTests`, 5),

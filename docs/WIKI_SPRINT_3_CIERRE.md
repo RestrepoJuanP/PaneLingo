@@ -100,7 +100,7 @@ la propuesta de cambiar el tipo sin reprocesar está en ADR-003, P10.
 ## 5. Calidad y pruebas
 
 Los 74 casos de prueba de las historias del Sprint 3 tienen al menos una
-prueba automática asociada; la suite tiene 676 pruebas y una cobertura local
+prueba automática asociada; la suite tiene 678 pruebas y una cobertura local
 del 97 %. Cuatro casos de HU-89 (CP-89.2, CP-89.3, CP-89.6 y CP-89.8) tienen
 además una parte interactiva que se verifica a mano y **todavía no se ha
 ejecutado**. La suite también conserva las pruebas de los sprints anteriores
