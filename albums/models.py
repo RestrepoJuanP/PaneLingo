@@ -52,10 +52,14 @@ def album_cover_path(instance, filename):
 
 
 def album_export_path(instance, filename):
-    """Ruta privada de un DOCX exportado, con nombre generado por el servidor."""
+    """Ruta privada de una exportación, con nombre generado por el servidor.
+
+    La extensión sale del formato: .docx (HU-27) o .zip (HU-90).
+    """
+    extension = ".zip" if instance.format == "png_zip" else ".docx"
     return (
         f"albums/user_{instance.album.owner_id}/album_{instance.album_id}"
-        f"/exports/{uuid.uuid4().hex}.docx"
+        f"/exports/{uuid.uuid4().hex}{extension}"
     )
 
 
@@ -950,9 +954,19 @@ class AlbumExport(models.Model):
         FAILED = "failed", _("Error")
 
     class Format(models.TextChoices):
-        """Formatos admitidos por el alcance actual."""
+        """Formatos admitidos: guion DOCX (HU-27) y páginas PNG (HU-90)."""
 
         DOCX = "docx", _("Documento DOCX")
+        PNG_ZIP = "png_zip", _("Páginas traducidas (PNG en un ZIP)")
+
+    # Etiqueta corta del formato para el historial y tipo MIME de la descarga.
+    FORMAT_LABELS = {"docx": "DOCX", "png_zip": "PNG en ZIP"}
+    CONTENT_TYPES = {
+        "docx": (
+            "application/vnd.openxmlformats-officedocument." "wordprocessingml.document"
+        ),
+        "png_zip": "application/zip",
+    }
 
     album = models.ForeignKey(
         Album,
@@ -1006,6 +1020,26 @@ class AlbumExport(models.Model):
     def get_status_url(self):
         """Devuelve la dirección privada para consultar el estado."""
         return reverse("albums:export_status", kwargs={"pk": self.pk})
+
+    @property
+    def format_label(self):
+        """Formato en pocas letras, para el historial (HU-90)."""
+        return self.FORMAT_LABELS.get(self.format, self.get_format_display())
+
+    @property
+    def content_type(self):
+        """Tipo MIME con el que se descarga el archivo."""
+        return self.CONTENT_TYPES[self.format]
+
+    @property
+    def is_png(self):
+        """Indica si la exportación son páginas PNG en un ZIP (HU-90)."""
+        return self.format == self.Format.PNG_ZIP
+
+    @property
+    def exported_page_count(self):
+        """Número de páginas de una exportación PNG, según su instantánea."""
+        return len(self.snapshot.get("pages", []))
 
     def get_download_url(self):
         """Devuelve la dirección privada para descargar esta exportación."""

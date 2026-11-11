@@ -6,6 +6,11 @@ Rama de preparación: `docs/sprint-3-final-delivery`
 
 Base verificada: `main` en `99113ef`
 
+Actualización del 10 de noviembre de 2026: se añade la épica EP-08 Edición de
+imagen y BUG-096, verificados en la rama `docs/ep08-closure` (apilada sobre
+`main` en `8eb3323`). Los estados de los entregables que dependen del equipo
+no cambian.
+
 ## Propósito
 
 Esta lista convierte los entregables del documento maestro del Sprint 3 en
@@ -26,12 +31,12 @@ dependa de participantes, reuniones o servicios externos.
 
 | Entregable | Estado al corte | Evidencia disponible | Acción para cerrar |
 |---|---|---|---|
-| Producto de software del Sprint 3 | Listo | HU-20, HU-22, HU-23, HU-24, HU-25, HU-27 y HU-28 fusionadas en `main` | Ejecutar la demostración final sobre la versión desplegada. |
+| Producto de software del Sprint 3 | En preparación | HU-20, HU-22 a HU-25, HU-27, HU-28 y HU-85 a HU-88 fusionadas en `main`; HU-89, HU-90 y BUG-096 terminadas con Quality Gate 7/7, en PR pendientes de fusión; HU-91 descartada tras el spike (ADR-003, P4) | Fusionar los PR de EP-08 en orden y ejecutar la demostración final sobre la versión desplegada. |
 | Backlog actualizado | En preparación | Historias y bugs gestionados en GitHub Projects; código fusionado en `main` | Confirmar en el tablero que todos los elementos cerrados tengan estado y responsable finales. |
-| Actualización de documentos anteriores | En preparación | Wiki de Sprint 1 y Sprint 2; ADR-001 y ADR-002 | Corregir enlaces o cifras que cambien al completar despliegue y viabilidad. |
-| Casos de prueba del Sprint 3 | Listo | Siete borradores de casos de prueba en `docs/WIKI_SPRINT_3_CP_HU-*.md` | Publicar o integrar los borradores en la página de Sprint 3 de la Wiki. |
-| Pruebas automáticas | Listo | Suite de Django, CI y trazabilidad en `docs/WIKI_SPRINT_3_REPORTE_PRUEBAS.md` | Adjuntar la ejecución de CI del PR final. |
-| Correcciones de cierre | Listo | BUG-063, BUG-071, BUG-072, BUG-073 y BUG-074 fusionados en `main` | Mostrar las regresiones cubiertas en el informe de pruebas. |
+| Actualización de documentos anteriores | En preparación | Wiki de Sprint 1 y Sprint 2; ADR-001, ADR-002 y ADR-003; textos para la Wiki en `docs/WIKI_EP08_ACTUALIZACIONES.md` | Pegar en la Wiki RF-15, el cambio de alcance del Sprint 0, la entrada de EP-08 y la actualización de HU-27 y HU-28; corregir enlaces o cifras que cambien al completar despliegue y viabilidad. |
+| Casos de prueba del Sprint 3 | Listo | Trece borradores de casos de prueba y la nota de HU-91 en `docs/WIKI_SPRINT_3_CP_HU-*.md` | Publicar o integrar los borradores en la página de Sprint 3 de la Wiki. Las partes manuales de CP-89.2, CP-89.3, CP-89.6 y CP-89.8 se ejecutaron el 11/11/2026. |
+| Pruebas automáticas | Listo | 678 pruebas, cobertura local del 97 %, CI y trazabilidad en `docs/WIKI_SPRINT_3_REPORTE_PRUEBAS.md` | Adjuntar la ejecución de CI del PR final. |
+| Correcciones de cierre | En preparación | BUG-063, BUG-071, BUG-072, BUG-073 y BUG-074 fusionados en `main`; BUG-096 corregido en `fix/BUG-096-16bit-grayscale`, pendiente de fusión | Fusionar BUG-096 y mostrar las regresiones cubiertas en el informe de pruebas. |
 | Resultados de usabilidad | Requiere evidencia | Protocolo completo definido en la página Sprint 2 de la Wiki | Ejecutar cinco sesiones reales, tabular métricas, registrar hallazgos y crear bugs o HU de Sprint 4. |
 | Manual de usuario | Pendiente | La aplicación y el README sirven como fuente técnica | Crear manual orientado al usuario, con capturas y recorridos de los flujos principales. |
 | Despliegue público | Pendiente | Configuración local por variables de entorno | Preparar la aplicación para producción, elegir proveedor, desplegar y publicar la URL en Wiki y README. |
@@ -51,7 +56,14 @@ dependa de participantes, reuniones o servicios externos.
 | HU-25 | Progreso por páginas aprobadas | 4 | `albums/tests/test_library_progress.py` |
 | HU-27 | Exportación asíncrona a DOCX | 4 | `albums/tests/test_export.py` |
 | HU-28 | Descarga privada e historial de exportaciones | 4 | `albums/tests/test_export_download.py` |
-| **Total** | **Siete historias** | **30** | Todos los CP tienen cobertura automática. |
+| HU-85 | Regiones de texto añadidas a mano | 7 | `albums/tests/test_manual_regions.py` |
+| HU-86 | Eliminar regiones y marcar «No traducir» | 6 | `albums/tests/test_region_management.py` |
+| HU-87 | Vista previa de la página traducida | 7 | `albums/tests/test_translated_preview.py` |
+| HU-88 | Limpieza del texto original en una capa aparte | 8 | `albums/tests/test_cleaning.py` |
+| HU-89 | Editor de maquetación y estado «Maquetada» | 9 | `albums/tests/test_typesetting_editor.py` |
+| HU-90 | Exportación de páginas traducidas en PNG dentro de un ZIP | 7 | `albums/tests/test_png_export.py` |
+| HU-91 | Descartada tras el spike (ADR-003, P4) | 0 | — |
+| **Total** | **Trece historias entregadas y una descartada** | **74** | Todos los CP tienen cobertura automática; cuatro de HU-89 tienen además una parte manual, ejecutada el 11/11/2026. |
 
 ## Evidencia que debe aportar el equipo
 

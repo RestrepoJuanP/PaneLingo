@@ -9,6 +9,7 @@ from django.db import transaction
 from django.utils import timezone
 from PIL import Image
 
+from albums.imaging import to_rgb
 from albums.models import ComicPage, TextRegion
 
 logger = logging.getLogger(__name__)
@@ -103,6 +104,9 @@ def uniform_background(image, box):
 def restore_original_area(original, target, region):
     """Vuelve a pegar en target la zona original de la región (ADR-003, P6).
 
+    region puede ser una TextRegion o cualquier caja con x, y, width y
+    height, como las congeladas en la instantánea de exportación (HU-90).
+
     Es la única implementación: la usan la limpieza para las regiones "No
     traducir" y al restaurar una región, y render_page para las regiones
     sin traducción aprobada.
@@ -170,7 +174,7 @@ def replace_cleaned_image(page, image, statuses=None):
 def build_cleaned_image(page):
     """Construye en memoria la capa limpia y los estados de sus regiones."""
     with page.image.open("rb") as image_file, Image.open(image_file) as source:
-        original = source.convert("RGB")
+        original = to_rgb(source)
     cleaned = original.copy()
     statuses = {}
     for region in page.regions.order_by("reading_order", "pk"):
@@ -218,12 +222,12 @@ def run_page_cleaning(page_id):
 def load_original_and_cleaned(page):
     """Abre como RGB la imagen original y la capa limpia existente."""
     with page.image.open("rb") as original_file, Image.open(original_file) as source:
-        original = source.convert("RGB")
+        original = to_rgb(source)
     with (
         page.cleaned_image.open("rb") as cleaned_file,
         Image.open(cleaned_file) as source,
     ):
-        cleaned = source.convert("RGB")
+        cleaned = to_rgb(source)
     return original, cleaned
 
 

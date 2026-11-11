@@ -8,6 +8,8 @@ Relaciona cada historia de usuario con sus criterios de aceptación, sus casos d
 
 Los nombres de prueba están tomados del código, no transcritos a mano: el inventario se generó recorriendo los archivos de prueba y leyendo el CP citado en cada docstring.
 
+Al final se añade la épica [EP-08 Edición de imagen](#sprint-3--ep-08-edición-de-imagen) del Sprint 3 (HU-89, HU-90 y HU-91) y la sección de [bugs](#bugs) con el mismo formato. El resto de las historias del Sprint 3 está en el [reporte de pruebas del Sprint 3](WIKI_SPRINT_3_REPORTE_PRUEBAS.md).
+
 ---
 
 ## HU-01 — Crear cuenta
@@ -275,3 +277,103 @@ Se verificaron adicionalmente a mano, sin prueba automática que los cubra:
 | Comportamiento de la cola de archivos en el navegador (previsualización, quitar archivo, arrastre, deduplicación) | Requiere navegador; el cliente de pruebas de Django no ejecuta JavaScript | Deuda técnica DT-01 |
 | Aspecto visual frente a las capturas del mockup | Comparación visual | `/design-system/` |
 | Flujo de recuperación con el enlace tomado de la consola | Complementa a `test_password_reset.py`, que ya lo cubre de extremo a extremo | README |
+
+---
+
+# Sprint 3 — EP-08 Edición de imagen
+
+Historias de la épica EP-08 que se cierran en este sprint ([ADR-003](adr/ADR-003-edicion-de-imagen.md)). HU-85 a HU-88 están en el [reporte de pruebas del Sprint 3](WIKI_SPRINT_3_REPORTE_PRUEBAS.md); los casos detallados de cada historia, en `docs/WIKI_SPRINT_3_CP_HU-*.md`.
+
+## HU-89 — Maquetar la traducción sobre la imagen
+
+Issue: [#89](https://github.com/RestrepoJuanP/PaneLingo/issues/89) · Casos: [WIKI_SPRINT_3_CP_HU-89.md](WIKI_SPRINT_3_CP_HU-89.md)
+
+> Como traductor, quiero ajustar cada texto traducido directamente sobre la página (su posición, tamaño, fuente y alineación) para que la página final se vea como un cómic editado profesionalmente.
+
+| CA | CP | Prueba automática | Evidencia | Estado |
+|---|---|---|---|---|
+| CA-89.1 | CP-89.1 | `albums/tests/test_typesetting_editor.py::LayoutAlgorithmTests::test_default_layout_uses_the_ocr_box_and_the_kind_font` | [`etapa-89/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-89) | Cubierto |
+| CA-89.1 | CP-89.1 | `albums/tests/test_typesetting_workspace.py::InitialLayoutTests::test_each_region_carries_the_server_lines_and_size` | [`etapa-89b/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-89b) | Cubierto |
+| CA-89.1 | CP-89.1 | `albums/tests/test_typesetting_workspace.py::InitialLayoutTests::test_the_editor_starts_from_the_cleaned_image` | [`etapa-89b/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-89b) | Cubierto |
+| CA-89.2 | CP-89.2 | `albums/tests/test_typesetting_workspace.py::EditorMarkupTests::test_each_box_carries_urls_versions_and_an_accessible_name` | [`etapa-89b/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-89b) | Cubierto (automático y manual) |
+| CA-89.3 | CP-89.3 | `albums/tests/test_typesetting_editor.py::LayoutStyleTests::test_a_box_outside_the_image_is_rejected` | [`etapa-89/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-89) | Cubierto (automático y manual) |
+| CA-89.3 | CP-89.3 | `albums/tests/test_typesetting_editor.py::LayoutStyleTests::test_a_box_touching_the_edges_is_accepted` | [`etapa-89/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-89) | Cubierto (automático y manual) |
+| CA-89.4 | CP-89.4 | `albums/tests/test_typesetting_editor.py::LayoutStyleTests::test_each_valid_style_is_saved` | [`etapa-89/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-89) | Cubierto |
+| CA-89.4 | CP-89.4 | `albums/tests/test_typesetting_editor.py::LayoutStyleTests::test_the_panel_style_of_the_scenario_is_applied` | [`etapa-89/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-89) | Cubierto |
+| CA-89.4 | CP-89.4 | `albums/tests/test_typesetting_editor.py::LayoutStyleTests::test_each_invalid_value_is_rejected_and_nothing_changes` | [`etapa-89/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-89) | Cubierto |
+| CA-89.4 | CP-89.4 | `albums/tests/test_typesetting_editor.py::RenderPageTests::test_left_and_right_alignment_are_drawn_where_they_belong` | [`etapa-99b/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-99b) | Cubierto |
+| CA-89.5 | CP-89.5 | `albums/tests/test_typesetting_editor.py::TranslationEditTests::test_editing_updates_the_translation_and_removes_approval` | [`etapa-89/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-89) | Cubierto |
+| CA-89.6 | CP-89.6 | `albums/tests/test_typesetting_editor.py::LayoutResetTests::test_reset_restores_the_ocr_box_and_the_default_style` | [`etapa-89/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-89) | Cubierto (automático y manual) |
+| CA-89.7 | CP-89.7 | `albums/tests/test_typesetting_editor.py::TypesetApprovalTests::test_approving_with_everything_ready` | [`etapa-89/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-89) | Cubierto |
+| CA-89.7 | CP-89.7 | `albums/tests/test_typesetting_editor.py::TypesetApprovalTests::test_the_grid_shows_the_typeset_chip` | [`etapa-89/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-89) | Cubierto |
+| CA-89.7 | CP-89.7 | `albums/tests/test_typesetting_editor.py::TypesetApprovalTests::test_rejected_without_a_cleaned_image` | [`etapa-89/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-89) | Cubierto |
+| CA-89.7 | CP-89.7 | `albums/tests/test_typesetting_editor.py::TypesetApprovalTests::test_rejected_with_translations_not_approved` | [`etapa-89/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-89) | Cubierto |
+| CA-89.7 | CP-89.7 | `albums/tests/test_typesetting_editor.py::TypesetApprovalTests::test_without_javascript_it_redirects_with_a_message` | [`etapa-89/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-89) | Cubierto |
+| CA-89.7 | CP-89.7 | `albums/tests/test_typesetting_editor.py::TypesetApprovalTests::test_a_later_change_removes_the_typeset_state` | [`etapa-89/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-89) | Cubierto |
+| CA-89.7 | CP-89.7 | `albums/tests/test_typesetting_workspace.py::EditorMarkupTests::test_approve_is_disabled_with_its_reason` | [`etapa-89b/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-89b) | Cubierto |
+| CA-89.7 | CP-89.7 | `albums/tests/test_typesetting_workspace.py::EditorMarkupTests::test_an_approved_page_says_so_in_text` | [`etapa-89b/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-89b) | Cubierto |
+| CA-89.7 | CP-89.7 | `albums/tests/test_typesetting_workspace.py::EditorMarkupTests::test_layout_responses_carry_the_page_status` | [`etapa-89b/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-89b) | Cubierto |
+| CA-89.8 | CP-89.8 | `albums/tests/test_typesetting_editor.py::RenderPageTests::test_the_render_keeps_resolution_and_mode` | [`etapa-89/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-89) | Cubierto (automático y manual) |
+| CA-89.8 | CP-89.8 | `albums/tests/test_typesetting_editor.py::RenderPageTests::test_pixels_change_inside_each_box_and_nowhere_else` | [`etapa-89/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-89) | Cubierto (automático y manual) |
+| CA-89.8 | CP-89.8 | `albums/tests/test_typesetting_editor.py::RenderPageTests::test_the_drawn_text_matches_the_layout_within_two_pixels` | [`etapa-89/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-89) | Cubierto (automático y manual) |
+| CA-89.8 | CP-89.8 | `albums/tests/test_typesetting_editor.py::RenderPageTests::test_the_stored_style_is_drawn` | [`etapa-89/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-89) | Cubierto (automático y manual) |
+| CA-89.8 | CP-89.8 | `albums/tests/test_typesetting_editor.py::RenderPageTests::test_left_and_right_alignment_are_drawn_where_they_belong` | [`etapa-99b/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-99b) | Cubierto (automático y manual) |
+| CA-89.8 | CP-89.8 | `albums/tests/test_png_export.py::ImageFidelityTests::test_same_resolution_rgb_and_identical_to_render_page` | [`etapa-90/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-90) | Cubierto (automático y manual) |
+| CA-89.9 | CP-89.9 | `albums/tests/test_typesetting_editor.py::ForeignResourceTests::test_every_endpoint_answers_404_without_changes` | [`etapa-89/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-89) | Cubierto |
+
+**Total CP-89.1: 3 · CP-89.2: 1 · CP-89.3: 2 · CP-89.4: 4 · CP-89.5: 1 · CP-89.6: 1 · CP-89.7: 9 · CP-89.8: 6 · CP-89.9: 1.** CP-89.8 incluye una prueba de HU-90 que compara el PNG con `render_page`. La prueba de alineación cubre CP-89.4 y CP-89.8 y se añadió en la verificación final (etapa 99b).
+
+Partes manuales, con su procedimiento en el anexo de casos: selección con clic y `Tab` (CP-89.2), arrastre y teclado (CP-89.3), guardado y `Ctrl+Z` (CP-89.6) y comparación visual con el PNG (CP-89.8). **Ejecutadas el 11/11/2026 con resultado correcto**; el registro está en [Resultado de la ejecución manual](WIKI_SPRINT_3_CP_HU-89.md#resultado-de-la-ejecución-manual).
+
+Regresión: `TypesetInvalidationTests::test_every_path_clears_the_typeset_state` recorre los 20 caminos que quitan «Maquetada» (ADR-003, P1). Apoyo: pestañas y `?paso=` (5), sin JavaScript (2), fuentes y límites emitidos por el servidor (6, patrón BUG-043), conflicto de versión (1).
+
+---
+
+## HU-90 — Exportar las páginas traducidas como PNG
+
+Issue: [#90](https://github.com/RestrepoJuanP/PaneLingo/issues/90) · Casos: [WIKI_SPRINT_3_CP_HU-90.md](WIKI_SPRINT_3_CP_HU-90.md)
+
+> Como traductor, quiero descargar las páginas del álbum ya traducidas como imágenes para entregarlas o publicarlas sin pasar por otro programa.
+
+| CA | CP | Prueba automática | Evidencia | Estado |
+|---|---|---|---|---|
+| CA-90.1 | CP-90.1 | `albums/tests/test_png_export.py::FormatChoiceTests::test_the_dialog_offers_both_formats_as_native_radios` | [`etapa-90/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-90) | Cubierto |
+| CA-90.1 | CP-90.1 | `albums/tests/test_png_export.py::FormatChoiceTests::test_docx_still_works_the_same` | [`etapa-90/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-90) | Cubierto |
+| CA-90.2 | CP-90.2 | `albums/tests/test_png_export.py::ArchiveContentTests::test_zip_name_type_and_page_order_with_a_gap` | [`etapa-90/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-90) | Cubierto |
+| CA-90.2 | CP-90.2 | `albums/tests/test_png_export.py::PreparingPngExportTests::test_png_export_waits_as_preparing_and_is_queued_once` | [`etapa-99b/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-99b) | Cubierto |
+| CA-90.3 | CP-90.3 | `albums/tests/test_png_export.py::ImageFidelityTests::test_same_resolution_rgb_and_identical_to_render_page` | [`etapa-90/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-90) | Cubierto |
+| CA-90.3 | CP-90.3 | `albums/tests/test_png_export.py::ImageFidelityTests::test_a_grayscale_original_exports_in_l` | [`etapa-90/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-90) | Cubierto |
+| CA-90.3 | CP-90.3 | `albums/tests/test_png_export.py::ImageFidelityTests::test_an_rgba_original_exports_in_rgb_without_alpha` | [`etapa-90/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-90) | Cubierto |
+| CA-90.3 | CP-90.3 | `albums/tests/test_png_export.py::ImageFidelityTests::test_a_gray_palette_exports_in_l_and_a_color_one_in_rgb` | [`etapa-90/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-90) | Cubierto |
+| CA-90.3 | CP-90.3 | `albums/tests/test_png_export.py::ImageFidelityTests::test_a_sixteen_bit_gray_page_is_scaled_not_whitened` | [`etapa-90/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-90) | Cubierto |
+| CA-90.4 | CP-90.4 | `albums/tests/test_png_export.py::UntypesetPagesTests::test_the_warning_counts_only_pages_with_text_to_typeset` | [`etapa-90/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-90) | Cubierto |
+| CA-90.4 | CP-90.4 | `albums/tests/test_png_export.py::UntypesetPagesTests::test_confirmation_is_required_before_exporting` | [`etapa-90/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-90) | Cubierto |
+| CA-90.4 | CP-90.4 | `albums/tests/test_png_export.py::UntypesetPagesTests::test_an_untypeset_page_uses_its_saved_layout` | [`etapa-90/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-90) | Cubierto |
+| CA-90.5 | CP-90.5 | `albums/tests/test_png_export.py::BlankAndKeptTextTests::test_a_blank_page_is_identical_to_the_original` | [`etapa-90/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-90) | Cubierto |
+| CA-90.5 | CP-90.5 | `albums/tests/test_png_export.py::BlankAndKeptTextTests::test_a_skipped_region_keeps_its_original_text` | [`etapa-90/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-90) | Cubierto |
+| CA-90.6 | CP-90.6 | `albums/tests/test_png_export.py::FailureTests::test_a_failure_mid_task_leaves_an_error_and_no_file` | [`etapa-90/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-90) | Cubierto |
+| CA-90.6 | CP-90.6 | `albums/tests/test_png_export.py::FailureTests::test_a_cleaned_image_changed_after_the_snapshot_fails` | [`etapa-90/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-90) | Cubierto |
+| CA-90.6 | CP-90.6 | `albums/tests/test_png_export.py::FailureTests::test_a_missing_original_fails` | [`etapa-90/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-90) | Cubierto |
+| CA-90.7 | CP-90.7 | `albums/tests/test_png_export.py::ForeignAlbumTests::test_foreign_export_and_download_answer_not_found` | [`etapa-90/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-90) | Cubierto |
+
+**Total CP-90.1: 2 · CP-90.2: 2 · CP-90.3: 5 · CP-90.4: 3 · CP-90.5: 2 · CP-90.6: 3 · CP-90.7: 1.**
+
+La espera «Preparando exportación…» de CA-90.2 reutiliza el mecanismo de HU-27; `PreparingPngExportTests`, añadida en la verificación final (etapa 99b), la verifica con el formato PNG, incluido que un segundo POST no crea otra exportación. Apoyo: requisito para exportar en PNG, formato en el historial, miniatura de 16 bits, aviso de «Limpieza manual» y página sin imagen limpia (5).
+
+---
+
+## HU-91 — Limpiar con IA el texto que está sobre el dibujo
+
+Issue: [#91](https://github.com/RestrepoJuanP/PaneLingo/issues/91) · Nota: [WIKI_SPRINT_3_CP_HU-91.md](WIKI_SPRINT_3_CP_HU-91.md)
+
+**Descartada tras el spike**, sin CA implementados, CP ni pruebas. Motivo y datos en [ADR-003, P4](adr/ADR-003-edicion-de-imagen.md#p4--spike-de-hu-91). Evidencia del Quality Gate de la etapa de documentación: [`etapa-91/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-91).
+
+---
+
+## Bugs
+
+| Bug | Detectado en | Rama | Corrección | Prueba de regresión | Evidencia | Estado |
+|---|---|---|---|---|---|---|
+| BUG-096 | HU-90 | `fix/BUG-096-16bit-grayscale` | `albums/ocr/layout.py` escala las páginas de 16 bits con `albums/imaging.py` antes de calcular la luminosidad. Sin ello, todas las regiones de una página gris de 16 bits se clasificaban como globo, en el OCR automático y en el manual. **La primera parte se corrigió en HU-90**, que creó `albums/imaging.py` para la miniatura, la limpieza, el recorte del OCR manual y el dibujo de la página. | `albums/tests/test_ocr_layout.py::SixteenBitRegionKindTests` (3 pruebas) | [`etapa-90b/`](https://github.com/RestrepoJuanP/PaneLingo/tree/main/docs/evidence/sprint-3/etapa-90b) | Corregido; pendiente de fusión |
+
+Las regiones de páginas de 16 bits procesadas antes de la corrección siguen clasificadas como globo hasta reprocesar la página, lo que borra su trabajo ([ADR-003, P9 y P10](adr/ADR-003-edicion-de-imagen.md)).

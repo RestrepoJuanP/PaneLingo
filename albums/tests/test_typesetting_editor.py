@@ -718,6 +718,34 @@ class RenderPageTests(TypesettingTestCase):
         self.assertIn((255, 0, 0), colors)
         self.assertEqual(rendered.getpixel((self.BOXES[1][0] + 20, 100)), WHITE)
 
+    def test_left_and_right_alignment_are_drawn_where_they_belong(self):
+        """CP-89.4 / CP-89.8 — La alineación guardada es la que se dibuja."""
+        TextRegion.objects.filter(pk=self.first.pk).update(translation="Hola mundo")
+        x, y, width, height = 20, 200, 360, 80
+        for align in ("left", "right"):
+            with self.subTest(align=align):
+                self.post_layout(
+                    self.first,
+                    {
+                        "x": str(x),
+                        "y": str(y),
+                        "width": str(width),
+                        "height": str(height),
+                        "font_size": "20",
+                        "text_align": align,
+                    },
+                )
+                self.first.refresh_from_db()
+                layout = layout_for_region(self.first)
+                padding = layout["padding"]
+                rendered = render_page(self.page)
+                difference = ImageChops.difference(rendered, self.cleaned_base())
+                ink = difference.crop((x, y, x + width, y + height)).getbbox()
+                if align == "left":
+                    self.assertAlmostEqual(x + ink[0], x + padding, delta=2)
+                else:
+                    self.assertAlmostEqual(x + ink[2], x + width - padding, delta=2)
+
     def test_regions_without_an_approved_translation_keep_the_original(self):
         """ADR-003 P6 — Sin aprobar, "No traducir" o aprobada vacía: original."""
         cases = {

@@ -6,6 +6,7 @@ cómo se forman las regiones, en qué orden se leen ni qué tipo se les asigna.
 
 from dataclasses import replace
 
+from albums.imaging import to_eight_bit
 from albums.ocr.base import DetectedRegion
 
 # Idiomas de origen cuyas viñetas se leen de derecha a izquierda. El coreano
@@ -153,10 +154,12 @@ def median_luminance(image, region):
     """Devuelve la luminosidad mediana, de 0 a 255, del interior de una región.
 
     La mediana, y no la media, para que los trazos del texto, que ocupan
-    menos de la mitad del globo, no oscurezcan el resultado.
+    menos de la mitad del globo, no oscurezcan el resultado. Las páginas de
+    16 bits se escalan con albums.imaging: convert("L") las recortaría a
+    blanco y todas sus regiones saldrían como globo.
     """
     crop = image.crop((region.x, region.y, region.right, region.bottom))
-    histogram = crop.convert("L").histogram()
+    histogram = to_eight_bit(crop).convert("L").histogram()
     half = sum(histogram) / 2
     accumulated = 0
     for level, count in enumerate(histogram):
