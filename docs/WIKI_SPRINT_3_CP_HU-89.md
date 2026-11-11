@@ -52,7 +52,7 @@ traducciones aprobadas, abierta en la pestaña **Maquetación**.
 | CA relacionado | CA-89.2 |
 | Prueba automática | `albums/tests/test_typesetting_workspace.py::EditorMarkupTests::test_each_box_carries_urls_versions_and_an_accessible_name` (marcado accesible de cada caja) |
 | Parte manual | **Selección con clic y con `Tab`, marco, tiradores y panel.** Procedimiento: (1) con el ratón, pulsar el texto de la región 2 y comprobar marco, cuatro tiradores y los valores del panel; (2) recargar, pulsar `Tab` hasta llegar a la región 2, comprobar que el foco es visible y que `Espacio` la selecciona; (3) con un lector de pantalla, comprobar que se anuncia «Región 2, texto: …». |
-| Estado | Marcado cubierto por prueba automática; interacción **manual pendiente de ejecutar** |
+| Estado | Marcado cubierto por prueba automática; interacción verificada a mano el 11/11/2026 (ver [Resultado de la ejecución manual](#resultado-de-la-ejecución-manual)) |
 
 ### CP-89.3 — Mover y cambiar el tamaño de la caja — Happy path
 
@@ -64,7 +64,7 @@ traducciones aprobadas, abierta en la pestaña **Maquetación**.
 | CA relacionado | CA-89.3 |
 | Pruebas automáticas | `albums/tests/test_typesetting_editor.py::LayoutStyleTests::test_a_box_outside_the_image_is_rejected`, `albums/tests/test_typesetting_editor.py::LayoutStyleTests::test_a_box_touching_the_edges_is_accepted` |
 | Parte manual | **Arrastre, tiradores y teclado.** Procedimiento: (1) arrastrar la caja y soltarla; comprobar que el texto se reajusta y que la barra pasa por «Guardando…» y después muestra el mensaje de guardado; (2) arrastrar el tirador inferior derecho y comprobar el reajuste; (3) con el foco en la caja, pulsar `→` una vez y `Mayús` + `→` una vez y comprobar en el panel que la posición cambia 1 y 10 px; (4) pulsar `Alt` + `↓` y comprobar que crece el alto; (5) arrastrar la caja contra cada borde y comprobar que no sale de la imagen. |
-| Estado | Límites cubiertos por prueba automática; interacción **manual pendiente de ejecutar** |
+| Estado | Límites cubiertos por prueba automática; interacción verificada a mano el 11/11/2026 (ver [Resultado de la ejecución manual](#resultado-de-la-ejecución-manual)) |
 
 ### CP-89.4 — Cambiar el estilo — Happy path
 
@@ -98,7 +98,7 @@ traducciones aprobadas, abierta en la pestaña **Maquetación**.
 | CA relacionado | CA-89.6 |
 | Prueba automática | `albums/tests/test_typesetting_editor.py::LayoutResetTests::test_reset_restores_the_ocr_box_and_the_default_style` |
 | Parte manual | **Guardado automático y `Ctrl+Z` por teclado.** Procedimiento: (1) cambiar la alineación y comprobar que la barra muestra «Guardando…» y después el mensaje de guardado, sin pulsar ningún botón; (2) recargar y comprobar que el cambio sigue; (3) hacer tres cambios y pulsar `Ctrl+Z` tres veces: cada pulsación deshace uno, y el contador del botón **Deshacer** baja; (4) hacer 21 cambios y comprobar que solo se pueden deshacer 20; (5) con el foco en el editor de texto, comprobar que `Ctrl+Z` deshace la escritura y no la maquetación. |
-| Estado | **Restablecer** cubierto por prueba automática; guardado y `Ctrl+Z` **manual pendiente de ejecutar** |
+| Estado | **Restablecer** cubierto por prueba automática; guardado y `Ctrl+Z` verificados a mano el 11/11/2026 (ver [Resultado de la ejecución manual](#resultado-de-la-ejecución-manual)) |
 
 ### CP-89.7 — Aprobar la maquetación — Happy path / Flujo alternativo
 
@@ -131,7 +131,7 @@ fija el caso contrario: volver a aprobar sin cambios no la borra.
 | CA relacionado | CA-89.8 |
 | Pruebas automáticas | `albums/tests/test_typesetting_editor.py::RenderPageTests::test_the_render_keeps_resolution_and_mode`, `::test_pixels_change_inside_each_box_and_nowhere_else`, `::test_the_drawn_text_matches_the_layout_within_two_pixels`, `::test_the_stored_style_is_drawn`, `::test_left_and_right_alignment_are_drawn_where_they_belong`; `albums/tests/test_png_export.py::ImageFidelityTests::test_same_resolution_rgb_and_identical_to_render_page` |
 | Parte manual | **Comparación visual del editor con el PNG.** Procedimiento: (1) maquetar una página con una región en Bangers a tamaño fijo, otra alineada a la izquierda y otra con color; (2) exportar en PNG (HU-90), descargar el ZIP y abrir la página; (3) poner el editor al 100 % de zoom y comparar, región por región, los saltos de línea, el tamaño y la posición con el PNG; (4) anotar cualquier diferencia visible. |
-| Estado | Coincidencia de ±2 px cubierta por prueba automática; comparación visual **manual pendiente de ejecutar** |
+| Estado | Coincidencia de ±2 px cubierta por prueba automática; comparación visual hecha a mano el 11/11/2026 (ver [Resultado de la ejecución manual](#resultado-de-la-ejecución-manual)) |
 
 ### CP-89.9 — Solo páginas propias — Flujo alternativo
 
@@ -164,15 +164,27 @@ Evidencia del Quality Gate:
 
 ## Resultado de la ejecución manual
 
-Para rellenar por el equipo al ejecutar cada procedimiento. Hasta entonces,
-ninguna parte manual consta como ejecutada en el repositorio.
+Ejecutada el 11/11/2026 en local, con los proveedores simulados, siguiendo la
+lista de comprobación de la verificación final (Módulo 6). Todas las
+comprobaciones resultaron correctas. El resultado lo informó el responsable;
+no se versionaron capturas. Si el equipo las toma, puede enlazarlas en la
+columna «Evidencia».
 
 | CP | Parte manual | Fecha | Responsable | Resultado | Evidencia |
 |---|---|---|---|---|---|
-| CP-89.2 | Selección con clic y con `Tab`, marco, tiradores y panel | | | | |
-| CP-89.3 | Arrastre, tiradores y teclado; límites de la imagen | | | | |
-| CP-89.6 | Guardado automático y `Ctrl+Z` por teclado | | | | |
-| CP-89.8 | Comparación visual del editor con el PNG exportado | | | | |
+| CP-89.2 | Selección con clic y con `Tab`, marco, tiradores y panel | 11/11/2026 | Juan Pablo | Correcto | Lista de comprobación del Módulo 6 ejecutada en local (`runserver`, proveedores simulados). Resultado informado por el responsable; sin capturas versionadas |
+| CP-89.3 | Arrastre, tiradores y teclado (flechas, `Mayús`, `Alt` + flechas, incluido `Alt` + `←` sin volver a la página anterior); límites de la imagen | 11/11/2026 | Juan Pablo | Correcto | Lista de comprobación del Módulo 6 ejecutada en local (`runserver`, proveedores simulados). Resultado informado por el responsable; sin capturas versionadas |
+| CP-89.6 | Guardado automático y `Ctrl+Z` por teclado; **Restablecer** | 11/11/2026 | Juan Pablo | Correcto | Lista de comprobación del Módulo 6 ejecutada en local (`runserver`, proveedores simulados). Resultado informado por el responsable; sin capturas versionadas |
+| CP-89.8 | Comparación visual del editor con el PNG exportado | 11/11/2026 | Juan Pablo | Correcto | Lista de comprobación del Módulo 6 ejecutada en local (`runserver`, proveedores simulados). Resultado informado por el responsable; sin capturas versionadas |
+
+Comprobaciones complementarias de la misma lista, sin CP propio:
+
+| Comprobación | Fecha | Responsable | Resultado | Evidencia |
+|---|---|---|---|---|
+| Aprobar la página y perder «Maquetada» al cambiar un estilo | 11/11/2026 | Juan Pablo | Correcto | Lista de comprobación del Módulo 6 ejecutada en local (`runserver`, proveedores simulados). Resultado informado por el responsable; sin capturas versionadas |
+| Editor por debajo de 900 px (800 y 375 px): pestañas, **Aprobar página**, enlace a propiedades, sin desplazamiento horizontal | 11/11/2026 | Juan Pablo | Correcto | Lista de comprobación del Módulo 6 ejecutada en local (`runserver`, proveedores simulados). Resultado informado por el responsable; sin capturas versionadas |
+| Pestaña Maquetación sin JavaScript: nota visible y **Aprobar página** como formulario | 11/11/2026 | Juan Pablo | Correcto | Lista de comprobación del Módulo 6 ejecutada en local (`runserver`, proveedores simulados). Resultado informado por el responsable; sin capturas versionadas |
+| Foco visible, anuncio del lector de pantalla y movimiento reducido en el editor | 11/11/2026 | Juan Pablo | Correcto | Lista de comprobación del Módulo 6 ejecutada en local (`runserver`, proveedores simulados). Resultado informado por el responsable; sin capturas versionadas |
 
 ## Seguridad y accesibilidad
 

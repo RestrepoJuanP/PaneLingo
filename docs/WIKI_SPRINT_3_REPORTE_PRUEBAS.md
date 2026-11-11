@@ -55,8 +55,8 @@ generan en cada prueba.
 La interacción con ratón y teclado del editor de maquetación (HU-89) ocurre
 en JavaScript, que el cliente de pruebas no ejecuta. Esas partes se
 verifican a mano con el procedimiento descrito en
-[CP de HU-89](WIKI_SPRINT_3_CP_HU-89.md#resultado-de-la-ejecución-manual);
-a la fecha no consta ninguna ejecución manual en el repositorio.
+[CP de HU-89](WIKI_SPRINT_3_CP_HU-89.md#resultado-de-la-ejecución-manual).
+Se ejecutaron el 11/11/2026 en local y todas resultaron correctas.
 
 ## 4. Trazabilidad HU → CA → CP → prueba
 
@@ -210,13 +210,13 @@ manual con tres páginas reales elegidas por Producto.
 | CA | CP | Prueba o grupo automático | Estado |
 |---|---|---|---|
 | CA-89.1 | CP-89.1 | `LayoutAlgorithmTests::test_default_layout_uses_the_ocr_box_and_the_kind_font` e `InitialLayoutTests` (2) | Cubierto |
-| CA-89.2 | CP-89.2 | `EditorMarkupTests::test_each_box_carries_urls_versions_and_an_accessible_name` | Parcial: selección con clic y `Tab`, manual pendiente |
-| CA-89.3 | CP-89.3 | `LayoutStyleTests::test_a_box_outside_the_image_is_rejected` y `test_a_box_touching_the_edges_is_accepted` | Parcial: arrastre y teclado, manual pendiente |
+| CA-89.2 | CP-89.2 | `EditorMarkupTests::test_each_box_carries_urls_versions_and_an_accessible_name` | Cubierto (automático y manual) |
+| CA-89.3 | CP-89.3 | `LayoutStyleTests::test_a_box_outside_the_image_is_rejected` y `test_a_box_touching_the_edges_is_accepted` | Cubierto (automático y manual) |
 | CA-89.4 | CP-89.4 | `LayoutStyleTests` (3 pruebas de CP-89.4) y `RenderPageTests::test_left_and_right_alignment_are_drawn_where_they_belong` | Cubierto |
 | CA-89.5 | CP-89.5 | `TranslationEditTests::test_editing_updates_the_translation_and_removes_approval` | Cubierto |
-| CA-89.6 | CP-89.6 | `LayoutResetTests::test_reset_restores_the_ocr_box_and_the_default_style` | Parcial: guardado y `Ctrl+Z`, manual pendiente |
+| CA-89.6 | CP-89.6 | `LayoutResetTests::test_reset_restores_the_ocr_box_and_the_default_style` | Cubierto (automático y manual) |
 | CA-89.7 | CP-89.7 | `TypesetApprovalTests` (6) y `EditorMarkupTests` (3) | Cubierto |
-| CA-89.8 | CP-89.8 | `RenderPageTests` (5) e `ImageFidelityTests::test_same_resolution_rgb_and_identical_to_render_page` | Parcial: comparación visual, manual pendiente |
+| CA-89.8 | CP-89.8 | `RenderPageTests` (5) e `ImageFidelityTests::test_same_resolution_rgb_and_identical_to_render_page` | Cubierto (automático y manual) |
 | CA-89.9 | CP-89.9 | `ForeignResourceTests::test_every_endpoint_answers_404_without_changes` | Cubierto |
 
 Archivos: `albums/tests/test_typesetting_editor.py` y
@@ -342,7 +342,9 @@ artefacto temporal.
 
 La trazabilidad está completa para los 74 CP funcionales del Sprint 3 y para
 las seis regresiones de cierre. Las 678 pruebas finalizaron correctamente, la
-cobertura local es del 97 % y el Quality Gate quedó 7/7 en verde. Quedan
-pendientes: la ejecución manual de las partes interactivas de CP-89.2,
-CP-89.3, CP-89.6 y CP-89.8, la validación de HU-88 con páginas reales y
-comprobar que la misma suite termine en verde en la CI de cada pull request.
+cobertura local es del 97 % y el Quality Gate quedó 7/7 en verde. Las
+partes interactivas de CP-89.2, CP-89.3, CP-89.6 y CP-89.8 se verificaron a
+mano el 11/11/2026 con resultado correcto. Quedan pendientes la validación de
+HU-88 con páginas reales, la comprobación manual de CP-90.3 sobre la versión
+desplegada y comprobar que la misma suite termine en verde en la CI de cada
+pull request.

@@ -79,7 +79,7 @@ La épica añade al espacio de trabajo el flujo **Detección → Traducción →
 | [HU-86](https://github.com/RestrepoJuanP/PaneLingo/issues/86) | Eliminar falsos positivos con deshacer y marcar «No traducir» | CP-86.1 a CP-86.6 | Entregada |
 | [HU-87](https://github.com/RestrepoJuanP/PaneLingo/issues/87) | Vista previa de la página traducida, con fuentes SIL OFL | CP-87.1 a CP-87.7 | Entregada |
 | [HU-88](https://github.com/RestrepoJuanP/PaneLingo/issues/88) | Limpiar el texto original en una capa aparte | CP-88.1 a CP-88.8 | Entregada |
-| [HU-89](https://github.com/RestrepoJuanP/PaneLingo/issues/89) | Maquetar cada traducción sobre la imagen y aprobar la página como «Maquetada» | CP-89.1 a CP-89.9 | Entregada; partes manuales de CP-89.2, 89.3, 89.6 y 89.8 pendientes de ejecutar |
+| [HU-89](https://github.com/RestrepoJuanP/PaneLingo/issues/89) | Maquetar cada traducción sobre la imagen y aprobar la página como «Maquetada» | CP-89.1 a CP-89.9 | Entregada; partes manuales de CP-89.2, 89.3, 89.6 y 89.8 verificadas el 11/11/2026 |
 | [HU-90](https://github.com/RestrepoJuanP/PaneLingo/issues/90) | Exportar las páginas traducidas como PNG en un ZIP, junto al DOCX | CP-90.1 a CP-90.7 | Entregada |
 | [HU-91](https://github.com/RestrepoJuanP/PaneLingo/issues/91) | Limpiar con IA el texto que está sobre el dibujo (*Could*) | — | **Descartada** tras el *spike* |
 
@@ -124,7 +124,7 @@ Entregada en el PR de `feature/HU-89-typesetting-editor`.
 
 - Pestaña **Maquetación** en el espacio de trabajo (`?paso=maquetacion`): caja, fuente, tamaño automático o fijo, alineación y color de cada texto, edición del texto sobre la imagen, deshacer (20 pasos), **Restablecer** y **Aprobar página** («Maquetada»).
 - Un único algoritmo de maquetación en `albums/typesetting.py`; el navegador pinta lo que devuelve el servidor (ADR-003).
-- CP-89.1 a CP-89.9 con prueba automática (52 pruebas nuevas, una de ellas de la verificación final). Las partes interactivas de CP-89.2, CP-89.3, CP-89.6 y CP-89.8 se verifican a mano con el procedimiento de `docs/WIKI_SPRINT_3_CP_HU-89.md`, que tiene la tabla de resultados para rellenar.
+- CP-89.1 a CP-89.9 con prueba automática (52 pruebas nuevas, una de ellas de la verificación final). Las partes interactivas de CP-89.2, CP-89.3, CP-89.6 y CP-89.8 se verificaron a mano el 11/11/2026, con resultado correcto; el registro está en `docs/WIKI_SPRINT_3_CP_HU-89.md`.
 - Supuestos de ADR-003 P1, P2, P7 y P8. El boceto del panel de propiedades sigue pendiente de revisión del equipo (DoR).
 ```
 

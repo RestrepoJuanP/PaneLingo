@@ -34,7 +34,7 @@ dependa de participantes, reuniones o servicios externos.
 | Producto de software del Sprint 3 | En preparación | HU-20, HU-22 a HU-25, HU-27, HU-28 y HU-85 a HU-88 fusionadas en `main`; HU-89, HU-90 y BUG-096 terminadas con Quality Gate 7/7, en PR pendientes de fusión; HU-91 descartada tras el spike (ADR-003, P4) | Fusionar los PR de EP-08 en orden y ejecutar la demostración final sobre la versión desplegada. |
 | Backlog actualizado | En preparación | Historias y bugs gestionados en GitHub Projects; código fusionado en `main` | Confirmar en el tablero que todos los elementos cerrados tengan estado y responsable finales. |
 | Actualización de documentos anteriores | En preparación | Wiki de Sprint 1 y Sprint 2; ADR-001, ADR-002 y ADR-003; textos para la Wiki en `docs/WIKI_EP08_ACTUALIZACIONES.md` | Pegar en la Wiki RF-15, el cambio de alcance del Sprint 0, la entrada de EP-08 y la actualización de HU-27 y HU-28; corregir enlaces o cifras que cambien al completar despliegue y viabilidad. |
-| Casos de prueba del Sprint 3 | Listo | Trece borradores de casos de prueba y la nota de HU-91 en `docs/WIKI_SPRINT_3_CP_HU-*.md` | Publicar o integrar los borradores en la página de Sprint 3 de la Wiki y ejecutar las partes manuales de CP-89.2, CP-89.3, CP-89.6 y CP-89.8. |
+| Casos de prueba del Sprint 3 | Listo | Trece borradores de casos de prueba y la nota de HU-91 en `docs/WIKI_SPRINT_3_CP_HU-*.md` | Publicar o integrar los borradores en la página de Sprint 3 de la Wiki. Las partes manuales de CP-89.2, CP-89.3, CP-89.6 y CP-89.8 se ejecutaron el 11/11/2026. |
 | Pruebas automáticas | Listo | 678 pruebas, cobertura local del 97 %, CI y trazabilidad en `docs/WIKI_SPRINT_3_REPORTE_PRUEBAS.md` | Adjuntar la ejecución de CI del PR final. |
 | Correcciones de cierre | En preparación | BUG-063, BUG-071, BUG-072, BUG-073 y BUG-074 fusionados en `main`; BUG-096 corregido en `fix/BUG-096-16bit-grayscale`, pendiente de fusión | Fusionar BUG-096 y mostrar las regresiones cubiertas en el informe de pruebas. |
 | Resultados de usabilidad | Requiere evidencia | Protocolo completo definido en la página Sprint 2 de la Wiki | Ejecutar cinco sesiones reales, tabular métricas, registrar hallazgos y crear bugs o HU de Sprint 4. |
@@ -63,7 +63,7 @@ dependa de participantes, reuniones o servicios externos.
 | HU-89 | Editor de maquetación y estado «Maquetada» | 9 | `albums/tests/test_typesetting_editor.py` |
 | HU-90 | Exportación de páginas traducidas en PNG dentro de un ZIP | 7 | `albums/tests/test_png_export.py` |
 | HU-91 | Descartada tras el spike (ADR-003, P4) | 0 | — |
-| **Total** | **Trece historias entregadas y una descartada** | **74** | Todos los CP tienen cobertura automática; cuatro de HU-89 tienen además una parte manual pendiente de ejecutar. |
+| **Total** | **Trece historias entregadas y una descartada** | **74** | Todos los CP tienen cobertura automática; cuatro de HU-89 tienen además una parte manual, ejecutada el 11/11/2026. |
 
 ## Evidencia que debe aportar el equipo
 

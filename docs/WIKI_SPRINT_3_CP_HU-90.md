@@ -130,14 +130,14 @@ BUG-096, [`etapa-90b/`](evidence/sprint-3/etapa-90b/E90b-quality-gate-RESUMEN.md
 
 ## Resultado de la ejecución manual
 
-Todos los CP de HU-90 tienen cobertura automática completa. Esta tabla queda
-para registrar la verificación en el navegador que el equipo haga sobre la
-versión desplegada; hasta entonces no consta ninguna en el repositorio.
+Todos los CP de HU-90 tienen cobertura automática completa. Esta tabla
+registra la verificación en el navegador. La del 11/11/2026 se hizo en local; la
+versión desplegada sigue pendiente.
 
 | CP | Comprobación | Fecha | Responsable | Resultado | Evidencia |
 |---|---|---|---|---|---|
-| CP-90.2 | Descargar el ZIP y abrirlo con el explorador del sistema | | | | |
-| CP-90.3 | Abrir los PNG en un visor y comprobar resolución y modo | | | | |
+| CP-90.2 | Descargar el ZIP y abrirlo con el explorador del sistema | 11/11/2026 | Juan Pablo | Correcto | Lista de comprobación del Módulo 6 ejecutada en local (`runserver`, proveedores simulados). Resultado informado por el responsable; sin capturas versionadas |
+| CP-90.3 | Abrir los PNG en un visor y comprobar resolución y modo | | | Pendiente | La lista del 11/11/2026 comparó el PNG con el editor (CP-89.8), pero no incluía comprobar a mano la resolución ni el modo; los cubre `ImageFidelityTests` |
 
 ## Seguridad y almacenamiento
 

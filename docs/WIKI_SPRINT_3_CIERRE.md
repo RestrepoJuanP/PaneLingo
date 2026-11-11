@@ -102,8 +102,8 @@ la propuesta de cambiar el tipo sin reprocesar está en ADR-003, P10.
 Los 74 casos de prueba de las historias del Sprint 3 tienen al menos una
 prueba automática asociada; la suite tiene 678 pruebas y una cobertura local
 del 97 %. Cuatro casos de HU-89 (CP-89.2, CP-89.3, CP-89.6 y CP-89.8) tienen
-además una parte interactiva que se verifica a mano y **todavía no se ha
-ejecutado**. La suite también conserva las pruebas de los sprints anteriores
+además una parte interactiva que se verificó a mano el 11/11/2026, con
+resultado correcto. La suite también conserva las pruebas de los sprints anteriores
 y las regresiones de los bugs de cierre.
 
 La estrategia, la matriz HU → CA → CP → prueba y las instrucciones de
