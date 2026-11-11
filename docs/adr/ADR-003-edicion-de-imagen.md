@@ -299,6 +299,11 @@ Acordadas el 10 de noviembre de 2026 al implementar HU-90:
   La clasificación globo/narración (`albums/ocr/layout.py`) también recortaba
   y la corrigió BUG-096: las regiones de páginas de 16 bits procesadas antes
   de esa corrección siguen clasificadas como globo hasta reprocesar la página.
+  **Reprocesar no es gratis:** borra todas las regiones de la página, con sus
+  traducciones, su maquetación y las regiones manuales, quita la aprobación
+  de la maquetación y descarta la capa limpia (`save_regions`, en
+  `albums/processing.py`). En páginas ya trabajadas conviene valorarlo antes;
+  hoy no hay otra forma de corregir el tipo (propuesta P10).
 
 ## Decisiones pendientes de cerrar
 
@@ -328,6 +333,22 @@ decidir si el porcentaje cuenta páginas aprobadas o maquetadas.
 
 **Decisión:** pendiente del PO. Hasta entonces, `derive_status`
 (`albums/insights.py`) y `progress_percentage` no cambian.
+
+### P10 — Cambiar el tipo de una región sin reprocesar (propuesta para el PO)
+
+**Carencia:** el tipo globo/narración (`TextRegion.kind`) lo asigna solo la
+heurística de luminosidad (`albums/ocr/layout.py`, supuesto S3) al procesar
+la página o al añadir una región manual. HU-15 corrige el texto, no el tipo,
+y ninguna pantalla permite cambiarlo. El tipo decide la fuente por defecto de
+la maquetación (P8: regular para diálogo, cursiva para narración). Cuando la
+heurística se equivoca, como con las páginas de 16 bits anteriores a BUG-096
+(P9), la única salida es reprocesar la página y perder su trabajo.
+
+**Propuesta:** permitir cambiar el tipo de una región desde el workspace, sin
+reprocesar ni tocar su texto, traducción ni maquetación guardada.
+
+**Decisión:** pendiente del PO. Solo se documenta: no tiene HU, CA ni CP y no
+se implementa hasta que el PO la acepte y se redacte la historia.
 
 ### Confirmaciones pendientes del DoR
 
