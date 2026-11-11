@@ -4,10 +4,10 @@ PaneLingo — Evidencia del Quality Gate
 Etapa           : 91
 Paso            : 6 de 7 — Django — pruebas automaticas
 Comando         : python manage.py test
-Herramienta     : Python 3.11.4 / Django 5.2.19
-Fecha y hora    : 2026-11-10T20:04:39-05:00
+Herramienta     : Python 3.12.10 / Django 5.2.19
+Fecha y hora    : 2026-11-10T20:57:33-05:00
 Rama            : docs/HU-91-spike-discarded
-Commit          : 1dcdf4f320cf0c4782f57e7f1bc71c161c7f40cf
+Commit          : 7490c8b3442801d220e525aa6f3b6b0c6c4cfcd2
 Arbol de trabajo: limpio
 Directorio      : /c/Users/Juan Pablo Restrepo/OneDrive/Documents/EAFIT/Semestre 11/Proyecto Integrador 2
 ==============================================================================
@@ -18,13 +18,13 @@ Traceback (most recent call last):
   File "C:\Users\Juan Pablo Restrepo\OneDrive\Documents\EAFIT\Semestre 11\Proyecto Integrador 2\albums\cleaning.py", line 215, in run_page_cleaning
     cleaned, statuses = build_cleaned_image(page)
                         ^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\Juan Pablo Restrepo\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1124, in __call__
+  File "C:\Users\Juan Pablo Restrepo\AppData\Local\Programs\Python\Python312\Lib\unittest\mock.py", line 1139, in __call__
     return self._mock_call(*args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\Juan Pablo Restrepo\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1128, in _mock_call
+  File "C:\Users\Juan Pablo Restrepo\AppData\Local\Programs\Python\Python312\Lib\unittest\mock.py", line 1143, in _mock_call
     return self._execute_mock_call(*args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\Juan Pablo Restrepo\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1183, in _execute_mock_call
+  File "C:\Users\Juan Pablo Restrepo\AppData\Local\Programs\Python\Python312\Lib\unittest\mock.py", line 1198, in _execute_mock_call
     raise effect
 OSError: fallo
 .....................................................................Fallo inesperado al exportar el álbum 1.
@@ -32,13 +32,13 @@ Traceback (most recent call last):
   File "C:\Users\Juan Pablo Restrepo\OneDrive\Documents\EAFIT\Semestre 11\Proyecto Integrador 2\albums\exporting.py", line 164, in run_album_export
     document_bytes = build_export_document(export.snapshot)
                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\Juan Pablo Restrepo\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1124, in __call__
+  File "C:\Users\Juan Pablo Restrepo\AppData\Local\Programs\Python\Python312\Lib\unittest\mock.py", line 1139, in __call__
     return self._mock_call(*args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\Juan Pablo Restrepo\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1128, in _mock_call
+  File "C:\Users\Juan Pablo Restrepo\AppData\Local\Programs\Python\Python312\Lib\unittest\mock.py", line 1143, in _mock_call
     return self._execute_mock_call(*args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\Juan Pablo Restrepo\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1183, in _execute_mock_call
+  File "C:\Users\Juan Pablo Restrepo\AppData\Local\Programs\Python\Python312\Lib\unittest\mock.py", line 1198, in _execute_mock_call
     raise effect
 RuntimeError: fallo
 .............................................................................................................................................................................................Fallo inesperado al exportar el álbum 1.
@@ -84,7 +84,7 @@ Traceback (most recent call last):
   File "C:\Users\Juan Pablo Restrepo\OneDrive\Documents\EAFIT\Semestre 11\Proyecto Integrador 2\.venv\Lib\site-packages\django\core\files\storage\filesystem.py", line 81, in _open
     return File(open(self.path(name), mode))
                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\JUANPA~1\\AppData\\Local\\Temp\\panelingo-processing-media-c5plc6yb\\albums\\user_1\\album_1\\c4136e86386a4869a40f7879f690e6c8.png'
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\JUANPA~1\\AppData\\Local\\Temp\\panelingo-processing-media-yo567qi_\\albums\\user_1\\album_1\\fc9196593f35428cb7dc7f39020f2661.png'
 
 The above exception was the direct cause of the following exception:
 
@@ -104,13 +104,13 @@ Traceback (most recent call last):
   File "C:\Users\Juan Pablo Restrepo\OneDrive\Documents\EAFIT\Semestre 11\Proyecto Integrador 2\albums\translating.py", line 151, in run_translation
     get_translator().translate(request) if request.numbers_to_translate else []
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\Juan Pablo Restrepo\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1124, in __call__
+  File "C:\Users\Juan Pablo Restrepo\AppData\Local\Programs\Python\Python312\Lib\unittest\mock.py", line 1139, in __call__
     return self._mock_call(*args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\Juan Pablo Restrepo\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1128, in _mock_call
+  File "C:\Users\Juan Pablo Restrepo\AppData\Local\Programs\Python\Python312\Lib\unittest\mock.py", line 1143, in _mock_call
     return self._execute_mock_call(*args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\Juan Pablo Restrepo\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1183, in _execute_mock_call
+  File "C:\Users\Juan Pablo Restrepo\AppData\Local\Programs\Python\Python312\Lib\unittest\mock.py", line 1198, in _execute_mock_call
     raise effect
 RuntimeError: fallo
 ...............................................................................................................Method Not Allowed (GET): /cuentas/salir/
@@ -163,7 +163,7 @@ Gemini respondió 500.
 ..No se pudo contactar con Gemini: <urlopen error sin red>
 ...........
 ----------------------------------------------------------------------
-Ran 673 tests in 79.460s
+Ran 673 tests in 103.571s
 
 OK
 Destroying test database for alias 'default'...

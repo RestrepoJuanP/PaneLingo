@@ -5,9 +5,9 @@ Etapa           : 91
 Paso            : 1 de 7 — Ruff — correcciones seguras
 Comando         : ruff check . --fix
 Herramienta     : ruff 0.17.4
-Fecha y hora    : 2026-11-10T20:04:39-05:00
+Fecha y hora    : 2026-11-10T20:57:33-05:00
 Rama            : docs/HU-91-spike-discarded
-Commit          : 1dcdf4f320cf0c4782f57e7f1bc71c161c7f40cf
+Commit          : 7490c8b3442801d220e525aa6f3b6b0c6c4cfcd2
 Arbol de trabajo: limpio
 Directorio      : /c/Users/Juan Pablo Restrepo/OneDrive/Documents/EAFIT/Semestre 11/Proyecto Integrador 2
 ==============================================================================
