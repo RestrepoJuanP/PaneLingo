@@ -1,7 +1,7 @@
 # PaneLingo — Reglas del proyecto
 
 ## Qué es
-Plataforma web para traducción asistida de cómics, manga y webtoons. El MVP del Sprint 1 cubre autenticación y gestión de álbumes y páginas. OCR, traducción con IA, workspace de traducción y exportación quedan FUERA del alcance del Sprint 1.
+Plataforma web para traducción asistida de cómics, manga y webtoons. Hoy cubre autenticación, gestión de álbumes y páginas, detección y OCR del texto, traducción con IA con revisión y aprobación humanas, guardado y progreso del trabajo, edición de imagen (limpieza y maquetación de la traducción sobre la página) y exportación en DOCX y en PNG. El Sprint 1 cubrió solo autenticación y gestión de álbumes y páginas; las reglas de alcance de ese sprint que siguen en este archivo están marcadas como históricas.
 
 ## Stack obligatorio (decidido en la wiki, no lo cambies)
 - Python 3.12
@@ -93,6 +93,8 @@ El mockup **no es código ejecutable**: usa plantillas propietarias con `sc-if`,
 
 ### Pantallas del mockup y su alcance en Sprint 1
 
+> **Histórico del Sprint 1.** Esta tabla y las dos reglas que la siguen fijaron el alcance del Sprint 1. Varias pantallas marcadas «No» llegaron después con su HU y ya están implementadas: el modal «Delete album?» con HU-20, el workspace de traducción con HU-14 a HU-19 y la revisión y exportación con HU-27, HU-28 y HU-90. No las deshabilites ni las retires siguiendo esta tabla. Siguen fuera de alcance los créditos, el SSO, el badge de plan y Settings › Preferences / Team.
+
 | Pantalla | Sprint 1 | Trazabilidad | Notas |
 |---|---|---|---|
 | Auth split (panel oscuro + pestañas Log in / Create account) | Sí | HU-01, HU-02 | Iniciar sesión / Crear cuenta |
@@ -105,12 +107,12 @@ El mockup **no es código ejecutable**: usa plantillas propietarias con `sc-if`,
 | Upload & scan pages (solo zona de carga y cola de archivos) | Sí, **sin** escaneo ni OCR | — | Cargar páginas |
 | Modal "Eliminar página" | Sí | HU-10, CA-10.1, CA-10.2 | **No existe como tal en el mockup.** Reutilizar el patrón del modal de confirmación |
 | Toast de confirmación | Sí | — | Mensajes de éxito y error |
-| Modal "Delete album?" | **No** | — | Sin HU, CA ni CP en el Sprint 1. Acción visible pero deshabilitada (ver abajo) |
-| Workspace de traducción dividido | No | — | — |
-| Final review & export | No | — | — |
+| Modal "Delete album?" | **No** | — | Sin HU, CA ni CP en el Sprint 1. Acción visible pero deshabilitada (ver abajo). **Sustituido por HU-20**, que la implementó |
+| Workspace de traducción dividido | No | — | Implementado después con HU-14 a HU-19 |
+| Final review & export | No | — | Implementado después con HU-27, HU-28 y HU-90 |
 | Settings › Preferences / Team | No | — | — |
 
-**Eliminar álbum — acción deshabilitada.** El botón "Eliminar" del detalle de álbum se maqueta con el estilo destructivo del mockup pero se renderiza en estado deshabilitado (`disabled`, `aria-disabled="true"`, cursor `not-allowed`, opacidad reducida) y con un texto de apoyo que indique que la funcionalidad llega en un Sprint posterior. No implementes vista, ruta, formulario ni servicio de borrado de álbumes: sería código sin historia de usuario ni caso de prueba que lo respalde.
+**Eliminar álbum — regla histórica del Sprint 1, sustituida por HU-20.** En el Sprint 1 el botón "Eliminar" del detalle de álbum se maquetaba deshabilitado y no existía vista, ruta, formulario ni servicio de borrado, porque no había historia que lo respaldara. HU-20 (Sprint 3) implementó la eliminación con confirmación accesible, borrado en cascada de páginas, regiones y archivos, y 404 para álbumes ajenos (`albums:delete`, `albums/tests/test_album_delete.py`). **No vuelvas a deshabilitarla.**
 
 **Recuperación de contraseña — cuatro pantallas a diseñar.** Se construyen reutilizando el layout dividido de autenticación (panel oscuro `--surface-navy` a la izquierda, formulario de `--w-auth-form` a la derecha) y sus componentes ya definidos: input, botón primario, botón secundario, alerta de error y toast. Las cuatro son:
 
@@ -121,7 +123,7 @@ El mockup **no es código ejecutable**: usa plantillas propietarias con `sc-if`,
 
 Se apoyan en las vistas de `django.contrib.auth` (`PasswordReset*`) con plantillas propias. En desarrollo el correo va al backend de consola; **no configures envío real de correo en producción** (fuera de alcance).
 
-Los elementos del mockup ligados a funcionalidad fuera de alcance (barras de progreso de traducción, chips "Needs review" / "Approved", contadores de bloques, "Resume translating") se omiten o se reemplazan por el estado real disponible en Sprint 1 (por ejemplo, número de páginas cargadas).
+Los elementos del mockup ligados a funcionalidad fuera de alcance se omiten o se reemplazan por el estado real disponible. En el Sprint 1 eso incluía las barras de progreso, los chips "Needs review" / "Approved" y "Resume translating"; hoy esos elementos ya muestran datos reales: el estado de las páginas (HU-19, HU-22), el progreso del álbum (HU-25) y "Continuar" (HU-24).
 
 ### Patrones de componente a respetar
 - **Layout de la app:** barra lateral fija de `--w-sidebar` sobre `--surface` con `border-right: 1px solid var(--border)`; contenido principal con `padding: var(--pad-page)`; header sticky translúcido (`rgba(247,246,243,.92)` + `backdrop-filter: blur(8px)`) con miga de pan. En móvil la barra lateral se reemplaza por una navegación inferior fija.
@@ -144,9 +146,9 @@ Los elementos del mockup ligados a funcionalidad fuera de alcance (barras de pro
 - **Un único algoritmo de maquetación**, en `albums/typesetting.py`, usado por la vista previa, el editor y la exportación. Prohibido duplicarlo en JavaScript: el navegador pinta las líneas, el tamaño y la caja que devuelve el servidor.
 - **Solo fuentes con licencia SIL OFL**, guardadas en `static/fonts/` junto a su licencia y compartidas por `@font-face` y Pillow.
 - **Coordenadas siempre en píxeles de la imagen original.** El navegador solo las escala para el zoom; el servidor nunca guarda coordenadas de pantalla.
-- **Trabajo pesado en Huey** (limpiar una página, limpiar con IA, generar los PNG de un álbum), con estado y "Reintentar". Todo proveedor externo va detrás de un adaptador y las pruebas usan siempre un proveedor simulado, sin red ni claves.
+- **Trabajo pesado en Huey** (limpiar una página, generar los PNG de un álbum), con estado y "Reintentar". La limpieza con IA de HU-91 no existe: se descartó tras el *spike* (ADR-003, P4). Todo proveedor externo va detrás de un adaptador y las pruebas usan siempre un proveedor simulado, sin red ni claves.
 
-En el Sprint 1: no implementes OCR, detección de burbujas, traducción con IA, workspace de traducción dividido, exportación, colaboración en equipo, envío real de correo en producción, pagos, panel administrativo ni eliminación de álbumes. Si una pantalla del mockup pertenece a esas funcionalidades, no la construyas en el Sprint 1.
+**Histórico del Sprint 1:** no se implementaron OCR, detección de burbujas, traducción con IA, workspace de traducción dividido, exportación, colaboración en equipo, envío real de correo en producción, pagos, panel administrativo ni eliminación de álbumes. De esa lista llegaron después, con su HU: detección y OCR (HU-12, HU-13), traducción con IA (HU-16), workspace (HU-14 a HU-19), exportación (HU-27, HU-28, HU-90) y eliminación de álbumes (HU-20). **Siguen fuera de alcance** la colaboración en equipo, el envío real de correo en producción, los pagos y el panel administrativo: no los construyas sin una HU que los respalde.
 
 ## Reglas de trabajo contigo
 - Trabaja etapa por etapa. No adelantes trabajo de etapas futuras.

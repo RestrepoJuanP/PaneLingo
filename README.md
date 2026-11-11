@@ -2,7 +2,7 @@
 
 Plataforma web para la **traducción asistida de cómics, manga y webtoons**. PaneLingo permite a un traductor organizar su trabajo en álbumes, cargar las páginas completas de cada obra y gestionarlas desde un espacio propio y privado.
 
-Proyecto académico desarrollado para **Proyecto Integrador 2**. El alcance del Sprint 1 cubre autenticación de usuarios y gestión de álbumes y páginas. El OCR, la traducción con IA, el workspace de traducción y la exportación quedan fuera de este sprint.
+Proyecto académico desarrollado para **Proyecto Integrador 2**. Hoy PaneLingo cubre el flujo completo de una página: autenticación, álbumes y páginas, detección y OCR del texto, traducción asistida por IA con revisión y aprobación humanas, autoguardado y progreso del trabajo, limpieza del texto original, maquetación de la traducción sobre la imagen y exportación en DOCX o en PNG. Lo que todavía no incluye está en [Fuera del alcance actual](#fuera-del-alcance-actual).
 
 ## Stack
 
@@ -312,24 +312,23 @@ Con el servidor de desarrollo levantado, <http://127.0.0.1:8000/design-system/> 
 
 Requisito no funcional: la aplicación cumple **WCAG 2.1 nivel AA**. Las desviaciones deliberadas respecto al mockup están documentadas en `DESIGN_TOKENS.md`.
 
-## Qué queda fuera del Sprint 1
+## Fuera del alcance actual
 
-Estas funcionalidades **no están implementadas** y no deben esperarse en esta entrega:
+Estas funcionalidades **no están implementadas** y no deben esperarse:
 
 | Fuera de alcance | Motivo |
 |---|---|
-| OCR y detección de burbujas | La detección de regiones llega con HU-12 (Sprint 2); el texto de cada región, con HU-13 |
-| Traducción con IA | Sprint posterior |
-| Workspace de traducción dividido | Sprint posterior |
-| Revisión y exportación | Sprint posterior |
-| Terminología y glosario | Sprint posterior |
+| Terminología y glosario | Sin historia de usuario. La entrada «Terminología» de la barra lateral se muestra deshabilitada |
+| Limpieza con IA del texto que está sobre el dibujo | HU-91 se descartó tras su *spike* ([ADR-003, P4](docs/adr/ADR-003-edicion-de-imagen.md#p4--spike-de-hu-91)). Las regiones que la limpieza no resuelve quedan en «Limpieza manual» y se avisan |
+| Cambiar a mano el tipo globo/narración de una región | Propuesta pendiente del PO ([ADR-003, P10](docs/adr/ADR-003-edicion-de-imagen.md)) |
+| Reordenar o insertar páginas | Sin historia de usuario |
 | Colaboración en equipo y SSO | Fuera del MVP |
 | Pagos, créditos y planes | Fuera del MVP |
 | Pantalla de perfil y preferencias | Fuera del MVP |
-| **Eliminar álbumes** | Sin HU, CA ni CP. El botón se maqueta deshabilitado |
+| Panel administrativo completo | Fuera del MVP. Solo existe el admin de Django |
 | **Envío real de correo** | En desarrollo va a la consola. Ver la sección de recuperación |
-| Filtros por estado en la biblioteca | Dependen de que el estado sea editable, que no lo es |
-| Reordenar o insertar páginas | Sin historia de usuario |
+
+Lo que el Sprint 1 dejó fuera y llegó después con su historia: detección y OCR (HU-12, HU-13), workspace y traducción con IA (HU-14 a HU-19), eliminar álbumes (HU-20), filtros por estado (HU-26), revisión y exportación (HU-27, HU-28) y edición de imagen (HU-85 a HU-90).
 
 Las páginas cargadas quedan en estado **Pendiente de procesamiento** hasta que se pulsa "Procesar página" en su vista (HU-12).
 
