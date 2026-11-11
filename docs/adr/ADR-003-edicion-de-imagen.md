@@ -2,6 +2,9 @@
 
 - **Estado:** provisional; autorizado para implementación, aprobación formal
   del Product Owner pendiente
+- **Implementación (10 de noviembre de 2026):** HU-85 a HU-90 terminadas
+  (HU-85 a HU-88 fusionadas en `main`; HU-89 y HU-90 en PR); HU-91 descartada
+  tras el spike (P4); BUG-096 corregido (P9)
 - **Fecha:** 9 de noviembre de 2026
 - **Épica:** EP-08 Edición de imagen
 - **Requisito:** RF-15
@@ -58,7 +61,8 @@ positivos o conservar texto sin traducir.
 - Todos los proveedores externos permanecen detrás de adaptadores y las
   pruebas usan proveedores simulados.
 - La IA de limpieza es opcional, se aplica región por región y exige aceptar
-  o descartar el resultado.
+  o descartar el resultado. **No se implementa:** HU-91 quedó descartada
+  tras el spike (P4).
 
 ## Orden de implementación
 
@@ -80,16 +84,20 @@ depende de HU-87 y HU-88; HU-90 depende de HU-89; HU-91 depende de HU-88.
 - HU-27 y HU-28 conservarán DOCX y ganarán un segundo formato en HU-90.
 - La regla de “Completado” de HU-25 y HU-26 no cambia en esta épica. Exigir
   páginas maquetadas queda como propuesta abierta para el PO (sección
-  «Decisiones pendientes de cerrar», P1-bis).
+  «Pendiente de decisión del PO», P1-bis).
 - Pillow sigue siendo la única dependencia obligatoria de imagen.
 - OpenCV no se incorpora: el spike de HU-91 no cumplió su criterio y la
   historia quedó descartada (P4).
 
 ## Validación pendiente
 
-- [ ] Aprobación formal del Product Owner.
-- [ ] Actualización de RF-15 y del alcance en la Wiki.
-- [ ] Confirmación de las fuentes y sus licencias antes de HU-87.
+- [ ] Aprobación formal del Product Owner (issue #84, abierto).
+- [ ] Actualización de RF-15 y del alcance en la Wiki. El texto listo para
+      pegar está en `docs/WIKI_EP08_ACTUALIZACIONES.md`; la Wiki aún no se
+      ha editado.
+- [x] Confirmación de las fuentes y sus licencias antes de HU-87: Comic Neue
+      (Regular, Bold, Italic) y Bangers, con sus licencias SIL OFL 1.1
+      (`OFL.txt` y `OFL-Bangers.txt`), en `static/fonts/` desde HU-87.
 - [x] Decisión del proveedor para HU-91 después del spike: ninguno; HU-91
       descartada (P4).
 
@@ -296,8 +304,44 @@ Acordadas el 10 de noviembre de 2026 al implementar HU-90:
   recorte del OCR manual y el dibujo de la página, para que editor y PNG
   coincidan. Las capas limpias de páginas de 16 bits creadas antes de este
   cambio siguen recortadas hasta que se vuelvan a limpiar.
+  La clasificación globo/narración (`albums/ocr/layout.py`) también recortaba
+  y la corrigió BUG-096: las regiones de páginas de 16 bits procesadas antes
+  de esa corrección siguen clasificadas como globo hasta reprocesar la página.
+  **Reprocesar no es gratis:** borra todas las regiones de la página, con sus
+  traducciones, su maquetación y las regiones manuales, quita la aprobación
+  de la maquetación y descarta la capa limpia (`save_regions`, en
+  `albums/processing.py`). En páginas ya trabajadas conviene valorarlo antes;
+  hoy no hay otra forma de corregir el tipo (propuesta P10).
 
-## Decisiones pendientes de cerrar
+## Pendiente de decisión del PO
+
+Propuestas abiertas que necesitan una decisión del Product Owner. Ninguna se
+implementa hasta que el PO decida y, si hace falta, se redacte la historia
+con sus CA y CP. Las de EP-08 están detalladas aquí; las de sprints
+anteriores se resumen con un enlace al documento donde se plantearon, y
+siguen abiertas porque el repositorio no registra ninguna decisión sobre
+ellas.
+
+| Propuesta | Origen | Qué se decide |
+|---|---|---|
+| P1-bis | EP-08 (HU-89) | Si «Completado» exige además páginas maquetadas. |
+| P3-bis | EP-08 (HU-90) | Si se confirman los nombres del ZIP y de los PNG, y si el ZIP incluye la carpeta `limpias/`. |
+| P10 | EP-08 (BUG-096) | Si se permite cambiar el tipo globo/narración de una región sin reprocesar. |
+| Aprobación de ADR-003 | EP-08 (#84) | Aprobación formal de esta decisión. |
+| Juego de páginas de prueba y umbrales de OCR | ADR-001, S5 y S7 | Quién aporta el juego de páginas y qué umbral de confianza (70 % provisional) y de precisión por idioma se acepta (CA-13.3 y CA-13.4). |
+| Riesgo de privacidad de Gemini y supuestos T1 a T3 | ADR-002, §2.3 y §5 | Aceptar el riesgo del nivel gratuito; traducción vacía (T1), sin «Aprobar todas» (T2) y HU-17 y HU-18 fusionadas (T3). |
+| Reordenar o insertar páginas | Sprint 1, propuesta 2.4 | Si entra como historia y si renumera las páginas. |
+| Perfil y preferencias | Sprint 1, propuesta 2.5 | Si entra como historia y dónde viven los idiomas predeterminados. |
+
+Las propuestas 2.1, 2.2 y 2.3 del Sprint 1 ya no están abiertas: el estado
+del álbum pasó a derivarse del avance y los filtros llegaron con HU-26, y
+eliminar álbumes llegó con HU-20. HU-49 y HU-50, pedidas en la review del
+Sprint 1, están cerradas.
+
+Documentos de origen: [ADR-001](ADR-001-proveedor-ocr-y-tareas-asincronas.md),
+[ADR-002](ADR-002-traduccion-asistida-por-ia.md) y
+[Sprint 1 — propuestas abiertas](../WIKI_SPRINT_1_DESARROLLO.md#2-propuestas-abiertas-para-el-product-owner).
+
 
 ### P1-bis — “Completado” exige páginas maquetadas (propuesta para el PO)
 
@@ -326,10 +370,46 @@ decidir si el porcentaje cuenta páginas aprobadas o maquetadas.
 **Decisión:** pendiente del PO. Hasta entonces, `derive_status`
 (`albums/insights.py`) y `progress_percentage` no cambian.
 
-### Confirmaciones pendientes del DoR
+### P3-bis — Nombres de archivo y carpeta `limpias/` del ZIP (HU-90)
+
+**Situación:** HU-90 se implementó con los nombres de P3 como supuesto,
+porque el DoR de la historia pedía que el PO los confirmara y esa
+confirmación no consta: `{álbum}_{idioma}_{fecha}_png.zip` y
+`pagina-{page_number:03d}.png`. El ZIP no incluye la imagen limpia sin texto.
+
+**Qué se decide:** si los nombres sirven tal cual y si el ZIP debe llevar
+también una carpeta `limpias/` con cada página limpia, sin textos. El PO la
+mencionó en la entrevista del 08/08/2026 («las páginas limpias del texto en
+su lenguaje original»).
+
+**Qué cambiaría:** los nombres solo tocan `export_download_name` y
+`png_name`, en `albums/exporting.py`, más
+`ArchiveContentTests`. Añadir `limpias/` sería un criterio nuevo de HU-90 con
+su CP.
+
+**Decisión:** pendiente del PO.
+
+### P10 — Cambiar el tipo de una región sin reprocesar (propuesta para el PO)
+
+**Carencia:** el tipo globo/narración (`TextRegion.kind`) lo asigna solo la
+heurística de luminosidad (`albums/ocr/layout.py`, supuesto S3) al procesar
+la página o al añadir una región manual. HU-15 corrige el texto, no el tipo,
+y ninguna pantalla permite cambiarlo, aunque ADR-001 (S3) suponía que el tipo
+sería «corregible a mano en HU-15». El tipo decide la fuente por defecto de
+la maquetación (P8: regular para diálogo, cursiva para narración). Cuando la
+heurística se equivoca, como con las páginas de 16 bits anteriores a BUG-096
+(P9), la única salida es reprocesar la página y perder su trabajo.
+
+**Propuesta:** permitir cambiar el tipo de una región desde el workspace, sin
+reprocesar ni tocar su texto, traducción ni maquetación guardada.
+
+**Decisión:** pendiente del PO. Solo se documenta: no tiene HU, CA ni CP y no
+se implementa hasta que el PO la acepte y se redacte la historia.
+
+## Confirmaciones pendientes del DoR
 
 - [ ] El equipo revisa el boceto del panel de propiedades y de las pestañas
       de HU-89.
 - [ ] El PO confirma los nombres de archivo de HU-90 y si quiere la página
-      limpia en el ZIP.
+      limpia en el ZIP (P3-bis).
 - [x] Resultado del spike de HU-91 (P4): descartada.
