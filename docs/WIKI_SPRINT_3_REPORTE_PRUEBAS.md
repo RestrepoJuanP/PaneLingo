@@ -9,6 +9,13 @@ final, apilada sobre `main` en `8eb3323`
 
 Entorno: Python 3.12.10, Django 5.2 y SQLite de prueba
 
+> **Actualización del 13 de noviembre de 2026 (cierre de la entrega).** Tras
+> la evaluación heurística y la review se añadieron 12 pruebas: 3 de la
+> corrección «una página aprobada no deja regiones por revisar»
+> (`test_library_progress.py`) y 9 del fondo detrás del texto maquetado
+> (`test_text_background.py`). La suite queda en **690 pruebas**, todas en
+> verde, con el Quality Gate 7/7.
+
 ## 1. Objetivo
 
 Verificar que las historias del Sprint 3 cumplen sus criterios de aceptación,
