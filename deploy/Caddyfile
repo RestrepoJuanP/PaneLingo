@@ -1,0 +1,32 @@
+# Proxy inverso de PaneLingo. SITE_ADDRESS es el dominio público
+# (por ejemplo 3-15-20-1.sslip.io): Caddy obtiene y renueva el certificado
+# HTTPS de Let's Encrypt por sí solo. Con ":80" sirve HTTP sin certificado.
+{$SITE_ADDRESS} {
+	encode zstd gzip
+
+	# Archivos estáticos (CSS, JS, fuentes) directamente desde el volumen.
+	handle_path /static/* {
+		root * /srv/static
+		header Cache-Control "public, max-age=86400"
+		file_server
+	}
+
+	# Todo lo demás, incluidas las imágenes privadas, pasa por Django, que
+	# comprueba la sesión y el propietario antes de entregarlas.
+	handle {
+		request_body {
+			max_size 120MB
+		}
+		reverse_proxy web:8000
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		-Server
+	}
+
+	log {
+		output stdout
+	}
+}

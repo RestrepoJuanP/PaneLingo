@@ -4,6 +4,8 @@ Plataforma web para la **traducción asistida de cómics, manga y webtoons**. Pa
 
 Proyecto académico desarrollado para **Proyecto Integrador 2**. Hoy PaneLingo cubre el flujo completo de una página: autenticación, álbumes y páginas, detección y OCR del texto, traducción asistida por IA con revisión y aprobación humanas, autoguardado y progreso del trabajo, limpieza del texto original, maquetación de la traducción sobre la imagen y exportación en DOCX o en PNG. Lo que todavía no incluye está en [Fuera del alcance actual](#fuera-del-alcance-actual).
 
+**Aplicación desplegada:** [https://13-185-1-92.sslip.io](https://13-185-1-92.sslip.io) · **Manual de usuario:** [PDF](docs/manual/PaneLingo-Manual-de-usuario.pdf) · **Wiki:** [https://github.com/RestrepoJuanP/PaneLingo/wiki](https://github.com/RestrepoJuanP/PaneLingo/wiki)
+
 ## Stack
 
 | Capa | Tecnología |
@@ -230,6 +232,30 @@ Dos detalles al leer la consola:
 
 Si envías un correo que no corresponde a ninguna cuenta, la aplicación mostrará la misma pantalla de confirmación pero **no aparecerá nada en la consola**: la respuesta visible no revela si la cuenta existe.
 
+## Despliegue con Docker
+
+PaneLingo está desplegado en AWS (EC2, `us-east-2`) en **[https://13-185-1-92.sslip.io](https://13-185-1-92.sslip.io)**. El
+despliegue usa tres contenedores definidos en [`docker-compose.yml`](docker-compose.yml):
+
+| Contenedor | Función |
+|---|---|
+| `web` | Django servido por Gunicorn; aplica las migraciones al arrancar |
+| `worker` | Trabajador de Huey para OCR, traducción, limpieza y exportación |
+| `caddy` | Proxy inverso con HTTPS automático (Let's Encrypt) y archivos estáticos |
+
+Para desplegar en un servidor con Docker:
+
+```bash
+git clone https://github.com/RestrepoJuanP/PaneLingo.git && cd PaneLingo
+cp deploy/.env.production.example .env   # completa dominio, clave y credenciales
+docker compose up -d --build
+```
+
+Actualizar a una nueva versión es `git pull` y `docker compose up -d --build`;
+los datos viven en un volumen y se conservan. El procedimiento completo
+(infraestructura, seguridad, copias de seguridad, restauración y solución de
+problemas) está en la wiki: [Despliegue en AWS](https://github.com/RestrepoJuanP/PaneLingo/wiki/Sprint-3-Despliegue).
+
 ## Comandos de calidad
 
 El **Quality Gate** debe ejecutarse completo al final de cada etapa. Los siete pasos, en este orden:
@@ -319,7 +345,7 @@ Estas funcionalidades **no están implementadas** y no deben esperarse:
 | Fuera de alcance | Motivo |
 |---|---|
 | Terminología y glosario | Sin historia de usuario. La entrada «Terminología» de la barra lateral se muestra deshabilitada |
-| Limpieza con IA del texto que está sobre el dibujo | HU-91 se descartó tras su *spike* ([ADR-003, P4](docs/adr/ADR-003-edicion-de-imagen.md#p4--spike-de-hu-91)). Las regiones que la limpieza no resuelve quedan en «Limpieza manual» y se avisan |
+| Limpieza con IA del texto que está sobre el dibujo | HU-91 se descartó tras su *spike* ([ADR-003, P4](docs/adr/ADR-003-edicion-de-imagen.md#p4--spike-de-hu-91)). Las regiones que la limpieza no resuelve quedan en «Limpieza manual», se avisan y su traducción lleva por defecto un fondo blanco que tapa el texto original |
 | Cambiar a mano el tipo globo/narración de una región | Propuesta pendiente del PO ([ADR-003, P10](docs/adr/ADR-003-edicion-de-imagen.md)) |
 | Reordenar o insertar páginas | Sin historia de usuario |
 | Colaboración en equipo y SSO | Fuera del MVP |
