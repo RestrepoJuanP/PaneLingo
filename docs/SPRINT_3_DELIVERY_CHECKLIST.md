@@ -6,6 +6,8 @@ Rama de preparación: `docs/sprint-3-final-delivery`
 
 Base verificada: `main` en `99113ef`
 
+Actualización del 13 de noviembre de 2026: producto desplegado en AWS, manual de usuario en PDF, Sección 6 del caso de negocio y página Sprint 3 de la Wiki listos; correcciones U1 a U5 de la evaluación heurística y la review (690 pruebas).
+
 Actualización del 10 de noviembre de 2026: se añade la épica EP-08 Edición de
 imagen y BUG-096, verificados en la rama `docs/ep08-closure` (apilada sobre
 `main` en `8eb3323`). Los estados de los entregables que dependen del equipo
@@ -38,9 +40,9 @@ dependa de participantes, reuniones o servicios externos.
 | Pruebas automáticas | Listo | 678 pruebas, cobertura local del 97 %, CI y trazabilidad en `docs/WIKI_SPRINT_3_REPORTE_PRUEBAS.md` | Adjuntar la ejecución de CI del PR final. |
 | Correcciones de cierre | Listo | BUG-063, BUG-071, BUG-072, BUG-073 y BUG-074 fusionados en `main`; BUG-096 corregido en `fix/BUG-096-16bit-grayscale`, pendiente de fusión | Fusionar BUG-096 y mostrar las regresiones cubiertas en el informe de pruebas. |
 | Resultados de usabilidad | Requiere evidencia | Protocolo completo definido en la página Sprint 2 de la Wiki | Ejecutar cinco sesiones reales, tabular métricas, registrar hallazgos y crear bugs o HU de Sprint 4. |
-| Manual de usuario | Pendiente | La aplicación y el README sirven como fuente técnica | Crear manual orientado al usuario, con capturas y recorridos de los flujos principales. |
-| Despliegue público | Pendiente | Configuración local por variables de entorno | Preparar la aplicación para producción, elegir proveedor, desplegar y publicar la URL en Wiki y README. |
-| Caso de negocio final | En preparación | Secciones 4 (finanzas) y 5 (riesgos) en la Wiki de Sprint 2 | Completar la sección 6: viabilidad técnica, operativa y conclusión costo-beneficio con cifras actualizadas. |
+| Manual de usuario | Listo | [`docs/manual/PaneLingo-Manual-de-usuario.pdf`](manual/PaneLingo-Manual-de-usuario.pdf) (18 páginas, capturas de la versión desplegada) y página «Manual de usuario» de la Wiki | Entregarlo al cliente. |
+| Despliegue público | Listo | https://13-185-1-92.sslip.io en AWS EC2 con Docker y HTTPS; procedimiento en la página «Despliegue en AWS» de la Wiki | Mantener la instancia encendida hasta la sustentación. |
+| Caso de negocio final | Listo | Sección 6 en la página Sprint 3 de la Wiki: viabilidad técnica y operativa, costo-beneficio, costos a escala, sensibilidad, riesgos de privacidad y conclusión | — |
 | Evidencias de ceremonias | Requiere evidencia | Registros de Sprint 1 y enlaces de Sprint 2 | Incorporar actas, fechas, participantes, acuerdos y enlaces reales del Sprint 3. |
 | Presentación al cliente | Pendiente | Producto y trazabilidad funcional disponibles | Preparar demostración breve enfocada en valor, cambios y retroalimentación. |
 | Sustentación ante el profesor | Pendiente | Código, pruebas y documentación disponibles | Preparar presentación con demo, arquitectura, calidad, usabilidad, negocio, manual y despliegue. |

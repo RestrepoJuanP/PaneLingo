@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>PaneLingo — Manual de usuario</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Archivo:wght@500;700;800&display=swap" rel="stylesheet" />
+<style>
+  @font-face { font-family: "Bangers"; src: url("Bangers-Regular.ttf"); }
+  @font-face { font-family: "Comic Neue"; src: url("ComicNeue-Regular.ttf"); }
+  @font-face { font-family: "Comic Neue"; font-weight: 700; src: url("ComicNeue-Bold.ttf"); }
+
+  :root {
+    --brand: #4c3fd9; --brand-light: #8d7bf0; --brand-deep: #2b2560;
+    --brand-tint: #eef0ff; --brand-tint-2: #f5f3ff; --brand-surface-border: #e0daf8;
+    --accent: #f2765a; --accent-ink: #231a17;
+    --ink-900: #191821; --ink-800: #2b2740; --ink-600: #4a463d; --muted: #6f6a60;
+    --bg: #f7f6f3; --surface: #ffffff; --surface-subtle: #fbfaf7; --surface-muted: #f2f0ea;
+    --surface-navy: #1b1836; --border: #e7e3db; --divider: #e2ded4;
+    --success: #2f7d4f; --success-fg: #215c3a; --success-bg: #eaf6ee;
+    --warning: #f2b23a; --warning-fg: #8a5b12; --warning-bg: #fff5e0; --warning-border: #f2e2b4;
+    --danger: #b13c22; --danger-fg: #8c2f1a; --danger-bg: #fdece7;
+    --r-lg: 10px; --r-xl: 12px; --r-2xl: 16px; --r-pill: 999px;
+  }
+  @page { size: A4; margin: 15mm 17mm 17mm; }
+  @page full { margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+    color: var(--ink-800); background: var(--bg);
+    font-size: 10.4pt; line-height: 1.55;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  body { background: #fff; }
+  .page { break-before: page; position: relative; }
+  .page:first-child { break-before: auto; }
+  .cover, .back { page: full; width: 244.18mm; height: 345.2mm; overflow: hidden; }
+  .shot, .card, .two, .flow, tr, .tip, .warn, .note, .legend li, .steps li, .phone { break-inside: avoid; }
+  h3, .chapter-head { break-after: avoid; }
+  .fig { break-inside: avoid; }
+  .card, .flow div { background: var(--surface-subtle); }
+  h1, h2, h3 { font-family: "Plus Jakarta Sans", sans-serif; color: var(--ink-900); letter-spacing: -0.02em; margin: 0; }
+  h2 { font-size: 22pt; font-weight: 800; line-height: 1.15; margin-bottom: 4mm; }
+  h3 { font-size: 13pt; font-weight: 700; margin: 7mm 0 2.5mm; }
+  p { margin: 0 0 3mm; }
+  strong { color: var(--ink-900); }
+  .eyebrow { font-family: "Archivo", sans-serif; font-weight: 700; font-size: 8.5pt; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin-bottom: 2mm; }
+  .lead { font-size: 11.5pt; color: var(--ink-600); max-width: 150mm; margin-bottom: 6mm; }
+
+  /* --- Portada ------------------------------------------------------------ */
+  .cover { background: var(--surface-navy); color: #fff; padding: 22mm 20mm; display: flex; flex-direction: column; overflow: hidden; }
+  .cover .brand { display: flex; align-items: center; gap: 3mm; font-weight: 800; font-size: 15pt; }
+  .cover h1 { color: #fff; font-size: 44pt; line-height: 1.02; margin-top: 18mm; letter-spacing: -0.035em; }
+  .cover h1 span { color: var(--brand-light); }
+  .cover .sub { color: #cfcbe6; font-size: 13pt; margin-top: 6mm; max-width: 140mm; }
+  .panels { display: grid; grid-template-columns: 1.3fr 1fr; grid-template-rows: 46mm 38mm; gap: 4mm; margin-top: 16mm; }
+  .panel { border: 1.5px solid rgba(255,255,255,.85); border-radius: 6px; position: relative; overflow: hidden; }
+  .panel.p1 { background: repeating-linear-gradient(135deg, #4c3fd9 0 7px, #5a4de6 7px 14px); }
+  .panel.p2 { background: radial-gradient(circle at 30% 30%, #f8a48f, #f2765a 55%, #d9482b); }
+  .panel.p3 { background: linear-gradient(160deg, #24525a, #3d8f8a); }
+  .panel.p4 { background: repeating-linear-gradient(135deg, #3a2fb8 0 6px, #4c3fd9 6px 12px); }
+  .bubble { position: absolute; background: #fff; color: #111; border: 2px solid #111; border-radius: 14px; padding: 2.5mm 4mm; font-family: "Comic Neue", sans-serif; font-weight: 700; font-size: 11pt; line-height: 1.2; }
+  .sfx { position: absolute; font-family: "Bangers", sans-serif; font-size: 34pt; color: #fff; -webkit-text-stroke: 1.5px #231a17; transform: rotate(-8deg); letter-spacing: .03em; }
+  .cover .meta { margin-top: auto; display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid rgba(255,255,255,.18); padding-top: 6mm; }
+  .cover .meta b { display: block; color: var(--accent); font-family: "Archivo"; font-size: 12pt; }
+  .cover .meta span { color: #b9b4d6; font-size: 9pt; }
+
+  /* --- Índice ------------------------------------------------------------- */
+  .toc { list-style: none; padding: 0; margin: 4mm 0 0; counter-reset: toc; }
+  .toc li { display: flex; align-items: baseline; gap: 4mm; padding: 3.2mm 0; border-bottom: 1px solid var(--divider); font-weight: 600; font-size: 11.5pt; color: var(--ink-900); }
+  .toc li .n { font-family: "Archivo"; font-weight: 700; color: var(--brand); width: 10mm; }
+  .toc li .d { color: var(--muted); font-weight: 500; font-size: 9.5pt; margin-left: auto; text-align: right; }
+
+  /* --- Componentes -------------------------------------------------------- */
+  .shot { position: relative; margin: 3mm 0 2mm; border-radius: var(--r-xl); overflow: hidden; border: 1px solid var(--border); box-shadow: 0 8px 24px rgba(25,24,33,.08); background: #fff; }
+  .shot img { display: block; width: 100%; }
+  .caption { font-size: 8.6pt; color: var(--muted); margin: 0 0 5mm; }
+  .mark { position: absolute; width: 7mm; height: 7mm; margin: -3.5mm 0 0 -3.5mm; border-radius: 50%; background: var(--accent); color: #fff; font-family: "Archivo"; font-weight: 800; font-size: 9.5pt; display: grid; place-items: center; box-shadow: 0 0 0 2px #fff, 0 3px 8px rgba(0,0,0,.25); }
+  .legend { display: grid; grid-template-columns: 1fr 1fr; gap: 2mm 6mm; margin: 2mm 0 4mm; padding: 0; list-style: none; }
+  .legend li { position: relative; padding-left: 8mm; font-size: 9.2pt; line-height: 1.4; }
+  .legend li i { position: absolute; left: 0; top: .2mm; width: 5.5mm; height: 5.5mm; border-radius: 50%; background: var(--accent); color: #fff; font-style: normal; font-family: "Archivo"; font-weight: 800; font-size: 8pt; display: grid; place-items: center; }
+  .legend.one { grid-template-columns: 1fr; }
+  .crop { overflow: hidden; }
+  .crop img { width: 100%; object-fit: cover; object-position: top; }
+  .steps { counter-reset: step; list-style: none; padding: 0; margin: 2mm 0 4mm; }
+  .steps li { counter-increment: step; position: relative; padding: 0 0 2.6mm 10mm; }
+  .steps li::before { content: counter(step); position: absolute; left: 0; top: .2mm; width: 6.5mm; height: 6.5mm; border-radius: 50%; background: var(--brand); color: #fff; font-family: "Archivo"; font-weight: 700; font-size: 8.5pt; display: grid; place-items: center; }
+  .tip, .warn, .note { border-radius: var(--r-xl); padding: 3.5mm 4.5mm; margin: 3mm 0 4mm; font-size: 9.6pt; display: flex; gap: 3mm; }
+  .tip { background: var(--brand-tint-2); border: 1px solid var(--brand-surface-border); }
+  .warn { background: var(--warning-bg); border: 1px solid var(--warning-border); color: #5c3d0c; }
+  .note { background: var(--surface); border: 1px solid var(--border); }
+  .tip b, .warn b, .note b { white-space: nowrap; }
+  .tip b { color: var(--brand); } .warn b { color: var(--warning-fg); }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; align-items: start; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-2xl); padding: 4.5mm 5mm; }
+  .card h4 { margin: 0 0 1.5mm; font-size: 10.5pt; color: var(--ink-900); }
+  .card p { font-size: 9.2pt; color: var(--ink-600); margin: 0; }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-xl); overflow: hidden; font-size: 9.2pt; margin: 2mm 0 5mm; }
+  th { text-align: left; background: var(--surface-muted); font-weight: 700; color: var(--ink-900); padding: 2.6mm 3.5mm; font-size: 8.8pt; }
+  td { padding: 2.6mm 3.5mm; border-top: 1px solid var(--divider); vertical-align: top; }
+  .chip { display: inline-block; border-radius: var(--r-pill); padding: .6mm 2.8mm; font-weight: 700; font-size: 8.2pt; white-space: nowrap; }
+  .c-ok { background: var(--success-bg); color: var(--success-fg); }
+  .c-warn { background: var(--warning-bg); color: var(--warning-fg); }
+  .c-err { background: var(--danger-bg); color: var(--danger-fg); }
+  .c-brand { background: var(--brand-tint); color: var(--brand); }
+  .c-neutral { background: var(--surface-muted); color: var(--ink-600); }
+  kbd { font-family: "Archivo", sans-serif; font-size: 8.4pt; background: #fff; border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 5px; padding: .2mm 1.6mm; color: var(--ink-900); }
+  .flow { display: grid; grid-template-columns: repeat(6, 1fr); gap: 2.5mm; margin: 5mm 0 6mm; }
+  .flow div { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-xl); padding: 3.5mm 3mm; position: relative; }
+  .flow div b { display: block; font-family: "Archivo"; color: var(--brand); font-size: 15pt; line-height: 1; margin-bottom: 1.5mm; }
+  .flow div span { font-weight: 700; font-size: 9pt; color: var(--ink-900); display: block; }
+  .flow div small { color: var(--muted); font-size: 7.8pt; line-height: 1.35; display: block; margin-top: 1mm; }
+  .chapter-head { display: flex; align-items: center; gap: 4mm; margin-bottom: 5mm; }
+  .chapter-num { width: 14mm; height: 14mm; border-radius: 14px; background: var(--surface-navy); color: #fff; font-family: "Archivo"; font-weight: 800; font-size: 17pt; display: grid; place-items: center; flex: none; }
+  .phone { width: 52mm; border-radius: 22px; border: 6px solid var(--surface-navy); overflow: hidden; box-shadow: 0 10px 28px rgba(25,24,33,.18); }
+  .phone img { display: block; width: 100%; }
+  .back { background: var(--surface-navy); color: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+  .back h2 { color: #fff; font-size: 26pt; }
+  .back p { color: #cfcbe6; max-width: 130mm; }
+  .small { font-size: 8.6pt; color: var(--muted); }
+  ul.plain { margin: 1mm 0 4mm; padding-left: 5mm; }
+  ul.plain li { margin-bottom: 1.4mm; }
+</style>
+</head>
+<body>
+
+<!-- ============================== PORTADA ============================== -->
+<section class="page cover">
+  <div class="brand">
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none"><rect x="1.25" y="1.25" width="21.5" height="21.5" rx="6.5" stroke="#fff" stroke-width="1.5"/><path d="M12 1.5V22.5M1.5 12H22.5" stroke="#fff" stroke-width="1.5"/></svg>
+    PaneLingo
+  </div>
+  <h1>Manual<br/>de <span>usuario</span></h1>
+  <p class="sub">Guía paso a paso para traducir cómics, manga y webtoons con PaneLingo: de la página escaneada a la página traducida, lista para publicar.</p>
+  <div class="panels">
+    <div class="panel p1"><div class="bubble" style="left:7mm; top:8mm;">ESPERA. ESTA FRASE<br/>NO ES ASÍ.</div></div>
+    <div class="panel p2"><div class="sfx" style="left:12mm; top:12mm;">¡TZONK!</div></div>
+    <div class="panel p3"><div class="bubble" style="left:6mm; bottom:7mm; border-radius:4px; font-size:9.5pt;">Cada viñeta hereda el contexto de la anterior.</div></div>
+    <div class="panel p4"></div>
+  </div>
+  <div class="meta">
+    <div><b>Versión 3.0 · Producto final</b><span>Proyecto Integrador 2 · Sprint 3 · Noviembre de 2026</span></div>
+    <div style="text-align:right"><b>La página entera como contexto</b><span>no globos sueltos</span></div>
+  </div>
+</section>
+
+<!-- ============================== ÍNDICE ============================== -->
+<section class="page">
+  <div class="eyebrow">Contenido</div>
+  <h2>Índice</h2>
+  <ol class="toc">
+    <li><span class="n">01</span>Bienvenida a PaneLingo<span class="d">Qué es y cómo funciona</span></li>
+    <li><span class="n">02</span>Primeros pasos<span class="d">Cuenta, acceso y contraseña</span></li>
+    <li><span class="n">03</span>La biblioteca<span class="d">Resumen, búsqueda y filtros</span></li>
+    <li><span class="n">04</span>Álbumes<span class="d">Crear, editar, archivar y eliminar</span></li>
+    <li><span class="n">05</span>Cargar páginas<span class="d">Formatos y recomendaciones</span></li>
+    <li><span class="n">06</span>Detectar y corregir el texto<span class="d">OCR y regiones</span></li>
+    <li><span class="n">07</span>Traducir y aprobar<span class="d">Traducción asistida por IA</span></li>
+    <li><span class="n">08</span>Limpiar y maquetar la página<span class="d">Edición de imagen</span></li>
+    <li><span class="n">09</span>Exportar el resultado<span class="d">DOCX o PNG en un ZIP</span></li>
+    <li><span class="n">10</span>Estados y progreso<span class="d">Qué significa cada etiqueta</span></li>
+    <li><span class="n">11</span>Uso en el celular y accesibilidad<span class="d">Teclado y pantallas pequeñas</span></li>
+    <li><span class="n">12</span>Preguntas frecuentes<span class="d">Problemas comunes y soluciones</span></li>
+  </ol>
+  <div class="tip" style="margin-top:9mm"><b>Consejo</b><span>Si es tu primera vez, lee los capítulos 1 y 2 y luego sigue el recorrido completo de los capítulos 4 a 9 con una página de prueba: en unos 15 minutos tendrás tu primera página traducida.</span></div>
+</section>
+
+<!-- ============================== 1. BIENVENIDA ============================== -->
+<section class="page">
+  <div class="chapter-head"><div class="chapter-num">1</div><div><div class="eyebrow">Capítulo 1</div><h2 style="margin:0">Bienvenida a PaneLingo</h2></div></div>
+  <p class="lead">PaneLingo es una plataforma web para <strong>traductores de cómics, manga y webtoons</strong>. Reúne en un solo lugar lo que antes exigía varias herramientas: organizar el trabajo por obras, leer el texto de las páginas, proponer una traducción con inteligencia artificial, revisarla y devolverla a la página.</p>
+  <p>La idea central es que <strong>la unidad de trabajo es la página completa</strong>, no el globo suelto. La IA lee todas las viñetas en orden de lectura, con las onomatopeyas y el tono de los personajes, y propone cada traducción sabiendo lo que vino antes. Tú siempre tienes la última palabra: nada se da por bueno hasta que lo apruebas.</p>
+
+  <h3>El recorrido de una página</h3>
+  <div class="flow">
+    <div><b>1</b><span>Cargar</span><small>Sube las páginas escaneadas a un álbum.</small></div>
+    <div><b>2</b><span>Detectar</span><small>El OCR encuentra y lee cada texto.</small></div>
+    <div><b>3</b><span>Corregir</span><small>Revisa lo que el OCR leyó con dudas.</small></div>
+    <div><b>4</b><span>Traducir</span><small>La IA propone; tú editas y apruebas.</small></div>
+    <div><b>5</b><span>Maquetar</span><small>Borra el original y coloca la traducción.</small></div>
+    <div><b>6</b><span>Exportar</span><small>Descarga un DOCX o las páginas en PNG.</small></div>
+  </div>
+
+  <h3>Para quién es</h3>
+  <div class="two">
+    <div class="card"><h4>Traductores independientes y scanlators</h4><p>Personas que traducen obras por encargo o por afición y necesitan ordenar muchas páginas y entregar un guion o la página final.</p></div>
+    <div class="card"><h4>Editoriales y estudios pequeños</h4><p>Equipos que quieren acelerar la primera versión de la traducción sin renunciar a la revisión humana de cada texto.</p></div>
+  </div>
+
+  <h3>Qué necesitas</h3>
+  <ul class="plain">
+    <li>Un computador o celular con un navegador actualizado (Chrome, Edge, Firefox o Safari).</li>
+    <li>Conexión a internet y la dirección de PaneLingo: <strong>https://13-185-1-92.sslip.io</strong></li>
+    <li>Las páginas en imagen <strong>JPG, PNG o WEBP</strong>, de hasta <strong>10 MB</strong> cada una.</li>
+  </ul>
+  <div class="note"><b>Privacidad</b><span>Tus álbumes y páginas son privados: solo tu cuenta puede verlos. Ni siquiera las imágenes tienen una dirección pública; se entregan únicamente cuando inicias sesión.</span></div>
+</section>
+
+<!-- ============================== 2. PRIMEROS PASOS ============================== -->
+<section class="page">
+  <div class="chapter-head"><div class="chapter-num">2</div><div><div class="eyebrow">Capítulo 2</div><h2 style="margin:0">Primeros pasos</h2></div></div>
+  <h3 style="margin-top:0">Crear una cuenta</h3>
+  <div class="two">
+    <div>
+      <ol class="steps">
+        <li>Abre PaneLingo y elige la pestaña <strong>Crear cuenta</strong>.</li>
+        <li>Escribe tu nombre completo y tu correo electrónico.</li>
+        <li>Elige una contraseña de al menos 8 caracteres y repítela. El medidor te indica si es segura.</li>
+        <li>Acepta los términos y pulsa <strong>Crear cuenta</strong>. Entrarás directamente a tu biblioteca.</li>
+      </ol>
+      <div class="tip"><b>Consejo</b><span>Evita contraseñas parecidas a tu nombre o correo, o solo numéricas: PaneLingo las rechaza para proteger tu trabajo.</span></div>
+    </div>
+    <div class="shot"><img src="img/02-crear-cuenta.jpg" alt="" /></div>
+  </div>
+
+  <h3>Iniciar sesión</h3>
+  <div class="two" style="grid-template-columns: 1.35fr 1fr">
+    <div class="shot"><img src="img/01-iniciar-sesion.jpg" alt="" />
+      <span class="mark" style="left:69%; top:30%">1</span>
+      <span class="mark" style="left:62%; top:52%">2</span>
+      <span class="mark" style="left:86%; top:56%">3</span>
+      <span class="mark" style="left:63%; top:65%">4</span>
+    </div>
+    <ul class="legend one">
+      <li><i>1</i>Pestañas para pasar de iniciar sesión a crear una cuenta.</li>
+      <li><i>2</i>Tu correo y tu contraseña.</li>
+      <li><i>3</i><strong>¿Olvidaste tu contraseña?</strong> abre la recuperación.</li>
+      <li><i>4</i>Marca <strong>Mantener la sesión iniciada</strong> solo en un equipo propio.</li>
+    </ul>
+  </div>
+  <h3>Recuperar la contraseña</h3>
+  <ol class="steps">
+    <li>En la pantalla de inicio de sesión pulsa <strong>¿Olvidaste tu contraseña?</strong>, escribe tu correo y pulsa <strong>Enviar enlace</strong>.</li>
+    <li>Abre el enlace que recibes. Por seguridad <strong>caduca en una hora</strong> y solo sirve una vez.</li>
+    <li>Escribe la nueva contraseña dos veces. Al guardarla, se cierran las sesiones abiertas en otros dispositivos.</li>
+  </ol>
+  <div class="warn"><b>Importante</b><span>En la versión académica el correo de recuperación no se envía por internet: lo recibe el administrador del servidor. Si lo necesitas, pide el enlace al equipo de PaneLingo.</span></div>
+
+  <h3>Cerrar sesión</h3>
+  <p>Abre el menú de tu perfil, en la esquina inferior izquierda, y elige <strong>Cerrar sesión</strong>. En el celular, el botón está en la barra inferior. Al salir, el navegador deja de mostrar tus páginas aunque uses el botón Atrás.</p>
+</section>
+
+<!-- ============================== 3. BIBLIOTECA ============================== -->
+<section class="page">
+  <div class="chapter-head"><div class="chapter-num">3</div><div><div class="eyebrow">Capítulo 3</div><h2 style="margin:0">La biblioteca</h2></div></div>
+  <p class="lead">Es tu pantalla de inicio. De un vistazo ves cuánto trabajo tienes, en qué ibas y el estado de cada álbum.</p>
+  <div class="fig">
+  <div class="shot"><img src="img/04-biblioteca.jpg" alt="" />
+    <span class="mark" style="left:8%; top:16%">1</span>
+    <span class="mark" style="left:84.5%; top:3.2%">2</span>
+    <span class="mark" style="left:78.6%; top:14%">3</span>
+    <span class="mark" style="left:57%; top:22%">4</span>
+    <span class="mark" style="left:8.5%; top:40%">5</span>
+    <span class="mark" style="left:21.5%; top:33.5%">6</span>
+    <span class="mark" style="left:59.3%; top:50.5%">7</span>
+    <span class="mark" style="left:36%; top:73%">8</span>
+  </div>
+  <ul class="legend">
+    <li><i>1</i><strong>Menú principal:</strong> biblioteca, carga de páginas, espacio de trabajo y revisión y exportación. El número rojo indica las regiones que esperan tu revisión.</li>
+    <li><i>2</i><strong>Búsqueda:</strong> filtra los álbumes por título mientras escribes. Pulsa <kbd>/</kbd> para ir a ella.</li>
+    <li><i>3</i><strong>Cargar páginas</strong> y <strong>Nuevo álbum</strong>.</li>
+    <li><i>4</i><strong>Resumen:</strong> álbumes en progreso, páginas procesadas en la semana, regiones por revisar y confianza media del OCR.</li>
+    <li><i>5</i><strong>Cuota del mes:</strong> páginas procesadas frente al límite del servicio de lectura de texto.</li>
+    <li><i>6</i><strong>Continuar donde lo dejaste:</strong> te lleva a la última página y región en que trabajaste, incluso desde otro dispositivo.</li>
+    <li><i>7</i><strong>Filtros por estado:</strong> todos, en progreso, por revisar, completados y borradores.</li>
+    <li><i>8</i><strong>Tarjeta de álbum:</strong> idiomas, páginas, regiones por revisar, progreso por páginas aprobadas y el menú <strong>···</strong>.</li>
+  </ul>
+  </div>
+  <div class="two" style="margin-top:3mm">
+    <div><div class="shot"><img src="img/04b-busqueda.jpg" alt="" /></div><p class="caption">Búsqueda por título: «naruto».</p></div>
+    <div><div class="shot"><img src="img/04c-filtro-completados.jpg" alt="" /></div><p class="caption">Filtro «Completados».</p></div>
+  </div>
+</section>
+
+<!-- ============================== 4. ÁLBUMES ============================== -->
+<section class="page">
+  <div class="chapter-head"><div class="chapter-num">4</div><div><div class="eyebrow">Capítulo 4</div><h2 style="margin:0">Álbumes</h2></div></div>
+  <p class="lead">Un álbum agrupa las páginas de una obra (un tomo, un capítulo o un webtoon) con su idioma de origen y de destino.</p>
+  <h3 style="margin-top:0">Crear un álbum</h3>
+  <div class="two">
+    <div>
+      <ol class="steps">
+        <li>En la biblioteca pulsa <strong>+ Nuevo álbum</strong>.</li>
+        <li>Escribe el <strong>título</strong> de la obra.</li>
+        <li>Elige el <strong>idioma de origen</strong> (japonés, coreano, chino simplificado, inglés…) y el <strong>de destino</strong>. Deben ser distintos.</li>
+        <li>Opcional: sube una <strong>portada</strong>. Sin portada se muestra una ilustración por defecto.</li>
+        <li>Pulsa <strong>Crear álbum</strong>.</li>
+      </ol>
+    </div>
+    <div class="shot"><img src="img/05-nuevo-album.jpg" alt="" /></div>
+  </div>
+  <h3>El detalle del álbum</h3>
+  <div class="shot crop"><img src="img/06-detalle-album.jpg" alt="" style="height:78mm" /></div>
+  <p class="caption">Detalle de un álbum: progreso, desglose por estado, acciones y la cuadrícula de páginas con su estado.</p>
+  <h3>Editar, archivar y eliminar</h3>
+  <div class="two">
+    <div>
+      <ul class="plain">
+        <li><strong>Editar:</strong> cambia título, idiomas o portada desde <strong>Editar</strong> en el detalle o en el menú <strong>···</strong> de la tarjeta.</li>
+        <li><strong>Archivar:</strong> oculta un álbum terminado sin borrarlo. Lo encuentras en el filtro <strong>Archivados</strong> y puedes desarchivarlo cuando quieras.</li>
+        <li><strong>Eliminar:</strong> borra el álbum con todas sus páginas, textos y exportaciones. Te pide confirmación y <strong>no se puede deshacer</strong>.</li>
+      </ul>
+    </div>
+    <div class="shot"><img src="img/04d-menu-album.jpg" alt="" style="object-fit:cover; object-position: 0 45%; height:50mm" /></div>
+  </div>
+</section>
+
+<!-- ============================== 5. CARGAR ============================== -->
+<section class="page">
+  <div class="chapter-head"><div class="chapter-num">5</div><div><div class="eyebrow">Capítulo 5</div><h2 style="margin:0">Cargar páginas</h2></div></div>
+  <div class="shot"><img src="img/07-cargar-paginas.jpg" alt="" /></div>
+  <ol class="steps">
+    <li>Desde el álbum pulsa <strong>Cargar páginas</strong>, o usa <strong>Cargar y escanear</strong> en el menú y elige el álbum.</li>
+    <li>Arrastra las imágenes a la zona de carga o pulsa para seleccionarlas. Puedes subir varias a la vez; se numeran en el orden en que las eliges.</li>
+    <li>Revisa la lista de archivos y pulsa <strong>Cargar</strong>. Cada página aparece en el álbum como <span class="chip c-neutral">Pendiente de procesamiento</span>.</li>
+  </ol>
+  <table>
+    <tr><th>Requisito</th><th>Valor</th><th>Qué pasa si no se cumple</th></tr>
+    <tr><td>Formato</td><td>JPG, JPEG, PNG o WEBP</td><td>El archivo se rechaza con un mensaje.</td></tr>
+    <tr><td>Tamaño máximo</td><td>10 MB por página</td><td>El archivo se rechaza; los demás se cargan.</td></tr>
+    <tr><td>Resolución recomendada</td><td>2 megapíxeles o más</td><td>Se carga igual, con un aviso de <strong>baja resolución</strong>: el OCR puede leer peor.</td></tr>
+  </table>
+  <div class="tip"><b>Consejo</b><span>Escanea a 300 ppp y sube la página completa, no viñetas recortadas. La IA traduce mejor cuando ve toda la escena.</span></div>
+  <h3>Eliminar una página</h3>
+  <p>Abre la página y elige <strong>Eliminar</strong>, o usa el botón de la miniatura en el álbum. Se borran la imagen y todo su trabajo. Las demás páginas conservan su número, así el hueco te recuerda qué página falta.</p>
+</section>
+
+<!-- ============================== 6. DETECTAR ============================== -->
+<section class="page">
+  <div class="chapter-head"><div class="chapter-num">6</div><div><div class="eyebrow">Capítulo 6</div><h2 style="margin:0">Detectar y corregir el texto</h2></div></div>
+  <p class="lead">Al abrir una página entras al <strong>espacio de trabajo</strong>: la imagen a la izquierda y los textos a la derecha.</p>
+  <div class="fig">
+  <div class="shot"><img src="img/08-espacio-trabajo.jpg" alt="" />
+    <span class="mark" style="left:30%; top:9.4%">1</span>
+    <span class="mark" style="left:44%; top:9.4%">2</span>
+    <span class="mark" style="left:80%; top:9.4%">3</span>
+    <span class="mark" style="left:92%; top:9.4%">4</span>
+    <span class="mark" style="left:44%; top:14%">5</span>
+    <span class="mark" style="left:33%; top:20%">6</span>
+    <span class="mark" style="left:42%; top:38%">7</span>
+    <span class="mark" style="left:84%; top:52%">8</span>
+  </div>
+  <ul class="legend">
+    <li><i>1</i>Volver al álbum y pasar de una página a otra.</li>
+    <li><i>2</i>Filtros de regiones y zoom (<strong>Ajustar</strong> encaja la página).</li>
+    <li><i>3</i>Vista <strong>Original</strong>, <strong>Limpia</strong> o <strong>Traducida</strong>.</li>
+    <li><i>4</i><strong>Añadir región</strong> si el OCR pasó por alto un texto.</li>
+    <li><i>5</i>Progreso de aprobación y acciones de la página.</li>
+    <li><i>6</i>Pestañas <strong>Detección y traducción</strong> y <strong>Maquetación</strong>.</li>
+    <li><i>7</i>Regiones numeradas en orden de lectura. Al pulsar una, se resalta su texto.</li>
+    <li><i>8</i>Tarjeta de la región: tipo, confianza del OCR, texto de origen y traducción.</li>
+  </ul>
+  </div>
+  <h3>Procesar la página</h3>
+  <p>Pulsa <strong>Procesar página</strong>. PaneLingo detecta los globos y cuadros de narración y lee su texto en segundo plano: puedes seguir trabajando y la vista se actualiza sola. Si el servicio falla, la página queda en <span class="chip c-err">Error</span> con el botón <strong>Reintentar</strong>.</p>
+  <h3>Revisar y corregir</h3>
+  <ul class="plain">
+    <li>Cada región muestra la <strong>confianza</strong> del OCR. Las de confianza baja se marcan <span class="chip c-warn">Revisar</span> y la página pasa a <span class="chip c-warn">Necesita revisión</span>.</li>
+    <li>Corrige el texto de origen y pulsa <strong>Guardar corrección</strong>. Si te equivocas, <strong>Restaurar original</strong> recupera lo que leyó el OCR.</li>
+    <li><strong>Eliminar región</strong> quita un falso positivo (con opción de deshacer); <strong>No traducir</strong> conserva la región pero la deja fuera de la traducción, útil para firmas o letreros.</li>
+    <li><strong>Volver a procesar</strong> repite la detección. Te avisa de cuántas correcciones se perderán antes de hacerlo.</li>
+  </ul>
+</section>
+
+<section class="cont">
+  <h3>Añadir una región a mano</h3>
+  <div class="two">
+    <div>
+      <ol class="steps">
+        <li>Pulsa <strong>Añadir región</strong>.</li>
+        <li>Dibuja un rectángulo sobre el texto con el ratón, o escribe sus coordenadas en el formulario si prefieres el teclado.</li>
+        <li>Indica si es <strong>globo de diálogo</strong> o <strong>narración</strong> y guarda. PaneLingo lee el texto de ese recorte y la región entra en el orden de lectura.</li>
+      </ol>
+    </div>
+    <div class="shot"><img src="img/08d-anadir-region.jpg" alt="" /></div>
+  </div>
+  <h3>Una página con dudas</h3>
+  <div class="shot"><img src="img/08e-pagina-por-revisar.jpg" alt="" /></div>
+  <p class="caption">Una página en «Necesita revisión»: el aviso y el filtro <strong>Por revisar</strong> te llevan directo a los textos dudosos.</p>
+  <div class="note"><b>Guardado automático</b><span>Todo lo que escribes se guarda solo, en segundos, y verás «Guardado» con la hora. Si se pierde la conexión, PaneLingo reintenta. Si abres la misma página en dos pestañas y cambias el mismo texto, la pestaña antigua no pisa el cambio más reciente: te avisa del conflicto.</span></div>
+</section>
+
+<!-- ============================== 7. TRADUCIR ============================== -->
+<section class="page">
+  <div class="chapter-head"><div class="chapter-num">7</div><div><div class="eyebrow">Capítulo 7</div><h2 style="margin:0">Traducir y aprobar</h2></div></div>
+  <p class="lead">La traducción se pide para la página entera. La IA recibe todas las regiones en orden de lectura y devuelve una propuesta para cada una.</p>
+  <ol class="steps">
+    <li>Pulsa <strong>Traducir página</strong>. Verás «Traduciendo la página…» y podrás seguir usando PaneLingo mientras tanto.</li>
+    <li>Cada región muestra su propuesta en <strong>ES · Traducción</strong> con la etiqueta <span class="chip c-brand">Generada</span>.</li>
+    <li>Lee el texto de origen y la propuesta lado a lado. Edita lo que quieras: se guarda solo y pasa a <span class="chip c-brand">Editada</span>.</li>
+    <li>Cuando estés conforme, pulsa <strong>Aprobar</strong>. La región queda <span class="chip c-ok">Aprobada</span> y una nueva traducción automática ya no la cambiará.</li>
+    <li>Con todas las regiones aprobadas, la página pasa a <span class="chip c-ok">Aprobada</span> y cuenta para el progreso del álbum.</li>
+  </ol>
+  <div class="shot"><img src="img/08c-vista-traducida.jpg" alt="" /></div>
+  <p class="caption">Vista «Traducida»: la página con las traducciones superpuestas y, a la derecha, el texto de origen y su traducción aprobada.</p>
+  <div class="two">
+    <div class="card"><h4>Reintentar con IA</h4><p>Pide otra propuesta solo para una región, sin tocar las demás. La IA sigue viendo la página completa como contexto.</p></div>
+    <div class="card"><h4>Retirar aprobación</h4><p>Si necesitas cambiar una traducción aprobada, retira la aprobación, edítala y vuelve a aprobarla.</p></div>
+  </div>
+  <div class="tip"><b>Consejo</b><span>Usa <strong>↑ Anterior</strong> y <strong>Siguiente ↓</strong> para recorrer las regiones en orden de lectura, y el filtro <strong>Sin aprobar</strong> para ver solo lo pendiente.</span></div>
+</section>
+
+<!-- ============================== 8. MAQUETAR ============================== -->
+<section class="page">
+  <div class="chapter-head"><div class="chapter-num">8</div><div><div class="eyebrow">Capítulo 8</div><h2 style="margin:0">Limpiar y maquetar la página</h2></div></div>
+  <p class="lead">Con las traducciones aprobadas, PaneLingo puede devolverlas a la imagen: primero borra el texto original y después coloca la traducción con el estilo que elijas.</p>
+  <h3 style="margin-top:0">1. Limpiar el texto original</h3>
+  <p>Pulsa <strong>Limpiar página</strong>. Se crea una <strong>copia limpia</strong> de la página, sin el texto original de los globos; la imagen original nunca se modifica. Compara el resultado con las vistas <strong>Original</strong>, <strong>Limpia</strong> y <strong>Traducida</strong>.</p>
+  <div class="fig">
+    <div class="shot"><img src="img/crop-08-espacio-trabajo.jpg" alt="" /></div>
+    <p class="caption">Original: la página tal como se cargó.</p>
+    <div class="two">
+      <div><div class="shot"><img src="img/crop-08b-vista-limpia.jpg" alt="" /></div><p class="caption">Limpia: los globos quedan en blanco.</p></div>
+      <div><div class="shot"><img src="img/crop-08c-vista-traducida.jpg" alt="" /></div><p class="caption">Traducida: la traducción en su lugar, con fondo blanco donde el original no se pudo borrar.</p></div>
+    </div>
+  </div>
+  <div class="warn"><b>Limpieza manual</b><span>Si un texto está sobre el dibujo y no sobre un fondo liso, PaneLingo no lo borra para no dañar la ilustración: lo marca como <strong>Limpieza manual</strong> y, para que se lea bien, coloca automáticamente un <strong>fondo blanco</strong> detrás de su traducción, que tapa el texto original. Puedes cambiarlo en la opción <strong>Fondo</strong> del editor.</span></div>
+  <h3>2. Maquetar la traducción</h3>
+  <div class="fig">
+  <div class="shot"><img src="img/09-maquetacion.jpg" alt="" />
+    <span class="mark" style="left:36%; top:21%">1</span>
+    <span class="mark" style="left:94%; top:21%">2</span>
+    <span class="mark" style="left:38%; top:36%">3</span>
+    <span class="mark" style="left:73%; top:33%">4</span>
+    <span class="mark" style="left:70%; top:62%">5</span>
+  </div>
+  <ul class="legend">
+    <li><i>1</i><strong>Deshacer</strong> (hasta 20 pasos) y la lista de <strong>atajos de teclado</strong>.</li>
+    <li><i>2</i><strong>Aprobar página</strong>: la marca como <span class="chip c-ok">Maquetada</span>.</li>
+    <li><i>3</i>Selecciona un texto con un clic o con <kbd>Tab</kbd>. Arrástralo para moverlo y usa las esquinas para cambiar su caja.</li>
+    <li><i>4</i>Lista de comprobación: imagen limpia, traducciones aprobadas y avisos.</li>
+    <li><i>5</i>Propiedades del texto: <strong>fuente</strong>, <strong>tamaño</strong> automático o fijo, <strong>alineación</strong>, <strong>fondo</strong> (automático, blanco o sin fondo) y <strong>color</strong>. <strong>Restablecer</strong> vuelve a la caja y el estilo iniciales.</li>
+  </ul>
+  </div>
+</section>
+
+<section class="cont">
+  <h3>Fuentes disponibles</h3>
+  <div class="two">
+    <div class="card"><h4 style="font-family:'Comic Neue'; font-size:14pt">Comic Neue</h4><p>La fuente por defecto para diálogos: clara y con aire de cómic. Disponible en normal, negrita y cursiva.</p></div>
+    <div class="card"><h4 style="font-family:'Bangers'; font-size:17pt; letter-spacing:.04em; font-weight:400">BANGERS</h4><p>Para gritos, títulos y efectos de sonido. Úsala con moderación.</p></div>
+  </div>
+  <p class="small">Todas las fuentes tienen licencia libre SIL OFL, así que puedes publicar las páginas sin costos de licencia.</p>
+  <h3>Atajos de teclado del editor</h3>
+  <table>
+    <tr><th style="width:42%">Atajo</th><th>Acción</th></tr>
+    <tr><td><kbd>Tab</kbd> o clic</td><td>Seleccionar un texto</td></tr>
+    <tr><td><kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd></td><td>Mover el texto 1 píxel</td></tr>
+    <tr><td><kbd>Mayús</kbd> + flechas</td><td>Mover el texto 10 píxeles</td></tr>
+    <tr><td><kbd>Alt</kbd> + flechas</td><td>Cambiar el tamaño de la caja</td></tr>
+    <tr><td><kbd>Enter</kbd> o doble clic</td><td>Editar el texto sobre la imagen</td></tr>
+    <tr><td><kbd>Ctrl</kbd> + <kbd>Enter</kbd> · <kbd>Escape</kbd></td><td>Guardar el texto · cancelar la edición</td></tr>
+    <tr><td><kbd>Ctrl</kbd> + <kbd>Z</kbd></td><td>Deshacer</td></tr>
+  </table>
+  <div class="tip"><b>Lo que ves es lo que exportas</b><span>La vista previa, el editor y la exportación usan el mismo motor de maquetación. Si un texto no cabe en su caja, el editor muestra «El texto no cabe»: agranda la caja, reduce el tamaño o acorta la frase.</span></div>
+  <h3>3. Aprobar la maquetación</h3>
+  <p>Cuando la página se vea bien, pulsa <strong>Aprobar página</strong>. Si después cambias algo, la página vuelve a quedar sin aprobar para que la revises de nuevo.</p>
+</section>
+
+<!-- ============================== 9. EXPORTAR ============================== -->
+<section class="page">
+  <div class="chapter-head"><div class="chapter-num">9</div><div><div class="eyebrow">Capítulo 9</div><h2 style="margin:0">Exportar el resultado</h2></div></div>
+  <div class="shot crop"><img src="img/10-exportar.jpg" alt="" style="height:92mm" /></div>
+  <ol class="steps">
+    <li>Abre <strong>Revisión y exportación</strong> desde el menú o desde el álbum.</li>
+    <li>Revisa el contenido: cuántas traducciones aprobadas se exportarán y cuántas regiones siguen sin aprobar (estas no se incluyen).</li>
+    <li>Elige el formato y pulsa <strong>Confirmar y exportar</strong>. El archivo se prepara en segundo plano.</li>
+    <li>Cuando aparezca <strong>Lista para descargar</strong>, pulsa <strong>Descargar</strong>.</li>
+  </ol>
+  <div class="two">
+    <div class="card"><h4>Documento de texto (DOCX)</h4><p>Un guion por página y región con el texto de origen y la traducción aprobada. Se abre en Word, Google Docs o LibreOffice. Ideal para entregar a un editor o rotulista.</p></div>
+    <div class="card"><h4>Páginas traducidas (PNG en un ZIP)</h4><p>Cada página con su traducción maquetada, a la resolución de la original. Ideal para publicar.</p></div>
+  </div>
+  <p class="small" style="margin-top:3mm">El <strong>historial</strong> guarda cada exportación con su fecha. Cada una es una foto fija del momento en que la confirmaste: si después cambias una traducción, las exportaciones anteriores no cambian. Las descargas son privadas y solo funcionan con tu sesión iniciada.</p>
+  <div class="two" style="margin-top:2mm">
+    <div><div class="shot"><img src="img/export-png.jpg" alt="" /></div><p class="caption">Una página del ZIP exportado, lista para publicar.</p></div>
+    <div><div class="note" style="margin-top:3mm"><b>Nombre</b><span>El ZIP se llama <em>álbum_idioma_fecha_png.zip</em> y sus imágenes <em>pagina-001.png</em>, <em>pagina-002.png</em>…</span></div></div>
+  </div>
+</section>
+
+<!-- ============================== 10. ESTADOS ============================== -->
+<section class="page">
+  <div class="chapter-head"><div class="chapter-num">10</div><div><div class="eyebrow">Capítulo 10</div><h2 style="margin:0">Estados y progreso</h2></div></div>
+  <h3 style="margin-top:0">Estados de una página</h3>
+  <table>
+    <tr><th style="width:36%">Estado</th><th>Significado</th></tr>
+    <tr><td><span class="chip c-neutral">Pendiente de procesamiento</span></td><td>Recién cargada. Pulsa <strong>Procesar página</strong>.</td></tr>
+    <tr><td><span class="chip c-brand">Procesando</span></td><td>El OCR está leyendo el texto. Se actualiza sola.</td></tr>
+    <tr><td><span class="chip c-brand">Procesada</span></td><td>Texto detectado sin dudas; falta traducir y aprobar.</td></tr>
+    <tr><td><span class="chip c-warn">Necesita revisión</span></td><td>Hay regiones con confianza baja que conviene revisar.</td></tr>
+    <tr><td><span class="chip c-ok">Aprobada</span></td><td>Todas sus traducciones están aprobadas.</td></tr>
+    <tr><td><span class="chip c-ok">Maquetada</span></td><td>Además, aprobaste cómo se ve la traducción sobre la imagen.</td></tr>
+    <tr><td><span class="chip c-err">Error</span></td><td>Falló el procesamiento. Usa <strong>Reintentar</strong>.</td></tr>
+  </table>
+  <h3>Estados de un álbum</h3>
+  <p>El estado de un álbum se calcula solo a partir de sus páginas; no se elige a mano.</p>
+  <table>
+    <tr><th style="width:36%">Estado</th><th>Cuándo aparece</th></tr>
+    <tr><td><span class="chip c-neutral">Borrador</span></td><td>El álbum todavía no tiene páginas.</td></tr>
+    <tr><td><span class="chip c-brand">En progreso</span></td><td>Alguna página falta por procesar o se está procesando.</td></tr>
+    <tr><td><span class="chip c-warn">En revisión</span></td><td>Todas las páginas están procesadas, pero alguna no está aprobada.</td></tr>
+    <tr><td><span class="chip c-ok">Completado</span></td><td>Todas las páginas están aprobadas.</td></tr>
+  </table>
+  <h3>El progreso</h3>
+  <p>La barra de cada álbum mide <strong>páginas aprobadas sobre páginas totales</strong>. Un álbum de 4 páginas con 1 aprobada está al 25 %, aunque las demás tengan muchas regiones listas.</p>
+</section>
+
+<!-- ============================== 11. MÓVIL ============================== -->
+<section class="page">
+  <div class="chapter-head"><div class="chapter-num">11</div><div><div class="eyebrow">Capítulo 11</div><h2 style="margin:0">Uso en el celular y accesibilidad</h2></div></div>
+  <p class="lead">PaneLingo se adapta a pantallas pequeñas: el menú lateral se convierte en una barra inferior y los paneles se apilan.</p>
+  <div style="display:flex; gap:7mm; justify-content:center; margin:4mm 0 6mm">
+    <div class="phone"><img src="img/14-movil-biblioteca.jpg" alt="" /></div>
+    <div class="phone"><img src="img/14c-movil-detalle.jpg" alt="" /></div>
+    <div class="phone"><img src="img/14b-movil-pagina.jpg" alt="" /></div>
+  </div>
+  <div class="tip"><b>Recomendación</b><span>Revisar, corregir y aprobar textos funciona bien en el celular. Para maquetar con precisión, mejor usa un computador con ratón o teclado.</span></div>
+  <h3>Accesibilidad</h3>
+  <ul class="plain">
+    <li>Toda la aplicación se puede usar <strong>solo con el teclado</strong>: <kbd>Tab</kbd> para avanzar, <kbd>Enter</kbd> para activar y <kbd>Escape</kbd> para cerrar ventanas.</li>
+    <li>El foco siempre es visible con un contorno morado.</li>
+    <li>Los avisos se anuncian a los lectores de pantalla sin interrumpir la lectura.</li>
+    <li>Si tu sistema pide reducir el movimiento, PaneLingo desactiva las animaciones.</li>
+  </ul>
+</section>
+
+<!-- ============================== 12. FAQ ============================== -->
+<section class="page">
+  <div class="chapter-head"><div class="chapter-num">12</div><div><div class="eyebrow">Capítulo 12</div><h2 style="margin:0">Preguntas frecuentes</h2></div></div>
+  <table>
+    <tr><th style="width:38%">Situación</th><th>Qué hacer</th></tr>
+    <tr><td>La página se quedó «Procesando» mucho tiempo.</td><td>Espera unos minutos; si pasan más de cinco, la página pasa a <strong>Error</strong> y puedes <strong>Reintentar</strong>.</td></tr>
+    <tr><td>El OCR no encontró un globo.</td><td>Usa <strong>Añadir región</strong> y dibújalo a mano.</td></tr>
+    <tr><td>El OCR marcó algo que no es texto.</td><td><strong>Eliminar región</strong>; si te equivocas, pulsa <strong>Deshacer</strong> en el aviso.</td></tr>
+    <tr><td>No quiero traducir una firma o un letrero.</td><td>Marca la región como <strong>No traducir</strong>.</td></tr>
+    <tr><td>La traducción falló.</td><td>Aparece un aviso con <strong>Reintentar</strong>. Las traducciones aprobadas no se pierden.</td></tr>
+    <tr><td>«Aprobar» está deshabilitado.</td><td>La región no tiene traducción: tradúcela con IA o escríbela.</td></tr>
+    <tr><td>Quedó texto original visible tras limpiar.</td><td>Es una región de <strong>limpieza manual</strong>: en el editor, elige <strong>Fondo › Blanco</strong> y ajusta la caja para taparlo.</td></tr>
+    <tr><td>«El texto no cabe».</td><td>Agranda la caja, cambia a un tamaño fijo menor o acorta la frase.</td></tr>
+    <tr><td>No puedo exportar.</td><td>Necesitas al menos una traducción aprobada.</td></tr>
+    <tr><td>Abrí la misma página en dos pestañas.</td><td>PaneLingo evita que una pise a la otra y te avisa; recarga la pestaña antigua.</td></tr>
+    <tr><td>Olvidé mi contraseña.</td><td>Usa <strong>¿Olvidaste tu contraseña?</strong> (capítulo 2).</td></tr>
+    <tr><td>Un álbum ya no lo uso.</td><td><strong>Archívalo</strong> en lugar de eliminarlo: no ocupa espacio en tu biblioteca y no se pierde.</td></tr>
+  </table>
+  <h3>Glosario</h3>
+  <div class="two">
+    <div class="card"><h4>Región</h4><p>Zona de la página con texto: un globo de diálogo o un cuadro de narración.</p></div>
+    <div class="card"><h4>OCR</h4><p>Reconocimiento óptico de caracteres: lee el texto que hay en la imagen.</p></div>
+    <div class="card"><h4>Confianza</h4><p>Qué tan seguro está el OCR de lo que leyó, de 0 a 100 %.</p></div>
+    <div class="card"><h4>Orden de lectura</h4><p>El orden en que se leen las regiones, de derecha a izquierda en manga.</p></div>
+  </div>
+</section>
+
+<!-- ============================== CONTRAPORTADA ============================== -->
+<section class="page back">
+  <svg width="54" height="54" viewBox="0 0 24 24" fill="none"><rect x="1.25" y="1.25" width="21.5" height="21.5" rx="6.5" stroke="#8d7bf0" stroke-width="1.5"/><path d="M12 1.5V22.5M1.5 12H22.5" stroke="#8d7bf0" stroke-width="1.5"/></svg>
+  <h2 style="margin-top:8mm">Tu obra, tuya.</h2>
+  <p>Las páginas que cargas en PaneLingo no salen de tu cuenta. La IA propone, tú decides.</p>
+  <p class="small" style="color:#9d98bd; margin-top:14mm">PaneLingo · Proyecto Integrador 2 · Universidad EAFIT · 2026<br/>Repositorio: github.com/RestrepoJuanP/PaneLingo</p>
+</section>
+
+</body>
+</html>
