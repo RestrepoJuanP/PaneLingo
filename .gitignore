@@ -20,6 +20,8 @@ media/*
 .env
 .env.*
 !.env.example
+# Plantilla de producción sin secretos (despliegue con Docker).
+!deploy/.env.production.example
 
 # Cobertura y cachés de herramientas
 .coverage
