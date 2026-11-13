@@ -59,6 +59,7 @@
       font_size: layout.is_auto_size ? "auto" : String(layout.font_size),
       text_align: layout.text_align,
       text_color: layout.text_color,
+      text_background: layout.text_background,
     };
   }
 
@@ -136,6 +137,7 @@
           font_size: data.autoSize === "true" ? "auto" : data.fontSize,
           text_align: data.textAlign,
           text_color: data.textColor,
+          text_background: data.textBackground,
         },
         shown: null,
         pending: null,
@@ -458,6 +460,7 @@
       fontSizeInput.disabled = isAuto;
       fontSizeInput.value = isAuto ? region.fontSize : stored.font_size;
       checkRadio("text_align", stored.text_align);
+      checkRadio("text_background", stored.text_background);
       colorPicker.value = stored.text_color.toLowerCase();
       colorHex.value = stored.text_color;
     }
@@ -727,7 +730,11 @@
       if (!selected) {
         return;
       }
-      if (field.name === "font_family" || field.name === "text_align") {
+      if (
+        field.name === "font_family" ||
+        field.name === "text_align" ||
+        field.name === "text_background"
+      ) {
         change(selected, { [field.name]: field.value });
       } else if (field.name === "size_mode") {
         var isAuto = field.value === "auto";

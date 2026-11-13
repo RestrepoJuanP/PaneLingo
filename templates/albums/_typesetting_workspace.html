@@ -105,6 +105,7 @@ de propiedades, "Deshacer" y la lista de textos solo existen con JavaScript.
               data-font-size="{{ item.layout.font_size }}"
               data-auto-size="{% if item.layout.is_auto_size %}true{% else %}false{% endif %}"
               data-text-color="{{ item.layout.text_color }}"
+              data-text-background="{{ item.layout.text_background }}"
             >
               <span class="page-overlay__lines" data-ts-lines>{% for line in item.preview.lines %}<span>{{ line }}</span>{% endfor %}</span>
               <span class="page-overlay__notice" data-ts-notice {% if not item.preview.export_notice %}hidden{% endif %}>{{ item.preview.export_notice }}</span>
@@ -234,6 +235,25 @@ de propiedades, "Deshacer" y la lista de textos solo existen con JavaScript.
                   <label class="pill" for="ts-align-right">Derecha</label>
                 </span>
               </div>
+            </fieldset>
+
+            <fieldset class="pill-field">
+              <legend class="field__label">Fondo</legend>
+              <div class="pill-group">
+                <span class="pill-option">
+                  <input class="pill-input" type="radio" name="text_background" id="ts-background-auto" value="auto" aria-describedby="ts-background-hint" />
+                  <label class="pill" for="ts-background-auto">Automático</label>
+                </span>
+                <span class="pill-option">
+                  <input class="pill-input" type="radio" name="text_background" id="ts-background-white" value="white" aria-describedby="ts-background-hint" />
+                  <label class="pill" for="ts-background-white">Blanco</label>
+                </span>
+                <span class="pill-option">
+                  <input class="pill-input" type="radio" name="text_background" id="ts-background-none" value="none" aria-describedby="ts-background-hint" />
+                  <label class="pill" for="ts-background-none">Sin fondo</label>
+                </span>
+              </div>
+              <p class="field__hint" id="ts-background-hint">Automático tapa con blanco el texto original que la limpieza no pudo borrar.</p>
             </fieldset>
 
             <fieldset class="pill-field ts-props__color">

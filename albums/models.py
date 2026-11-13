@@ -683,6 +683,18 @@ class TextRegion(models.Model):
         CENTER = "center", _("Centro")
         RIGHT = "right", _("Derecha")
 
+    class TextBackground(models.TextChoices):
+        """Fondo detrás del texto maquetado (corrección de HU-89 y HU-90).
+
+        Automático pone un fondo blanco solo cuando la limpieza no pudo
+        borrar el texto original (Limpieza manual), para que la traducción
+        no quede encima de él y se lea bien.
+        """
+
+        AUTO = "auto", _("Automático")
+        WHITE = "white", _("Blanco")
+        NONE = "none", _("Sin fondo")
+
     # Variante del chip de estado de la traducción, como en el mockup.
     TRANSLATION_VARIANTS = {
         "untranslated": "neutral",
@@ -800,6 +812,12 @@ class TextRegion(models.Model):
         default=TextAlign.CENTER,
     )
     text_color = models.CharField(_("color del texto"), max_length=7, default="#000000")
+    text_background = models.CharField(
+        _("fondo del texto"),
+        max_length=5,
+        choices=TextBackground.choices,
+        default=TextBackground.AUTO,
+    )
     layout_updated_at = models.DateTimeField(
         _("maquetación guardada"),
         null=True,
@@ -896,11 +914,17 @@ class TextRegion(models.Model):
 
     @property
     def requires_review(self):
-        """Indica si la región aún requiere revisión por parte del traductor."""
+        """Indica si la región aún requiere revisión por parte del traductor.
+
+        Una página aprobada no deja nada por revisar: el traductor ya dio por
+        buena la página entera, aunque contenga regiones sin texto que nunca
+        se tradujeron (CA-15.5).
+        """
         return (
             not self.skip_translation
             and self.needs_review
             and not self.is_translation_approved
+            and self.page.status != ComicPage.Status.APPROVED
         )
 
     @property
@@ -1049,3 +1073,19 @@ class AlbumExport(models.Model):
     def is_terminal(self):
         """Indica si la preparación terminó, con éxito o error."""
         return self.status in (self.Status.READY, self.Status.FAILED)
+
+
+def pending_review_q(prefix=""):
+    """Filtro de las regiones que todavía requieren revisión.
+
+    Es la versión en consulta de TextRegion.requires_review, para contar en
+    la base de datos. prefix es la ruta hasta la región desde el modelo que
+    se filtra, por ejemplo "pages__regions__" desde Album.
+    """
+    return (
+        models.Q(**{f"{prefix}needs_review": True, f"{prefix}skip_translation": False})
+        & ~models.Q(
+            **{f"{prefix}translation_status": TextRegion.TranslationStatus.APPROVED}
+        )
+        & ~models.Q(**{f"{prefix}page__status": ComicPage.Status.APPROVED})
+    )

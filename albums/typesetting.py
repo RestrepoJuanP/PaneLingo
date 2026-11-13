@@ -34,6 +34,10 @@ MIN_BOX_SIZE = 16
 LINE_SPACING_RATIO = 0.12
 PREVIEW_PADDING_RATIO = 0.006
 DEFAULT_TEXT_COLOR = "#000000"
+# Color del fondo que tapa el texto original cuando la limpieza no lo borró.
+TEXT_BACKGROUND_COLOR = "#FFFFFF"
+# Radio de las esquinas del fondo, en proporción al lado menor de la caja.
+BACKGROUND_RADIUS_RATIO = 0.18
 HEX_COLOR_PATTERN = re.compile(r"^#[0-9A-Fa-f]{6}$")
 FONT_DIRECTORY = Path(settings.BASE_DIR) / "static" / "fonts"
 REGULAR_FONT_PATH = FONT_DIRECTORY / "ComicNeue-Regular.ttf"
@@ -178,6 +182,33 @@ def auto_max_size(box_height):
     )
 
 
+def background_for(region):
+    """Color del fondo detrás del texto, o "" si no lleva (HU-89, HU-90).
+
+    En automático, solo las regiones en «Limpieza manual» llevan fondo: su
+    texto original sigue en la imagen y la traducción quedaría encima,
+    ilegible. Blanco lo fuerza y Sin fondo lo quita.
+    """
+    choice = region.text_background or TextRegion.TextBackground.AUTO
+    if choice == TextRegion.TextBackground.WHITE:
+        return TEXT_BACKGROUND_COLOR
+    if choice == TextRegion.TextBackground.NONE:
+        return ""
+    if region.cleaning_status == TextRegion.CleaningStatus.MANUAL:
+        return TEXT_BACKGROUND_COLOR
+    return ""
+
+
+def background_radius(layout):
+    """Radio de las esquinas del fondo, en píxeles de la imagen original.
+
+    Lo usan el PNG y la superposición del navegador, para que coincidan.
+    """
+    if not layout.get("background"):
+        return 0
+    return round(min(layout["width"], layout["height"]) * BACKGROUND_RADIUS_RATIO)
+
+
 def preview_text(region):
     """Elige traducción o texto fuente según el estado de la región."""
     return region.translation if region.translation else region.final_text
@@ -225,6 +256,8 @@ def layout_for_region(region, text=None):
         "padding": round(padding, 3),
         "text_align": region.text_align or TextRegion.TextAlign.CENTER,
         "text_color": region.text_color or DEFAULT_TEXT_COLOR,
+        "text_background": region.text_background or TextRegion.TextBackground.AUTO,
+        "background": background_for(region),
         "fits": lines_fit(lines, font, content_width, content_height),
     }
 
@@ -252,6 +285,10 @@ def preview_style(region, layout):
         "--preview-font-style": spec.css_style,
         "--preview-text-align": layout["text_align"],
         "--preview-text-color": layout["text_color"],
+        "--preview-background": layout["background"] or "transparent",
+        "--preview-radius-ratio": css_number(
+            page_ratio(page, background_radius(layout))
+        ),
     }
     box = percent_box_style(
         page, layout["x"], layout["y"], layout["width"], layout["height"]
@@ -385,6 +422,14 @@ def clean_text_align(value, errors):
     return value
 
 
+def clean_text_background(value, errors):
+    """Acepta fondo automático, blanco o sin fondo."""
+    value = str(value).strip()
+    if value not in TextRegion.TextBackground.values:
+        errors["text_background"] = ["Elige fondo automático, blanco o sin fondo."]
+    return value
+
+
 def clean_text_color(value, errors):
     """Acepta un color #RRGGBB y lo guarda en mayúsculas."""
     value = str(value).strip()
@@ -398,6 +443,7 @@ STYLE_CLEANERS = {
     "font_size": clean_font_size,
     "text_align": clean_text_align,
     "text_color": clean_text_color,
+    "text_background": clean_text_background,
 }
 
 
@@ -428,6 +474,7 @@ LAYOUT_UPDATE_FIELDS = [
     "font_size",
     "text_align",
     "text_color",
+    "text_background",
     "layout_updated_at",
 ]
 
@@ -464,6 +511,7 @@ def reset_layout(region):
     region.font_size = None
     region.text_align = TextRegion.TextAlign.CENTER
     region.text_color = DEFAULT_TEXT_COLOR
+    region.text_background = TextRegion.TextBackground.AUTO
     store_layout(region)
 
 
@@ -652,6 +700,22 @@ def text_mask(layout, font_path):
     return mask
 
 
+def draw_background(canvas, layout, box):
+    """Pinta el fondo de la caja, con las esquinas redondeadas del globo.
+
+    Las maquetaciones congeladas antes de existir el fondo no traen la
+    clave y se exportan como entonces, sin fondo.
+    """
+    background = layout.get("background")
+    if not background:
+        return
+    ImageDraw.Draw(canvas).rounded_rectangle(
+        (box[0], box[1], box[2] - 1, box[3] - 1),
+        radius=background_radius(layout),
+        fill=hex_to_rgb(background),
+    )
+
+
 def draw_layout(canvas, layout):
     """Pinta una maquetación ya calculada (viva o congelada) sobre la página."""
     mask = text_mask(layout, FONTS[layout["font_family"]].path)
@@ -662,6 +726,7 @@ def draw_layout(canvas, layout):
         layout["x"] + layout["width"],
         layout["y"] + layout["height"],
     )
+    draw_background(canvas, layout, box)
     canvas.paste(color, box, mask)
 
 

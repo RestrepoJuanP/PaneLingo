@@ -3242,7 +3242,8 @@ textarea {
 
 .region-canvas.uses-cleaned-image .page-overlay__region,
 .region-canvas.uses-cleaned-image .page-overlay__region--untranslated {
-  background: transparent;
+  background: var(--preview-background, transparent);
+  border-radius: calc(var(--preview-radius-ratio, 0) * 1cqw);
 }
 
 .page-overlay__region--narration {

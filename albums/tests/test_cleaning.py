@@ -159,7 +159,7 @@ class PageCleaningTests(ProcessingTestCase):
             self.cleaned_image().getpixel((region.x + 5, region.y + 5)), before
         )
         response = self.client.get(self.page.get_absolute_url())
-        self.assertContains(response, "1 región necesita limpieza manual o con IA")
+        self.assertContains(response, "1 región necesita limpieza manual.")
         self.assertContains(response, "Limpieza manual")
 
     def test_skipped_region_remains_identical(self):
