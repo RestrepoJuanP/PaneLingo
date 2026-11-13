@@ -434,3 +434,45 @@ class ApprovedReviewAccountingTests(ProcessingTestCase):
         self.assertEqual(workspace.context["review_count"], 0)
         self.assertNotContains(workspace, "necesita revisión")
         self.assertEqual(filtered.context["visible_regions"], [])
+
+
+class ApprovedPageReviewAccountingTests(ProcessingTestCase):
+    """Una página aprobada no deja regiones por revisar.
+
+    Regresión: una región añadida a mano y sin texto (CA-15.5) no bloquea la
+    aprobación de la página, pero seguía contando por revisar, de modo que un
+    álbum «Completado» mostraba «2 por revisar».
+    """
+
+    def setUp(self):
+        """Crea una página aprobada con una región dudosa y vacía."""
+        super().setUp()
+        self.region = add_region(self.page, 1, needs_review=True)
+        self.region.source_text = ""
+        self.region.save(update_fields=["source_text"])
+        set_status(self.page, ComicPage.Status.APPROVED)
+
+    def test_summaries_do_not_count_regions_of_an_approved_page(self):
+        """CP-25.1 — Los contadores coinciden con la página aprobada."""
+        progress = AlbumProgress.of(
+            with_progress(Album.objects.filter(pk=self.album.pk)).get()
+        )
+        page = pages_with_progress(self.album).get(pk=self.page.pk)
+        library = self.client.get(reverse("albums:list"))
+
+        self.assertEqual(progress.region_review, 0)
+        self.assertEqual(page.region_review, 0)
+        self.assertEqual(library.context["sidebar"]["review_total"], 0)
+
+    def test_workspace_of_an_approved_page_has_nothing_to_review(self):
+        """CP-19.2 — El espacio de trabajo no contradice la aprobación."""
+        workspace = self.client.get(self.page.get_absolute_url())
+
+        self.assertEqual(workspace.context["review_count"], 0)
+
+    def test_region_counts_again_when_the_page_is_not_approved(self):
+        """CP-14.3 — Sin aprobar la página, la región dudosa sigue pendiente."""
+        set_status(self.page, ComicPage.Status.NEEDS_REVIEW)
+        page = pages_with_progress(self.album).get(pk=self.page.pk)
+
+        self.assertEqual(page.region_review, 1)

@@ -53,7 +53,13 @@ from albums.insights import (
     with_progress,
 )
 from albums.manual_regions import add_manual_region
-from albums.models import Album, AlbumExport, ComicPage, TextRegion
+from albums.models import (
+    Album,
+    AlbumExport,
+    ComicPage,
+    TextRegion,
+    pending_review_q,
+)
 from albums.ocr import OcrProviderError
 from albums.processing import expire_if_stale, start_processing
 from albums.region_management import (
@@ -293,11 +299,7 @@ class AlbumListView(PrivateViewMixin, ListView):
             "stats": library_stats(user, progress),
             "resume": resume,
             "resume_review": (
-                resume.regions.filter(needs_review=True, skip_translation=False)
-                .exclude(translation_status=TextRegion.TranslationStatus.APPROVED)
-                .count()
-                if resume
-                else 0
+                resume.regions.filter(pending_review_q()).count() if resume else 0
             ),
             "review_regions": sum(item.region_review for item in progress),
             "active_albums": sum(
@@ -1037,11 +1039,7 @@ class PageStatusView(OwnedPageMixin, DetailView):
         """Devuelve el estado como JSON en lugar de una plantilla."""
         page = self.object
         page.region_total = page.regions.count()
-        page.region_review = (
-            page.regions.filter(needs_review=True, skip_translation=False)
-            .exclude(translation_status=TextRegion.TranslationStatus.APPROVED)
-            .count()
-        )
+        page.region_review = page.regions.filter(pending_review_q()).count()
         card = page_card(page)
         return JsonResponse(
             {
@@ -1199,7 +1197,7 @@ def cleaning_feedback(page):
     ).count()
     if manual_count:
         noun = "región necesita" if manual_count == 1 else "regiones necesitan"
-        return messages.WARNING, (f"{manual_count} {noun} limpieza manual o con IA.")
+        return messages.WARNING, (f"{manual_count} {noun} limpieza manual.")
     return messages.SUCCESS, "La página quedó limpia."
 
 

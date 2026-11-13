@@ -14,7 +14,7 @@ from django.conf import settings
 from django.db.models import Avg, Count, Q
 from django.utils import timezone
 
-from albums.models import Album, ComicPage, TextRegion
+from albums.models import Album, ComicPage, TextRegion, pending_review_q
 
 # Páginas cuya detección ya terminó.
 DONE_STATUSES = (
@@ -83,17 +83,7 @@ def with_progress(albums):
         region_total=Count("pages__regions", distinct=True),
         region_review=Count(
             "pages__regions",
-            filter=(
-                Q(
-                    pages__regions__needs_review=True,
-                    pages__regions__skip_translation=False,
-                )
-                & ~Q(
-                    pages__regions__translation_status=(
-                        TextRegion.TranslationStatus.APPROVED
-                    )
-                )
-            ),
+            filter=pending_review_q("pages__regions__"),
             distinct=True,
         ),
         region_corrected=Count(
@@ -279,12 +269,7 @@ def pages_with_progress(album):
         region_total=Count("regions"),
         region_review=Count(
             "regions",
-            filter=(
-                Q(regions__needs_review=True, regions__skip_translation=False)
-                & ~Q(
-                    regions__translation_status=(TextRegion.TranslationStatus.APPROVED)
-                )
-            ),
+            filter=pending_review_q("regions__"),
         ),
     ).order_by("page_number")
 
@@ -411,13 +396,8 @@ def monthly_quota(user):
 
 def review_total(user):
     """Regiones del usuario que necesitan revisión."""
-    return (
-        TextRegion.objects.filter(
-            page__album__owner=user,
-            page__album__archived_at__isnull=True,
-            needs_review=True,
-            skip_translation=False,
-        )
-        .exclude(translation_status=TextRegion.TranslationStatus.APPROVED)
-        .count()
-    )
+    return TextRegion.objects.filter(
+        pending_review_q(),
+        page__album__owner=user,
+        page__album__archived_at__isnull=True,
+    ).count()
