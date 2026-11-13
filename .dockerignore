@@ -1,0 +1,22 @@
+# Lo que no debe entrar en la imagen: secretos, datos locales y cachés.
+.git
+.github
+.venv
+venv
+env
+.env
+.env.*
+!.env.example
+db.sqlite3
+huey.sqlite3*
+media
+staticfiles
+.coverage
+htmlcov
+.ruff_cache
+.pytest_cache
+__pycache__
+*.py[cod]
+docs
+design
+deploy/.env*

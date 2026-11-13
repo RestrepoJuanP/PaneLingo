@@ -43,6 +43,21 @@ DEBUG = get_env_bool("DJANGO_DEBUG", default=False)
 
 ALLOWED_HOSTS = get_env_list("DJANGO_ALLOWED_HOSTS", default="localhost,127.0.0.1")
 
+# Orígenes desde los que se aceptan formularios POST cuando la aplicación
+# corre detrás de un proxy con HTTPS (despliegue). Ejemplo:
+# https://panelingo.ejemplo.com. Vacío en desarrollo.
+CSRF_TRUSTED_ORIGINS = get_env_list("DJANGO_CSRF_TRUSTED_ORIGINS")
+
+# Despliegue detrás de un proxy inverso que termina HTTPS (Caddy). Solo se
+# activa con DJANGO_SECURE_PROXY=True: sin proxy, confiar en la cabecera
+# X-Forwarded-Proto permitiría a cualquiera fingir una conexión segura.
+if get_env_bool("DJANGO_SECURE_PROXY", default=False):
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_REFERRER_POLICY = "same-origin"
+
 
 # --- Aplicaciones ----------------------------------------------------------
 
@@ -92,10 +107,15 @@ ASGI_APPLICATION = "config.asgi.application"
 
 # --- Base de datos ---------------------------------------------------------
 
+# Carpeta de los datos persistentes (base de datos y cola de Huey). En
+# desarrollo es la raíz del proyecto; en el contenedor apunta a un volumen
+# para que los datos sobrevivan a cada nueva versión de la imagen.
+DATA_DIR = Path(os.getenv("DJANGO_DATA_DIR", BASE_DIR))
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "NAME": DATA_DIR / "db.sqlite3",
     }
 }
 
@@ -112,7 +132,7 @@ DATABASES = {
 HUEY = {
     "huey_class": "huey.SqliteHuey",
     "name": "panelingo",
-    "filename": str(BASE_DIR / "huey.sqlite3"),
+    "filename": str(DATA_DIR / "huey.sqlite3"),
     "immediate": get_env_bool("HUEY_IMMEDIATE", default=False),
     "consumer": {"workers": 1, "worker_type": "thread"},
 }
@@ -179,7 +199,7 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 MEDIA_URL = "media/"
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_ROOT = Path(os.getenv("DJANGO_MEDIA_ROOT", BASE_DIR / "media"))
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

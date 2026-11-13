@@ -1,0 +1,56 @@
+# Despliegue de PaneLingo: Caddy (HTTPS automático) -> Gunicorn (Django)
+# y un trabajador de Huey para las tareas en segundo plano.
+# Uso: cp deploy/.env.production.example .env && docker compose up -d --build
+
+services:
+  web:
+    build: .
+    image: panelingo:latest
+    env_file: .env
+    environment:
+      RUN_MIGRATIONS: "1"
+    volumes:
+      - panelingo-data:/data
+      - panelingo-static:/srv/static
+    restart: unless-stopped
+    healthcheck:
+      # Se envía el primer host permitido: con 127.0.0.1 Django respondería 400.
+      test: ["CMD", "python", "deploy/healthcheck.py"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  worker:
+    image: panelingo:latest
+    env_file: .env
+    command: ["python", "manage.py", "run_huey"]
+    volumes:
+      - panelingo-data:/data
+    depends_on:
+      web:
+        condition: service_healthy
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2.10-alpine
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-:80}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - panelingo-static:/srv/static:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      web:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  panelingo-data:
+  panelingo-static:
+  caddy-data:
+  caddy-config:

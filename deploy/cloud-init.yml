@@ -1,0 +1,20 @@
+#cloud-config
+# Arranque de la instancia EC2 de PaneLingo (Ubuntu 24.04): instala Docker con
+# el plugin de Compose, crea 2 GB de swap para el procesamiento de imágenes y
+# programa la copia de seguridad diaria. La aplicación se clona y se arranca
+# después, con el .env de producción (ver la página de despliegue de la wiki).
+package_update: true
+package_upgrade: true
+packages:
+  - ca-certificates
+  - curl
+  - git
+  - sqlite3
+runcmd:
+  - curl -fsSL https://get.docker.com | sh
+  - systemctl enable --now docker
+  - usermod -aG docker ubuntu
+  - fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile
+  - echo '/swapfile none swap sw 0 0' >> /etc/fstab
+  - mkdir -p /opt/panelingo-backups
+  - echo '0 3 * * * root sh /opt/panelingo/deploy/backup.sh >> /var/log/panelingo-backup.log 2>&1' > /etc/cron.d/panelingo-backup

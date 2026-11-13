@@ -1,0 +1,5 @@
+# Dependencias del despliegue en producción (contenedor Docker).
+-r requirements.txt
+
+# Servidor WSGI. runserver es solo para desarrollo.
+gunicorn>=23.0,<24.0
